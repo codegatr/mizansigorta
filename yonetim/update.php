@@ -18,9 +18,22 @@ declare(strict_types=1);
 define('MZ_ADMIN', true);
 $adminTitle = 'Akıllı Güncelleme';
 
-require __DIR__ . '/_layout.php';
-require __DIR__ . '/_helpers.php';
-require_role('superadmin');
+// AJAX endpoint'leri layout'tan ONCE handle edilir, yoksa response = HTML + JSON karisimi olur
+$IS_AJAX = isset($_GET['ajax']);
+
+if ($IS_AJAX) {
+    // AJAX: layout YOK, sadece bootstrap + helpers + auth + handler
+    if (!defined('MIZAN_BOOT')) define('MIZAN_BOOT', true);
+    require __DIR__ . '/../includes/bootstrap.php';
+    require __DIR__ . '/_helpers.php';
+    require_role('superadmin');
+    header('Content-Type: application/json; charset=utf-8');
+} else {
+    // Normal sayfa: layout dahil
+    require __DIR__ . '/_layout.php';
+    require __DIR__ . '/_helpers.php';
+    require_role('superadmin');
+}
 
 // =================================================================
 //   KONFIGURASYON
@@ -786,7 +799,7 @@ $localVersion = upd_localVer();
   });
 
   // History yukle (Genel Durum tab'inda)
-  fetch('?ajax=history').then(r => r.json()).then(d => {
+  updFetch('history').then(d => {
     if (!d.ok || !d.history || !d.history.length) {
       document.getElementById('histList').textContent = 'Henüz güncelleme kaydı yok.';
       return;
@@ -813,7 +826,7 @@ $localVersion = upd_localVer();
     const log = document.getElementById('ovLog');
     log.textContent = 'Durum sorgulanıyor...';
     try {
-      const r = await fetch('?ajax=status').then(x => x.json());
+      const r = await updFetch('status');
       if (!r.ok) { log.innerHTML = '<span class="err">Hata: ' + (r.error || '?') + '</span>'; return; }
       document.getElementById('ovLocalVer').textContent = 'v' + r.local_ver;
       document.getElementById('ovRemoteVer').textContent = 'v' + r.remote_ver;
@@ -842,7 +855,7 @@ $localVersion = upd_localVer();
     const log = document.getElementById('ovLog');
     log.textContent = (force ? 'Force' : 'Smart') + ' sync başlatılıyor...';
     try {
-      const r = await fetch('?ajax=' + (force ? 'force_sync' : 'sync'), { method: 'POST' }).then(x => x.json());
+      const r = await updFetch((force ? 'force_sync' : 'sync'), new FormData());
       if (!r.ok && !r.updated) {
         log.innerHTML = '<span class="err">Hata: ' + (r.error || (r.errors && r.errors.join('\n')) || '?') + '</span>';
         return;
@@ -866,7 +879,7 @@ $localVersion = upd_localVer();
   window.updLoadFiles = async function () {
     const list = document.getElementById('fileList');
     list.innerHTML = '<div class="p-4 text-center text-muted"><div class="spinner-border spinner-border-sm"></div> Yükleniyor...</div>';
-    const r = await fetch('?ajax=status').then(x => x.json());
+    const r = await updFetch('status');
     if (!r.ok) { list.innerHTML = '<div class="p-4 text-danger">Hata: ' + (r.error || '?') + '</div>'; return; }
     const all = (r.changed_files || []).concat(r.added_files || []);
     if (!all.length) {
@@ -884,7 +897,7 @@ $localVersion = upd_localVer();
   window.updFileOne = async function (path, btn) {
     btn.disabled = true; btn.innerHTML = '<div class="spinner-border spinner-border-sm"></div>';
     const fd = new FormData(); fd.append('path', path);
-    const r = await fetch('?ajax=update_file', { method: 'POST', body: fd }).then(x => x.json());
+    const r = await updFetch('update_file', fd);
     btn.innerHTML = r.ok ? '<i class="bi bi-check-lg text-success"></i>' : '<i class="bi bi-x-lg text-danger" title="' + (r.error || '?') + '"></i>';
     btn.disabled = !r.ok;
   };
@@ -893,7 +906,7 @@ $localVersion = upd_localVer();
   window.updLoadCommits = async function () {
     const list = document.getElementById('commitList');
     list.innerHTML = '<div class="p-4 text-center text-muted"><div class="spinner-border spinner-border-sm"></div> Yükleniyor...</div>';
-    const r = await fetch('?ajax=commits').then(x => x.json());
+    const r = await updFetch('commits');
     if (!r.ok) { list.innerHTML = '<div class="p-4 text-danger">Hata: ' + (r.error || '?') + '</div>'; return; }
     if (!r.commits.length) { list.innerHTML = '<div class="p-4 text-muted">Commit yok.</div>'; return; }
     list.innerHTML = r.commits.map(c => {
@@ -910,7 +923,7 @@ $localVersion = upd_localVer();
   window.updLoadBackups = async function () {
     const list = document.getElementById('backupList');
     list.innerHTML = '<div class="p-4 text-center text-muted"><div class="spinner-border spinner-border-sm"></div> Yükleniyor...</div>';
-    const r = await fetch('?ajax=backups').then(x => x.json());
+    const r = await updFetch('backups');
     if (!r.ok) { list.innerHTML = '<div class="p-4 text-danger">Hata: ' + (r.error || '?') + '</div>'; return; }
     if (!r.backups.length) { list.innerHTML = '<div class="p-4 text-muted text-center">Henüz yedek yok.</div>'; return; }
     list.innerHTML = r.backups.map(b => {
@@ -926,7 +939,7 @@ $localVersion = upd_localVer();
   window.updRestore = async function (name) {
     if (!confirm('UYARI: ' + name + ' yedeği geri yüklenecek!\n\nMevcut config.php, uploads/ ve backups/ korunur. Diğer tüm dosyalar bu yedekteki sürüme dönecek. Devam?')) return;
     const fd = new FormData(); fd.append('name', name);
-    const r = await fetch('?ajax=restore', { method: 'POST', body: fd }).then(x => x.json());
+    const r = await updFetch('restore', fd);
     if (r.ok) { alert('Geri yüklendi (' + r.extracted + ' dosya). Sayfa yenileniyor.'); location.reload(); }
     else alert('Hata: ' + (r.error || '?'));
   };
@@ -934,7 +947,7 @@ $localVersion = upd_localVer();
   window.updDeleteBak = async function (name) {
     if (!confirm(name + ' silinsin mi?')) return;
     const fd = new FormData(); fd.append('name', name);
-    const r = await fetch('?ajax=delete_backup', { method: 'POST', body: fd }).then(x => x.json());
+    const r = await updFetch('delete_backup', fd);
     if (r.ok) updLoadBackups(); else alert('Hata: ' + (r.error || '?'));
   };
 
@@ -943,7 +956,7 @@ $localVersion = upd_localVer();
     if (!confirm('migration.sql çalıştırılsın mı?')) return;
     const log = document.getElementById('migLog');
     log.textContent = 'Migration çalıştırılıyor...';
-    const r = await fetch('?ajax=migrate', { method: 'POST' }).then(x => x.json());
+    const r = await updFetch('migrate', new FormData());
     let txt = 'Çalıştırılan: ' + r.executed + '\nAtlanan (idempotent): ' + r.skipped + '\nHatalı: ' + r.errors;
     if (r.error_list && r.error_list.length) {
       txt += '\n\nHATALAR:\n' + r.error_list.join('\n');
@@ -953,30 +966,42 @@ $localVersion = upd_localVer();
   };
 
   // ---- Settings tab ----
+  // Tüm AJAX çağrıları için ortak yardımcı (try/catch + JSON parse)
+  async function updFetch(action, formData) {
+    const opts = formData ? { method: 'POST', body: formData } : {};
+    const resp = await fetch('?ajax=' + action, opts);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    try { return JSON.parse(text); }
+    catch (e) { throw new Error('Sunucu yanıtı bozuk: ' + text.substring(0, 200)); }
+  }
+
   window.updSaveToken = async function () {
-    const fd = new FormData();
-    fd.append('token', document.getElementById('ghToken').value.trim());
-    fd.append('branch', document.getElementById('ghBranch').value.trim());
-    const r = await fetch('?ajax=save_token', { method: 'POST', body: fd }).then(x => x.json());
-    document.getElementById('tokTest').innerHTML = r.ok ? '<span class="text-success"><i class="bi bi-check-circle"></i> Kaydedildi.</span>' : '<span class="text-danger">Hata: ' + (r.error || '?') + '</span>';
+    const elt = document.getElementById('tokTest');
+    elt.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm"></span> Kaydediliyor...</span>';
+    try {
+      const fd = new FormData();
+      fd.append('token', document.getElementById('ghToken').value.trim());
+      fd.append('branch', document.getElementById('ghBranch').value.trim());
+      const r = await updFetch('save_token', fd);
+      if (r.ok) elt.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Kaydedildi. Token aktif.</span>';
+      else elt.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> Hata: ' + (r.error || '?') + '</span>';
+    } catch (err) {
+      elt.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> ' + (err.message || err) + '</span>';
+    }
   };
 
   window.updTestToken = async function () {
     const elt = document.getElementById('tokTest');
-    elt.textContent = 'Test ediliyor...';
+    elt.innerHTML = '<span class="text-muted"><span class="spinner-border spinner-border-sm"></span> Test ediliyor...</span>';
     try {
       const fd = new FormData();
       fd.append('token', document.getElementById('ghToken').value.trim());
-      const resp = await fetch('?ajax=test_token', { method: 'POST', body: fd });
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const text = await resp.text();
-      let r;
-      try { r = JSON.parse(text); }
-      catch (e) { throw new Error('JSON parse hatası. Sunucu yanıtı: ' + text.substring(0, 200)); }
+      const r = await updFetch('test_token', fd);
       if (r.ok) elt.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Token geçerli (' + (r.login || '?') + ').</span>';
       else elt.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> ' + (r.error || 'Bilinmeyen hata') + '</span>';
     } catch (err) {
-      elt.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Bağlantı hatası: ' + (err.message || err) + '</span>';
+      elt.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> ' + (err.message || err) + '</span>';
     }
   };
 })();
