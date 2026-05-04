@@ -17,7 +17,7 @@ require MIZAN_INC . '/header.php';
   <div class="container position-relative py-5">
     <div class="row align-items-center g-5 py-4">
       <div class="col-lg-7 text-white">
-        <span class="badge bg-warning text-dark fw-semibold mb-3">Çözüm Ortağınız</span>
+        <span class="badge bg-warning text-dark fw-semibold mb-3"><?= e(setting('site_slogan', 'Güven ve Özen İle')) ?></span>
         <h1 class="display-4 fw-bold lh-1 mb-3">Hayatınıza, aracınıza ve işinize <span class="text-warning">tam koruma</span></h1>
         <p class="lead mb-4">Anlaşmalı sigorta şirketleri arasından sizin için en uygun teminatları karşılaştırır, en avantajlı teklifi sunarız. Online teklif almak ücretsiz ve sizi bağlamaz.</p>
         <div class="d-flex flex-wrap gap-2">

@@ -9,6 +9,7 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
     <div class="row g-4">
       <div class="col-md-4">
         <img src="<?= asset('assets/img/logo-light.png') ?>" alt="Mizan Sigorta" class="mz-footer-logo">
+        <p class="fst-italic small mb-3" style="color:#fff;opacity:.85;font-family:'Brush Script MT',cursive;font-size:1.15rem">Güven ve Özen İle</p>
         <p class="small text-light-emphasis">
           Müşteri memnuniyetini önceliklendiren çözüm ortağınız.
           Anlaşmalı sigorta şirketleri ile en uygun teminat ve fiyatları sunuyoruz.
@@ -46,6 +47,12 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
           <?php if ($v = setting('email')): ?><li><i class="bi bi-envelope-fill text-warning"></i> <a href="mailto:<?= e($v) ?>"><?= e($v) ?></a></li><?php endif; ?>
           <?php if ($v = setting('whatsapp')): ?><li><i class="bi bi-whatsapp text-warning"></i> <a target="_blank" rel="noopener" href="https://wa.me/<?= e($v) ?>">WhatsApp</a></li><?php endif; ?>
           <?php if ($v = setting('adres')): ?><li class="mt-2"><i class="bi bi-geo-alt-fill text-warning"></i> <?= nl2br(e($v)) ?></li><?php endif; ?>
+          <?php if ($sehirler = setting('ofis_sehirler')): ?>
+            <li class="mt-2"><i class="bi bi-pin-map-fill text-warning"></i>
+              <?php $list = array_filter(array_map('trim', explode(',', (string)$sehirler))); ?>
+              <?= e(implode(' • ', $list)) ?>
+            </li>
+          <?php endif; ?>
         </ul>
       </div>
     </div>
