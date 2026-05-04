@@ -16,6 +16,12 @@ if (!$sayfa) {
 $pageTitle = $sayfa['seo_baslik'] ?: ($sayfa['baslik'] . ' - ' . SITE_NAME);
 $pageDesc  = $sayfa['seo_aciklama'] ?: '';
 
+// "hakkimizda" slug'i icin ozel zengin template
+if ($slug === 'hakkimizda') {
+    require __DIR__ . '/_hakkimizda.php';
+    exit;
+}
+
 require MIZAN_INC . '/header.php';
 ?>
 

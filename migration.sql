@@ -587,74 +587,85 @@ INSERT IGNORE INTO `mz_urunler` (`slug`,`baslik`,`kisa_aciklama`,`icon`,`sira`,`
 ('tarsim',                  'TARSİM Tarım Sigortaları','Bitkisel ürün, sera, hayvan ve arıcılık güvenceleri',    'bi-flower3',         70, 1, 0, NULL),
 ('ferdi-kaza',              'Ferdi Kaza',              'Bireysel kaza, deprem destek ve kritik hastalık',        'bi-bandaid-fill',    80, 1, 0, NULL),
 ('kefalet-sigortalari',     'Kefalet Sigortaları',     'Kefalet senedi, KDV iadesi, devlet destekli alacak',     'bi-file-earmark-check', 90, 1, 0, NULL);
+-- SET @parent_<x> degiskenlerini tanimla (alt urunlerin parent_id'leri icin)
+SET @parent_all_riskler := (SELECT id FROM mz_urunler WHERE slug='all-riskler');
+SET @parent_ferdi_kaza := (SELECT id FROM mz_urunler WHERE slug='ferdi-kaza');
+SET @parent_kefalet_sigortalari := (SELECT id FROM mz_urunler WHERE slug='kefalet-sigortalari');
+SET @parent_nakliyat := (SELECT id FROM mz_urunler WHERE slug='nakliyat');
+SET @parent_oto_sigortalari := (SELECT id FROM mz_urunler WHERE slug='oto-sigortalari');
+SET @parent_saglik_sigortalari := (SELECT id FROM mz_urunler WHERE slug='saglik-sigortalari');
+SET @parent_sorumluluk_sigortalari := (SELECT id FROM mz_urunler WHERE slug='sorumluluk-sigortalari');
+SET @parent_tarsim := (SELECT id FROM mz_urunler WHERE slug='tarsim');
+SET @parent_yangin_policeleri := (SELECT id FROM mz_urunler WHERE slug='yangin-policeleri');
+
 
 -- 5) Alt urunler (parent slug'a referans verir)
 -- Oto Sigortalari
 INSERT IGNORE INTO `mz_urunler` (`slug`,`baslik`,`kisa_aciklama`,`icon`,`sira`,`aktif`,`parent_id`) VALUES
-('kasko',                          'Kasko',                                  'Kendi aracınızı kapsamlı korur',                'bi-car-front', 11, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='oto-sigortalari') AS t)),
-('trafik-zorunlu-sorumluluk',      'Karayolları Zorunlu Sorumluluk (Trafik)','Yasal zorunlu, üçüncü şahıs sorumluluk',        'bi-shield',    12, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='oto-sigortalari') AS t)),
-('ihtiyari-mali-mesuliyet-imm',    'İhtiyari Mali Mesuliyet (İMM)',          'Trafik limit üstü ek sorumluluk teminatı',      'bi-shield-plus',13,1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='oto-sigortalari') AS t)),
-('yesilkart',                      'Yeşilkart',                              'Yurtdışı sınır ötesi araç sorumluluk',          'bi-passport',  14, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='oto-sigortalari') AS t));
+('kasko',                          'Kasko',                                  'Kendi aracınızı kapsamlı korur',                'bi-car-front', 11, 1, @parent_oto_sigortalari),
+('trafik-zorunlu-sorumluluk',      'Karayolları Zorunlu Sorumluluk (Trafik)','Yasal zorunlu, üçüncü şahıs sorumluluk',        'bi-shield',    12, 1, @parent_oto_sigortalari),
+('ihtiyari-mali-mesuliyet-imm',    'İhtiyari Mali Mesuliyet (İMM)',          'Trafik limit üstü ek sorumluluk teminatı',      'bi-shield-plus',13,1, @parent_oto_sigortalari),
+('yesilkart',                      'Yeşilkart',                              'Yurtdışı sınır ötesi araç sorumluluk',          'bi-passport',  14, 1, @parent_oto_sigortalari);
 
 -- Yangin Policeleri
 INSERT IGNORE INTO `mz_urunler` (`slug`,`baslik`,`kisa_aciklama`,`icon`,`sira`,`aktif`,`parent_id`) VALUES
-('isyeri-yangin-sigortasi',        'İşyeri Yangın Sigortası',                'Ticari mekanlar için yangın güvencesi',         'bi-shop',      21, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='yangin-policeleri') AS t)),
-('konut-sigortasi',                'Konut Sigortası',                        'Eviniz için kapsamlı paket',                    'bi-house-fill',22, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='yangin-policeleri') AS t)),
-('dask',                           'DASK Zorunlu Deprem',                    'Yasal zorunlu deprem güvencesi',                'bi-buildings', 23, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='yangin-policeleri') AS t)),
-('ortak-alan-sigortasi',           'Ortak Alan Sigortası',                   'Apartman/site ortak alanları',                  'bi-building',  24, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='yangin-policeleri') AS t));
+('isyeri-yangin-sigortasi',        'İşyeri Yangın Sigortası',                'Ticari mekanlar için yangın güvencesi',         'bi-shop',      21, 1, @parent_yangin_policeleri),
+('konut-sigortasi',                'Konut Sigortası',                        'Eviniz için kapsamlı paket',                    'bi-house-fill',22, 1, @parent_yangin_policeleri),
+('dask',                           'DASK Zorunlu Deprem',                    'Yasal zorunlu deprem güvencesi',                'bi-buildings', 23, 1, @parent_yangin_policeleri),
+('ortak-alan-sigortasi',           'Ortak Alan Sigortası',                   'Apartman/site ortak alanları',                  'bi-building',  24, 1, @parent_yangin_policeleri);
 
 -- Saglik
 INSERT IGNORE INTO `mz_urunler` (`slug`,`baslik`,`kisa_aciklama`,`icon`,`sira`,`aktif`,`parent_id`) VALUES
-('yurt-disi-seyahat-saglik',       'Yurt Dışı Seyahat Sağlık',               'Yurt dışı yolculukta sağlık güvencesi',         'bi-airplane',  31, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='saglik-sigortalari') AS t)),
-('tamamlayici-saglik-sigortasi',   'Tamamlayıcı Sağlık Sigortası',           'SGK üzerine tamamlayıcı paket',                 'bi-plus-square',32, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='saglik-sigortalari') AS t)),
-('ozel-saglik-sigortasi',          'Özel Sağlık Sigortası',                  'Özel hastane ve nitelikli tedavi',              'bi-hospital',  33, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='saglik-sigortalari') AS t));
+('yurt-disi-seyahat-saglik',       'Yurt Dışı Seyahat Sağlık',               'Yurt dışı yolculukta sağlık güvencesi',         'bi-airplane',  31, 1, @parent_saglik_sigortalari),
+('tamamlayici-saglik-sigortasi',   'Tamamlayıcı Sağlık Sigortası',           'SGK üzerine tamamlayıcı paket',                 'bi-plus-square',32, 1, @parent_saglik_sigortalari),
+('ozel-saglik-sigortasi',          'Özel Sağlık Sigortası',                  'Özel hastane ve nitelikli tedavi',              'bi-hospital',  33, 1, @parent_saglik_sigortalari);
 
 -- All Riskler
 INSERT IGNORE INTO `mz_urunler` (`slug`,`baslik`,`kisa_aciklama`,`icon`,`sira`,`aktif`,`parent_id`) VALUES
-('insaat-all-risk',                'İnşaat All Risk',                        'Şantiye ve inşaat süreci güvencesi',            'bi-cone-striped',41,1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='all-riskler') AS t)),
-('montaj-all-risk',                'Montaj All Risk',                        'Mühendislik ve makine montaj sigortası',        'bi-gear-wide-connected',42,1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='all-riskler') AS t)),
-('makine-kirilmasi',               'Makine Kırılması',                       'Üretim hattı makine arızası teminatı',          'bi-wrench-adjustable',43,1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='all-riskler') AS t)),
-('elektronik-cihaz',               'Elektronik Cihaz Sigortası',             'Bilişim ve elektronik ekipman güvencesi',       'bi-pc-display',44, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='all-riskler') AS t));
+('insaat-all-risk',                'İnşaat All Risk',                        'Şantiye ve inşaat süreci güvencesi',            'bi-cone-striped',41,1, @parent_all_riskler),
+('montaj-all-risk',                'Montaj All Risk',                        'Mühendislik ve makine montaj sigortası',        'bi-gear-wide-connected',42,1, @parent_all_riskler),
+('makine-kirilmasi',               'Makine Kırılması',                       'Üretim hattı makine arızası teminatı',          'bi-wrench-adjustable',43,1, @parent_all_riskler),
+('elektronik-cihaz',               'Elektronik Cihaz Sigortası',             'Bilişim ve elektronik ekipman güvencesi',       'bi-pc-display',44, 1, @parent_all_riskler);
 
 -- Nakliyat
 INSERT IGNORE INTO `mz_urunler` (`slug`,`baslik`,`kisa_aciklama`,`icon`,`sira`,`aktif`,`parent_id`) VALUES
-('tekne-hull',                     'Tekne (Hull)',                           'Gemi/tekne gövde sigortası',                    'bi-bookmark-star',51, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='nakliyat') AS t)),
-('yat-sigortasi',                  'Yat Sigortası',                          'Özel/ticari yat güvencesi',                     'bi-tsunami',   52, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='nakliyat') AS t)),
-('nakliyat-emtea-abonman',         'Nakliyat Emtea ve Abonman',              'Yıllık abonman emtea taşıma sigortası',         'bi-box-seam',  53, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='nakliyat') AS t)),
-('tasiyici-sorumluluk',            'Taşıyıcı Sorumluluk',                    'Lojistik firma yük sorumluluk teminatı',        'bi-truck-front',54, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='nakliyat') AS t)),
-('tekne-insaat-sigortasi',         'Tekne İnşaat Sigortası',                 'Tersane inşaat süreci güvencesi',               'bi-hammer',    55, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='nakliyat') AS t));
+('tekne-hull',                     'Tekne (Hull)',                           'Gemi/tekne gövde sigortası',                    'bi-bookmark-star',51, 1, @parent_nakliyat),
+('yat-sigortasi',                  'Yat Sigortası',                          'Özel/ticari yat güvencesi',                     'bi-tsunami',   52, 1, @parent_nakliyat),
+('nakliyat-emtea-abonman',         'Nakliyat Emtea ve Abonman',              'Yıllık abonman emtea taşıma sigortası',         'bi-box-seam',  53, 1, @parent_nakliyat),
+('tasiyici-sorumluluk',            'Taşıyıcı Sorumluluk',                    'Lojistik firma yük sorumluluk teminatı',        'bi-truck-front',54, 1, @parent_nakliyat),
+('tekne-insaat-sigortasi',         'Tekne İnşaat Sigortası',                 'Tersane inşaat süreci güvencesi',               'bi-hammer',    55, 1, @parent_nakliyat);
 
 -- Sorumluluk
 INSERT IGNORE INTO `mz_urunler` (`slug`,`baslik`,`kisa_aciklama`,`icon`,`sira`,`aktif`,`parent_id`) VALUES
-('isveren-mali-sorumluluk',        'İşveren Mali Sorumluluk',                'İşveren-çalışan iş kazası sorumluluğu',         'bi-people',    61, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='sorumluluk-sigortalari') AS t)),
-('ucuncu-sahis-sorumluluk',        'Üçüncü Şahıs Sorumluluk',                'Üçüncü taraflara verilen zarar teminatı',       'bi-person-x',  62, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='sorumluluk-sigortalari') AS t)),
-('tehlikeli-maddeler-sorumluluk',  'Tehlikeli Maddeler Zorunlu Sorumluluk',  'Tehlikeli madde işletmeleri için',              'bi-exclamation-diamond',63,1,(SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='sorumluluk-sigortalari') AS t)),
-('ozel-guvenlik-mali-sorumluluk',  'Özel Güvenlik Mali Sorumluluk',          'Güvenlik şirketleri için yasal teminat',        'bi-shield-lock',64,1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='sorumluluk-sigortalari') AS t)),
-('mesleki-sorumluluk',             'Mesleki Sorumluluk',                     'Avukat/mali müşavir/doktor mesleki teminatı',   'bi-briefcase', 65, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='sorumluluk-sigortalari') AS t));
+('isveren-mali-sorumluluk',        'İşveren Mali Sorumluluk',                'İşveren-çalışan iş kazası sorumluluğu',         'bi-people',    61, 1, @parent_sorumluluk_sigortalari),
+('ucuncu-sahis-sorumluluk',        'Üçüncü Şahıs Sorumluluk',                'Üçüncü taraflara verilen zarar teminatı',       'bi-person-x',  62, 1, @parent_sorumluluk_sigortalari),
+('tehlikeli-maddeler-sorumluluk',  'Tehlikeli Maddeler Zorunlu Sorumluluk',  'Tehlikeli madde işletmeleri için',              'bi-exclamation-diamond',63,1,@parent_sorumluluk_sigortalari),
+('ozel-guvenlik-mali-sorumluluk',  'Özel Güvenlik Mali Sorumluluk',          'Güvenlik şirketleri için yasal teminat',        'bi-shield-lock',64,1, @parent_sorumluluk_sigortalari),
+('mesleki-sorumluluk',             'Mesleki Sorumluluk',                     'Avukat/mali müşavir/doktor mesleki teminatı',   'bi-briefcase', 65, 1, @parent_sorumluluk_sigortalari);
 
 -- TARSIM
 INSERT IGNORE INTO `mz_urunler` (`slug`,`baslik`,`kisa_aciklama`,`icon`,`sira`,`aktif`,`parent_id`) VALUES
-('bitkisel-urun',                  'Bitkisel Ürün Sigortası',                'Tarımsal ürün hasar güvencesi',                 'bi-tree',      71, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='tarsim') AS t)),
-('sera-sigortasi',                 'Sera Sigortası',                         'Sera yapı ve içindeki ürünler',                 'bi-house-heart',72,1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='tarsim') AS t)),
-('kucukbas-hayvan-hayat',          'Küçükbaş Hayvan Hayat Sigortası',        'Koyun/keçi hayat güvencesi',                    'bi-piggy-bank',73, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='tarsim') AS t)),
-('buyukbas-hayvan-hayat',          'Büyükbaş Hayvan Hayat Sigortası',        'Sığır hayat güvencesi',                         'bi-piggy-bank-fill',74,1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='tarsim') AS t)),
-('kumes-hayvanlari-hayat',         'Kümes Hayvanları Hayat Sigortası',       'Kanatlı hayvancılık güvencesi',                 'bi-egg',       75, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='tarsim') AS t)),
-('su-urunleri-sigortasi',          'Su Ürünleri Sigortası',                  'Su ürünleri yetiştiriciliği',                   'bi-droplet-half',76,1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='tarsim') AS t)),
-('aricilik-sigortasi',             'Arıcılık Sigortası',                     'Arı kovanları ve bal üretimi',                  'bi-bug',       77, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='tarsim') AS t));
+('bitkisel-urun',                  'Bitkisel Ürün Sigortası',                'Tarımsal ürün hasar güvencesi',                 'bi-tree',      71, 1, @parent_tarsim),
+('sera-sigortasi',                 'Sera Sigortası',                         'Sera yapı ve içindeki ürünler',                 'bi-house-heart',72,1, @parent_tarsim),
+('kucukbas-hayvan-hayat',          'Küçükbaş Hayvan Hayat Sigortası',        'Koyun/keçi hayat güvencesi',                    'bi-piggy-bank',73, 1, @parent_tarsim),
+('buyukbas-hayvan-hayat',          'Büyükbaş Hayvan Hayat Sigortası',        'Sığır hayat güvencesi',                         'bi-piggy-bank-fill',74,1, @parent_tarsim),
+('kumes-hayvanlari-hayat',         'Kümes Hayvanları Hayat Sigortası',       'Kanatlı hayvancılık güvencesi',                 'bi-egg',       75, 1, @parent_tarsim),
+('su-urunleri-sigortasi',          'Su Ürünleri Sigortası',                  'Su ürünleri yetiştiriciliği',                   'bi-droplet-half',76,1, @parent_tarsim),
+('aricilik-sigortasi',             'Arıcılık Sigortası',                     'Arı kovanları ve bal üretimi',                  'bi-bug',       77, 1, @parent_tarsim);
 
 -- Ferdi Kaza
 INSERT IGNORE INTO `mz_urunler` (`slug`,`baslik`,`kisa_aciklama`,`icon`,`sira`,`aktif`,`parent_id`) VALUES
-('ferdi-kaza-sigortasi',           'Ferdi Kaza Sigortası',                   'Bireysel kaza koruması',                        'bi-bandaid',   81, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='ferdi-kaza') AS t)),
-('deprem-destek-sigortasi',        'Deprem Destek Sigortası',                'DASK üzerine ek destek paketi',                 'bi-activity',  82, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='ferdi-kaza') AS t)),
-('kritik-hastaliklar',             'Kritik Hastalıklar',                     'Kanser, kalp gibi kritik hastalık paketi',      'bi-heart',     83, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='ferdi-kaza') AS t));
+('ferdi-kaza-sigortasi',           'Ferdi Kaza Sigortası',                   'Bireysel kaza koruması',                        'bi-bandaid',   81, 1, @parent_ferdi_kaza),
+('deprem-destek-sigortasi',        'Deprem Destek Sigortası',                'DASK üzerine ek destek paketi',                 'bi-activity',  82, 1, @parent_ferdi_kaza),
+('kritik-hastaliklar',             'Kritik Hastalıklar',                     'Kanser, kalp gibi kritik hastalık paketi',      'bi-heart',     83, 1, @parent_ferdi_kaza);
 
 -- Kefalet
 INSERT IGNORE INTO `mz_urunler` (`slug`,`baslik`,`kisa_aciklama`,`icon`,`sira`,`aktif`,`parent_id`) VALUES
-('kefalet-senedi',                 'Kefalet Senedi',                         'İhale ve kefalet teminatı senedi',              'bi-file-earmark-ruled',91,1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='kefalet-sigortalari') AS t)),
-('kdv-iadesi',                     'KDV İadesi',                             'KDV iade kefalet sigortası',                    'bi-cash-coin', 92, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='kefalet-sigortalari') AS t)),
-('devlet-destekli-alacak-sigorta', 'Devlet Destekli Alacak Sigorta',         'KOBİ alacak güvencesi',                         'bi-bank',      93, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='kefalet-sigortalari') AS t)),
-('bina-tamamlama-sigortasi',       'Bina Tamamlama Sigortası',               'Müteahhit-tüketici tamamlama teminatı',         'bi-building-add',94,1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='kefalet-sigortalari') AS t)),
-('lisansli-depoculuk',             'Lisanslı Depoculuk',                     'Tarımsal lisanslı depo güvencesi',              'bi-archive',   95, 1, (SELECT id FROM (SELECT id FROM mz_urunler WHERE slug='kefalet-sigortalari') AS t));
+('kefalet-senedi',                 'Kefalet Senedi',                         'İhale ve kefalet teminatı senedi',              'bi-file-earmark-ruled',91,1, @parent_kefalet_sigortalari),
+('kdv-iadesi',                     'KDV İadesi',                             'KDV iade kefalet sigortası',                    'bi-cash-coin', 92, 1, @parent_kefalet_sigortalari),
+('devlet-destekli-alacak-sigorta', 'Devlet Destekli Alacak Sigorta',         'KOBİ alacak güvencesi',                         'bi-bank',      93, 1, @parent_kefalet_sigortalari),
+('bina-tamamlama-sigortasi',       'Bina Tamamlama Sigortası',               'Müteahhit-tüketici tamamlama teminatı',         'bi-building-add',94,1, @parent_kefalet_sigortalari),
+('lisansli-depoculuk',             'Lisanslı Depoculuk',                     'Tarımsal lisanslı depo güvencesi',              'bi-archive',   95, 1, @parent_kefalet_sigortalari);
 
 -- 6) one_cikan flagini ana kategoriler icin yeniden yukle (yukaridaki kayitlar one_cikan'i set etmedi)
 UPDATE `mz_urunler` SET one_cikan = 1 WHERE slug IN ('oto-sigortalari','yangin-policeleri','saglik-sigortalari','sorumluluk-sigortalari') AND parent_id IS NULL;
@@ -802,3 +813,33 @@ INSERT IGNORE INTO `mz_sss` (`kategori`,`soru`,`cevap`,`sira`,`aktif`) VALUES
 ('Kefalet','KDV iadesi sigortası nedir?','İhracatçıların KDV iade taleplerinde, vergi dairesinin nakit teminat istemesi yerine kabul ettiği sigorta poliçesidir. Nakit akışını rahatlatır.',91,1);
 
 -- TAMAMLANDI
+
+-- ====================================================
+-- v1.1.1 - Icon prefix fix (eski seed'lerdeki bi- prefix eksiklikleri)
+-- ====================================================
+
+-- Eski seed'lerde icon'lar 'car-front' olarak yazilmisti, bi- prefix eksik
+-- Bootstrap Icons class'i 'bi bi-car-front' olmali, bu yuzden DB'de de 'bi-car-front' tutulmali
+UPDATE `mz_urunler` SET `icon` = CONCAT('bi-', `icon`)
+  WHERE `icon` IS NOT NULL
+    AND `icon` != ''
+    AND `icon` NOT LIKE 'bi-%';
+
+-- 9 ana kategori icin icon ve aciklama duzenlemesi (bilinmeyenler icin guncel)
+UPDATE `mz_urunler` SET `icon` = 'bi-car-front-fill' WHERE `slug` = 'oto-sigortalari';
+UPDATE `mz_urunler` SET `icon` = 'bi-fire'           WHERE `slug` = 'yangin-policeleri';
+UPDATE `mz_urunler` SET `icon` = 'bi-heart-pulse-fill' WHERE `slug` = 'saglik-sigortalari';
+UPDATE `mz_urunler` SET `icon` = 'bi-shield-shaded' WHERE `slug` = 'all-riskler';
+UPDATE `mz_urunler` SET `icon` = 'bi-truck'         WHERE `slug` = 'nakliyat';
+UPDATE `mz_urunler` SET `icon` = 'bi-people-fill'   WHERE `slug` = 'sorumluluk-sigortalari';
+UPDATE `mz_urunler` SET `icon` = 'bi-tree-fill'     WHERE `slug` = 'tarsim';
+UPDATE `mz_urunler` SET `icon` = 'bi-bandaid'       WHERE `slug` = 'ferdi-kaza';
+UPDATE `mz_urunler` SET `icon` = 'bi-bank'          WHERE `slug` = 'kefalet-sigortalari';
+
+-- Eski seed'deki kategoriler de duzenlensin (eger varsa)
+UPDATE `mz_urunler` SET `icon` = 'bi-car-front-fill' WHERE `slug` = 'kasko-sigortasi';
+UPDATE `mz_urunler` SET `icon` = 'bi-traffic-cone'   WHERE `slug` = 'trafik-sigortasi';
+UPDATE `mz_urunler` SET `icon` = 'bi-house-fill'     WHERE `slug` = 'konut-sigortasi';
+UPDATE `mz_urunler` SET `icon` = 'bi-building'       WHERE `slug` = 'isyeri-sigortasi';
+UPDATE `mz_urunler` SET `icon` = 'bi-heart-pulse-fill' WHERE `slug` = 'saglik-sigortasi';
+UPDATE `mz_urunler` SET `icon` = 'bi-shield-check'   WHERE `slug` = 'hayat-sigortasi';
