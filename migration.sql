@@ -1641,3 +1641,63 @@ INSERT IGNORE INTO `mz_sigorta_sirketleri` (`ad`, `web_sitesi`, `aciklama`, `akt
 ('Mapfre Sigorta', 'https://www.mapfre.com.tr', 'Global İspanyol kökenli sigorta grubu.', 1),
 ('Ray Sigorta', 'https://www.raysigorta.com.tr', 'Türk-Avusturya ortaklığı, geniş ürün yelpazesi.', 1),
 ('Sompo Sigorta', 'https://www.sompo.com.tr', 'Japon kökenli, kurumsal güçlü yapı.', 1);
+
+-- ====================================================
+-- v1.1.3 - UNIQUE CONSTRAINT'ler (kritik!)
+-- Bu constraint'ler olmadigi icin INSERT IGNORE her seferinde
+-- duplike yaratiyordu (mz_sss 196'ya, sirketler 30'a, kurallar 40'a kadar)
+-- ====================================================
+
+-- mz_sss: kategori+soru kombinasyonu UNIQUE olsun
+SET @has_uk_kategori_soru := (
+  SELECT COUNT(*) FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'mz_sss'
+    AND INDEX_NAME = 'uk_kategori_soru'
+);
+-- Once duplikatlari temizle (en eski id kalsin)
+DELETE s1 FROM `mz_sss` s1
+INNER JOIN `mz_sss` s2
+  ON s1.id > s2.id
+  AND s1.kategori = s2.kategori
+  AND s1.soru = s2.soru;
+-- Yanlis encoding'li 'Police' kategorisini sil (dogru: 'Poliçe')
+DELETE FROM `mz_sss` WHERE `kategori` = 'Police';
+-- UNIQUE ekle
+SET @sql_uk_sss := IF(@has_uk_kategori_soru = 0,
+  'ALTER TABLE `mz_sss` ADD UNIQUE KEY `uk_kategori_soru` (`kategori`, `soru`(255))',
+  'SELECT 1');
+PREPARE stmt FROM @sql_uk_sss; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- mz_sigorta_sirketleri: ad UNIQUE olsun
+DELETE s1 FROM `mz_sigorta_sirketleri` s1
+INNER JOIN `mz_sigorta_sirketleri` s2 ON s1.id > s2.id AND s1.ad = s2.ad;
+SET @has_uk_sirket := (
+  SELECT COUNT(*) FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'mz_sigorta_sirketleri' AND INDEX_NAME = 'uk_ad'
+);
+SET @sql_uk_sirket := IF(@has_uk_sirket = 0,
+  'ALTER TABLE `mz_sigorta_sirketleri` ADD UNIQUE KEY `uk_ad` (`ad`)',
+  'SELECT 1');
+PREPARE stmt FROM @sql_uk_sirket; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- mz_hatirlatma_kurallari: ad UNIQUE
+DELETE k1 FROM `mz_hatirlatma_kurallari` k1
+INNER JOIN `mz_hatirlatma_kurallari` k2 ON k1.id > k2.id AND k1.ad = k2.ad;
+SET @has_uk_kural := (
+  SELECT COUNT(*) FROM information_schema.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'mz_hatirlatma_kurallari' AND INDEX_NAME = 'uk_ad'
+);
+SET @sql_uk_kural := IF(@has_uk_kural = 0,
+  'ALTER TABLE `mz_hatirlatma_kurallari` ADD UNIQUE KEY `uk_ad` (`ad`)',
+  'SELECT 1');
+PREPARE stmt FROM @sql_uk_kural; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- mz_urunler: Eski seed slug'larini sil (yeni hierarchy lehine)
+DELETE FROM `mz_urunler` WHERE `slug` IN (
+  'kasko-sigortasi', 'trafik-sigortasi', 'konut-sigortasi',
+  'isyeri-sigortasi', 'saglik-sigortasi', 'hayat-sigortasi',
+  'seyahat-sigortasi', 'tarim-sigortasi'
+);
