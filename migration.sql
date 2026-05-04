@@ -680,3 +680,125 @@ ALTER TABLE `mz_urunler`        ADD COLUMN IF NOT EXISTS `parent_id` INT UNSIGNE
 ALTER TABLE `mz_urunler`        ADD KEY    IF NOT EXISTS `idx_parent` (`parent_id`);
 ALTER TABLE `mz_teklif_notlari` ADD COLUMN IF NOT EXISTS `baslik`     VARCHAR(160) DEFAULT NULL AFTER `tip`;
 ALTER TABLE `mz_hatirlatma_log` ADD COLUMN IF NOT EXISTS `olusturma_tarihi` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- ====================================================
+-- v1.0.8 - Hakkimizda zengin icerik + 30+ SSS + Temsilcimiz Olun ipuclari
+-- ====================================================
+
+-- Hakkimizda CMS sayfasi: Mizan Sigorta'ya ozel zengin icerik
+UPDATE `mz_sayfalar` SET
+  `baslik` = 'Kurumsal',
+  `icerik` = '<div class="mz-prose">
+<h2>Güven ve Özen İle Yanınızdayız</h2>
+<p class="lead">Mizan Sigorta Aracılık Hizmetleri olarak, sigortacılığı bir ürün satışı olarak değil, müşterilerimizin geleceğini güvence altına alma sorumluluğu olarak görüyoruz.</p>
+
+<p>Mizan adı; <strong>denge, adalet ve ölçü</strong> anlamına gelir. Markamız bu felsefeyi sigortacılık anlayışımızın merkezine yerleştirmiştir: müşterimizin ihtiyacı ile sunulan teminat arasında, prim ile koruma kapsamı arasında, beklenti ile gerçek arasında dengeyi kurmak.</p>
+
+<h3>Misyonumuz</h3>
+<p>Müşterilerimizin risklerini anlayarak, ihtiyaçlarına en uygun ve en ekonomik sigorta çözümlerini sunmak. Hasar veya tazminat sürecinde profesyonel rehberlik yaparak hak ve menfaatlerini korumak. Sigorta şirketi ile sigortalı arasında güvenilir bir köprü olmak ve uzun soluklu ilişkiler kurmak.</p>
+
+<h3>Vizyonumuz</h3>
+<p>Türkiye genelinde yaygın hizmet ağıyla, kaliteli hizmetiyle tercih edilen, güvenilen ve referans gösterilen bir sigorta aracılık kurumu olmak. Dijital dönüşümü takip ederek müşterilerimize her an, her yerden ulaşılabilir bir deneyim sunmak.</p>
+
+<h3>Değerlerimiz</h3>
+<ul>
+  <li><strong>Güven:</strong> Her müşteri ilişkimizin temelinde dürüstlük ve şeffaflık vardır.</li>
+  <li><strong>Özen:</strong> Her poliçe, her hasar dosyası, her görüşme aynı titizlikle ele alınır.</li>
+  <li><strong>Uzmanlık:</strong> Sigorta mevzuatı ve ürün gelişmelerini sürekli takip eden uzman kadro.</li>
+  <li><strong>Adalet:</strong> Müşterimizin haklarını koruyarak sigorta şirketleri ile dengeyi sağlamak.</li>
+  <li><strong>Süreklilik:</strong> Tek seferlik satış değil, hayatın her aşamasında yanınızda olmak.</li>
+</ul>
+
+<h3>Hizmet Kapsamımız</h3>
+<p>9 ana kategoride 35''ten fazla sigorta ürünü ile bireysel ve kurumsal her ihtiyaca özel çözüm sunuyoruz:</p>
+<ul>
+  <li><strong>Oto Sigortaları:</strong> Kasko, Trafik, İMM, Yeşilkart</li>
+  <li><strong>Yangın Poliçeleri:</strong> Konut, İşyeri, DASK, Ortak Alan</li>
+  <li><strong>Sağlık Sigortaları:</strong> Özel Sağlık, Tamamlayıcı Sağlık, Yurt Dışı Seyahat</li>
+  <li><strong>All Riskler:</strong> İnşaat, Montaj, Makine Kırılması, Elektronik Cihaz</li>
+  <li><strong>Nakliyat:</strong> Tekne, Yat, Emtea, Taşıyıcı Sorumluluk</li>
+  <li><strong>Sorumluluk Sigortaları:</strong> İşveren, Üçüncü Şahıs, Mesleki, Tehlikeli Maddeler</li>
+  <li><strong>TARSİM:</strong> Bitkisel Ürün, Sera, Hayvancılık, Arıcılık</li>
+  <li><strong>Ferdi Kaza:</strong> Bireysel Kaza, Deprem Destek, Kritik Hastalıklar</li>
+  <li><strong>Kefalet Sigortaları:</strong> Kefalet Senedi, KDV İadesi, Devlet Destekli Alacak</li>
+</ul>
+
+<h3>Şubelerimiz</h3>
+<p>İstanbul Genel Merkezimiz Ataşehir''de yer almaktadır. Konya, Ankara ve Aksaray illerinde de hizmet noktalarımız bulunmaktadır. Her şubemizde aynı kalite standardı ve aynı müşteri odaklı yaklaşım ile hizmet veriyoruz.</p>
+
+<h3>Anlaşmalı Sigorta Şirketleri</h3>
+<p>Türkiye''nin önde gelen 12''den fazla sigorta şirketi ile anlaşmalı olarak çalışıyoruz. Bu sayede her müşterimiz için piyasadaki en avantajlı teminat-prim dengesini kurabiliyoruz.</p>
+
+<div class="alert alert-warning mt-4">
+  <h5 class="fw-bold">Neden Aracı Acente Üzerinden Sigorta?</h5>
+  <p class="mb-0">Doğrudan sigorta şirketinden poliçe yapmak yerine bir acente ile çalışmak; teklif karşılaştırması, hasar süreci desteği, mevzuat bilgisi ve uzun vadeli müşteri ilişkisi açısından önemli avantajlar sağlar. Hasarın yaşandığı kritik anda yalnız değil, yanınızda bir uzman bulursunuz.</p>
+</div>
+</div>'
+WHERE `slug` = 'hakkimizda';
+
+-- ===== 30+ SSS sorusu =====
+
+-- Once mevcut basit SSS'leri silelim (yenilerini ekleyecegiz)
+DELETE FROM `mz_sss` WHERE `kategori` IN ('Genel', 'Teklif', 'Hasar') AND `sira` < 100;
+
+INSERT IGNORE INTO `mz_sss` (`kategori`,`soru`,`cevap`,`sira`,`aktif`) VALUES
+
+-- ====== Genel ======
+('Genel','Mizan Sigorta hangi sigorta şirketleri ile çalışıyor?','Türkiye''nin önde gelen 12''den fazla sigorta şirketi ile anlaşmalı çalışıyoruz. Anadolu Sigorta, Allianz, AXA, HDI, Türkiye Sigorta, Quick Sigorta, Neova, Ak Sigorta, Doğa Sigorta gibi köklü şirketlerle çalışarak size en uygun teminatları karşılaştırıyoruz.',1,1),
+('Genel','Acente üzerinden sigorta yaptırmak daha mı pahalı?','Hayır, tam tersi. Aracı acenteler aynı poliçeyi sigorta şirketinin doğrudan kendisiyle yapacağınız fiyatla sunar; üzerinde bir komisyon yoktur. Ancak hasar sürecinde uzman destek, çoklu teklif karşılaştırması ve mevzuat danışmanlığı gibi büyük avantajlar sağlar.',2,1),
+('Genel','Online teklif almak ücretli mi, beni bağlar mı?','Hayır, web sitemizden veya telefon ile alınan tüm teklifler tamamen ücretsizdir ve sizi hiçbir şekilde bağlamaz. Karar tamamen size aittir.',3,1),
+('Genel','Sigortaymı yaptırdıktan sonra şirket değiştirmem mümkün mü?','Evet. Yenileme döneminde dilediğiniz şirkete geçebilirsiniz. Bizimle çalıştığınızda size yenileme öncesi otomatik karşılaştırma yapıyoruz, en uygun teklifi sunuyoruz.',4,1),
+('Genel','Mizan Sigorta nerelerde hizmet veriyor?','Genel Merkezimiz İstanbul Ataşehir''dedir. Ek olarak Konya (Karatay), Ankara ve Aksaray''da hizmet noktalarımız bulunmaktadır. Türkiye genelinde online ve telefon ile hizmet vermekteyiz.',5,1),
+
+-- ====== Teklif ======
+('Teklif','Teklif almak için hangi bilgiler gerekiyor?','Sigorta türüne göre değişir. Trafik/kasko için araç plakası ve ruhsat sahibi TC kimlik numarası; konut/DASK için adres bilgileri; sağlık için yaş ve TC kimlik numarası yeterlidir.',10,1),
+('Teklif','Aldığım teklifin geçerlilik süresi ne kadar?','Sigorta şirketleri tarafından üretilen teklifler genellikle 7-15 gün arasında geçerlidir. Bazı poliçelerde fiyat günlük değişebileceği için en güncel fiyat için bizi arayın.',11,1),
+('Teklif','Birden fazla sigorta şirketinden teklif alabilir miyim?','Evet, bizim asıl işimiz bu. Anlaşmalı 12+ şirketten aynı anda teklif çekip size karşılaştırmalı sunarız. Hangi şirketin hangi teminatı, hangi fiyata verdiği şeffafça görüşülür.',12,1),
+('Teklif','Hızlı teklif sihirbazı nasıl çalışıyor?','Sayfanın sağ üstündeki "Hızlı Teklif" butonuna tıklayın. 3 adımda (sigorta türü → bilgileriniz → iletişim) teklif talebi gönderebilirsiniz. Yetkilimiz size kısa sürede dönüş yapacak.',13,1),
+
+-- ====== Kasko ======
+('Kasko','Kasko zorunlu mu?','Hayır, kasko isteğe bağlıdır. Ancak özellikle yeni veya değerli araçlar için kesinlikle önerilir; kendi aracınızda oluşan zararlar (kaza, hırsızlık, yangın, doğal afet vb.) kasko ile karşılanır.',20,1),
+('Kasko','Kasko ile trafik sigortası arasındaki fark nedir?','Trafik sigortası zorunludur ve sadece <strong>karşı tarafın</strong> hasarını karşılar. Kasko ise isteğe bağlıdır ve <strong>kendi aracınızı</strong> hırsızlık, yangın, deprem, kaza gibi risklere karşı korur.',21,1),
+('Kasko','Kasko fiyatı nasıl belirlenir?','Aracın değeri, modeli, yaşı, kullanım amacı, sürücünün yaşı ve hasar geçmişi gibi faktörler etkiler. Hasarsızlık indirimi (%0-65) ile prim önemli ölçüde düşürülebilir.',22,1),
+('Kasko','İkame araç teminatı nedir?','Kasko poliçenize ek olarak alınabilen bu teminat, aracınız hasarda olduğu sürece (genellikle 7-15 gün) size kiralık araç sağlanmasını ifade eder.',23,1),
+('Kasko','Cam hasarımda mini onarım indirimi nasıl çalışır?','Mini onarım, aracın küçük çiziklerinin kasko hasarsızlık indirimi bozulmadan onarılmasıdır. Yılda 1-2 kez kullanılabilir, hasarsızlık derecenizi etkilemez.',24,1),
+
+-- ====== Trafik ======
+('Trafik','Trafik sigortası yaptırmazsam ne olur?','2918 sayılı Kanun gereği zorunludur. Yaptırmazsanız ceza yer, aracınız trafikten men edilir ve kaza halinde tüm zarar size kalır.',30,1),
+('Trafik','Hasarsızlık indirimi nasıl çalışır?','İlk poliçede 4. basamaktan başlarsınız. Her hasarsız yıl bir basamak yukarı çıkarsınız (8. basamak en yüksek indirim, %50). Hasar olursa basamağınız düşer.',31,1),
+('Trafik','Aracımı sattığımda trafik sigortası ne olur?','Mülkiyet değişiklik tarihinden 10 gün sonra otomatik iptal olur. Kullanılmayan prim gün esasına göre size iade edilir.',32,1),
+('Trafik','Trafik sigortası karşı tarafın hasarını ne kadar karşılar?','Hazine ve Maliye Bakanlığı''nın belirlediği maddi ve bedeni teminat limitleri çerçevesinde karşılar. Limit üstü zarar için ek olarak İMM (İhtiyari Mali Mesuliyet) yaptırılması önerilir.',33,1),
+
+-- ====== DASK ======
+('DASK','DASK kimler için zorunlu?','Tapuya kayıtlı tüm konutlar için zorunludur. DASK''sız elektrik, su, doğalgaz aboneliği açılamaz; konut kredisi kullanılamaz; tapu işlemi yapılamaz.',40,1),
+('DASK','DASK primleri nasıl hesaplanır?','Yapı tarzı (2 tip) ve deprem bölgesi (7 risk bölgesi) baz alınarak hesaplanır. Toplam 14 farklı fiyat seçeneği vardır. Her yıl yenilenir.',41,1),
+('DASK','DASK ile konut sigortası arasındaki fark nedir?','DASK sadece <strong>deprem ve deprem kaynaklı hasarlarda binayı</strong> teminat altına alır. Konut sigortası ise yangın, hırsızlık, sel, ev eşyaları gibi geniş riskleri kapsar. İkisini birlikte yaptırmak idealdir.',42,1),
+('DASK','Kiracı DASK yaptırmak zorunda mı?','Hayır, DASK ev sahibinin sorumluluğundadır. Ancak kiracılar kendi eşyalarını korumak için <strong>konut sigortası</strong> yaptırabilirler.',43,1),
+
+-- ====== Konut ======
+('Konut','Konut sigortası neleri kapsar?','Yangın, hırsızlık, sel, su baskını, fırtına, deprem (DASK üstü ek), patlama, vandalizm gibi geniş risklere karşı binayı ve içindeki eşyaları teminat altına alır.',50,1),
+('Konut','Kiracıyım, konut sigortası yaptırabilir miyim?','Evet. Sadece eşyalarınızı (mobilya, beyaz eşya, elektronik vb.) sigortalatabilirsiniz. Bina ev sahibinin sorumluluğundadır.',51,1),
+('Konut','Konut sigortasında eksik sigorta ne demek?','Eviniz ve eşyalarınızın gerçek değerinden düşük tutarda sigortalanması durumudur. Hasar halinde tazminat oranlı ödenir. Doğru bedeli belirlemek için eksperimizden destek alabilirsiniz.',52,1),
+
+-- ====== Sağlık ======
+('Sağlık','Özel sağlık ile tamamlayıcı sağlık farkı nedir?','<strong>Tamamlayıcı sağlık (TSS)</strong> SGK üzerine eklenir, daha uygundur (300-800 TL/ay), sadece SGK anlaşmalı özel hastanelerde geçerlidir. <strong>Özel sağlık</strong> (1.500-4.000 TL/ay) tamamen bağımsızdır, daha geniş kapsamlıdır.',60,1),
+('Sağlık','Tamamlayıcı sağlık sigortasından kimler yararlanabilir?','SGK''lı (4A, 4B, 4C) tüm vatandaşlar yararlanabilir. SGK''sı olmayanlar tamamlayıcı sağlık yapamaz, özel sağlık yaptırmalıdır.',61,1),
+('Sağlık','Mevcut hastalıklarım sağlık sigortası tarafından karşılanır mı?','Genellikle hayır. Poliçe yapımı sırasında bilinen hastalıklar (önceden var olan rahatsızlıklar) kapsam dışı bırakılabilir. Beyan etmek önemlidir, aksi halde tazminat ödenmeyebilir.',62,1),
+('Sağlık','Yurt dışı seyahat sağlık sigortası ne kadar süreli?','Seyahat süreniz boyunca geçerlidir. Schengen vizesi için minimum 30.000 EUR teminat ve seyahat tarihlerini kapsayan süre gereklidir.',63,1),
+
+-- ====== Hasar ======
+('Hasar','Hasar olduğunda ne yapmalıyım?','Hemen <strong>112''yi arayın</strong> (yaralı varsa), kazaya tutanak tutturun veya kaza tespit tutanağı düzenleyin, fotoğraf çekin ve hemen bizi arayın. Süreç boyunca size eşlik ederiz.',70,1),
+('Hasar','Hasar bildirimi için ne kadar süre var?','Genellikle 5 iş günü içinde bildirim yapmanız gerekir. Geç bildirim hak kaybına neden olabilir.',71,1),
+('Hasar','Hasar tazminatı ne kadar sürede ödenir?','Tüm belgelerin tamamlanmasını takiben ortalama 7-15 iş günü içinde ödeme yapılır. Karmaşık dosyalarda eksper ataması gerekebilir.',72,1),
+('Hasar','Hasarımı online takip edebilir miyim?','Evet. Sitemizdeki "Hasar İhbarı" sayfasından dosya numaranızla takip edebilir veya bizi arayarak güncel durumu öğrenebilirsiniz.',73,1),
+
+-- ====== İşyeri / Kurumsal ======
+('İşyeri','İşyeri sigortası neleri kapsar?','Yangın, hırsızlık, sel, fırtına, deprem (ek teminat), camlar, makine, mali sorumluluk, iş durması gibi geniş bir teminat yelpazesi sunar.',80,1),
+('İşyeri','İşveren mali sorumluluk sigortası zorunlu mu?','Bazı sektörlerde (inşaat, tehlikeli işler) zorunludur. Tüm işverenler için yasal sorumluluğa karşı koruma sağladığından önemle önerilir.',81,1),
+('İşyeri','Mesleki sorumluluk sigortası kimlere uygundur?','Avukat, mali müşavir, doktor, mühendis, eczacı gibi mesleki hizmet sunan kişilere uygundur. Yaptıkları iş nedeniyle 3. kişilere verilebilecek zararı teminat altına alır.',82,1),
+
+-- ====== Kefalet ======
+('Kefalet','Kefalet sigortası nedir, ne işe yarar?','İhale, taahhüt veya alacak süreçlerinde teminat mektubu yerine geçen sigortadır. Bankaya yüksek bloke koymadan kefalet sağlar.',90,1),
+('Kefalet','KDV iadesi sigortası nedir?','İhracatçıların KDV iade taleplerinde, vergi dairesinin nakit teminat istemesi yerine kabul ettiği sigorta poliçesidir. Nakit akışını rahatlatır.',91,1);
+
+-- TAMAMLANDI

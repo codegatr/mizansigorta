@@ -507,11 +507,13 @@ if (isset($_GET['ajax'])) {
 
         // ---- test_token ----
         if ($aj === 'test_token') {
-            if (!$token) { echo json_encode(['ok' => false, 'error' => 'Token boş']); exit; }
-            $r = upd_curl('https://api.github.com/user', upd_ghHeaders($token));
+            // Once POST'tan gelen token'i kontrol et, yoksa DB'den oku
+            $testToken = trim((string)($_POST['token'] ?? '')) ?: $token;
+            if (!$testToken) { echo json_encode(['ok' => false, 'error' => 'Token boş — önce input alanına yapıştırın']); exit; }
+            $r = upd_curl('https://api.github.com/user', upd_ghHeaders($testToken));
             if ($r['code'] === 200) {
                 $u = json_decode($r['body'], true);
-                echo json_encode(['ok' => true, 'login' => $u['login'] ?? '?']);
+                echo json_encode(['ok' => true, 'login' => $u['login'] ?? '?', 'scopes' => $r['error'] ?? '']);
             } else {
                 echo json_encode(['ok' => false, 'error' => "HTTP {$r['code']}: " . substr($r['body'], 0, 80)]);
             }
@@ -939,7 +941,9 @@ $localVersion = upd_localVer();
 
   window.updTestToken = async function () {
     document.getElementById('tokTest').textContent = 'Test ediliyor...';
-    const r = await fetch('?ajax=test_token').then(x => x.json());
+    const fd = new FormData();
+    fd.append('token', document.getElementById('ghToken').value.trim());
+    const r = await fetch('?ajax=test_token', { method: 'POST', body: fd }).then(x => x.json());
     if (r.ok) document.getElementById('tokTest').innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Token geçerli (' + r.login + ').</span>';
     else document.getElementById('tokTest').innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> ' + (r.error || '?') + '</span>';
   };
