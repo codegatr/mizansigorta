@@ -533,4 +533,5 @@ INSERT IGNORE INTO `mz_ayarlar` (`anahtar`,`deger`,`aciklama`,`grup`,`tip`) VALU
 ('hasar_otomatik_no','HSR','Hasar dosya numarası ön eki','teklif','text'),
 ('cron_anahtar','','Cron URL koruması için rastgele anahtar (cron?key=...)','sistem','text'),
 ('github_token','','GitHub güncellemeleri için (opsiyonel) PAT','sistem','password'),
+('github_branch','main','Güncelleme alınacak Git branch (varsayılan: main)','sistem','text'),
 ('bakim_modu','0','Bakım modu (1=aktif, ziyaretçilere bakım sayfası gösterilir)','sistem','checkbox');

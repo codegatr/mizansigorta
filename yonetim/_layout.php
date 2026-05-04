@@ -96,7 +96,7 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
     <a href="ayarlar.php"              class="<?= $current === 'ayarlar.php' ? 'active' : '' ?>"><i class="bi bi-gear"></i> Ayarlar</a>
     <a href="audit-log.php"            class="<?= $current === 'audit-log.php' ? 'active' : '' ?>"><i class="bi bi-clipboard-data"></i> İşlem Kaydı</a>
     <?php if (is_superadmin()): ?>
-    <a href="update.php"               class="<?= $current === 'update.php' ? 'active' : '' ?>"><i class="bi bi-cloud-arrow-down"></i> Güncelleme</a>
+    <a href="update.php"               class="<?= $current === 'update.php' ? 'active' : '' ?>"><i class="bi bi-cpu"></i> Akıllı Güncelleme</a>
     <?php endif; ?>
     <?php endif; ?>
 
