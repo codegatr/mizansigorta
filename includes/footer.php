@@ -8,7 +8,7 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
   <div class="container py-5">
     <div class="row g-4">
       <div class="col-md-4">
-        <h5 class="text-warning mb-3">Mizan Sigorta</h5>
+        <img src="<?= asset('assets/img/logo-light.png') ?>" alt="Mizan Sigorta" class="mz-footer-logo">
         <p class="small text-light-emphasis">
           Müşteri memnuniyetini önceliklendiren çözüm ortağınız.
           Anlaşmalı sigorta şirketleri ile en uygun teminat ve fiyatları sunuyoruz.

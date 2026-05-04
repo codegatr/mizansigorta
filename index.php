@@ -25,8 +25,17 @@ require __DIR__ . '/includes/bootstrap.php';
 // Bakim modu (admin alanlari haric)
 check_maintenance(false);
 
+// Alt dizin (subdirectory) destegi: SITE_BASE_URL'den base path'i cikar ve URL'den ayikla.
+// Ornek: SITE_BASE_URL='https://example.com/v2'  =>  base='/v2'  =>  /v2/teklif-al -> /teklif-al
+$basePath = (string)(parse_url(SITE_BASE_URL, PHP_URL_PATH) ?? '');
+$basePath = '/' . trim($basePath, '/');
+if ($basePath === '/') $basePath = '';
+
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-$path = '/' . trim($path, '/');
+if ($basePath !== '' && (str_starts_with($path, $basePath . '/') || $path === $basePath)) {
+    $path = substr($path, strlen($basePath));
+}
+$path = '/' . trim((string)$path, '/');
 
 $routes = [
     '#^/$#'                          => 'home.php',

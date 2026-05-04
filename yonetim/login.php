@@ -27,10 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="mz-login-wrap">
   <div class="mz-login-card">
-    <div class="text-center mb-4">
-      <span class="mz-logo-mark mz-logo-lg">M</span>
-      <h3 class="fw-bold mt-3 mb-1">Mizan Sigorta</h3>
-      <p class="text-muted small">Yönetim Paneli</p>
+    <div class="mz-logo-lg text-center mb-4">
+      <img src="<?= asset('assets/img/logo.png') ?>" alt="Mizan Sigorta">
+      <p class="text-muted small mt-2 mb-0">Yönetim Paneli</p>
     </div>
 
     <?php if ($err): ?>

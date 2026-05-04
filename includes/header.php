@@ -46,7 +46,7 @@ $wa         = setting('whatsapp');
 <nav class="navbar navbar-expand-lg mz-navbar sticky-top">
   <div class="container">
     <a class="navbar-brand fw-bold" href="<?= u('/') ?>">
-      <span class="mz-logo-mark">M</span> Mizan <span class="text-warning">Sigorta</span>
+      <img src="<?= asset('assets/img/logo-light.png') ?>" alt="<?= e(setting('site_basligi', SITE_NAME)) ?>">
     </a>
     <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMain" aria-label="Menu">
       <span class="navbar-toggler-icon"></span>
