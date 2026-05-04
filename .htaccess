@@ -1,0 +1,47 @@
+# Mizan Sigorta - Apache / LiteSpeed
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Mevcut dosya/klasore git
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # config / includes / cron / backups klasorlerine erisim engelli
+  RewriteRule ^(config|includes|cron|backups)/ - [F,L]
+
+  # Geri kalan her sey index.php'ye
+  RewriteRule ^ index.php [L]
+</IfModule>
+
+# .env, .git, .sql, .md, .lock gibi hassas dosyalara erisimi engelle (manifest.json haric)
+<FilesMatch "(^\.|\.(sql|md|lock|gitignore|gitattributes|env|sample)$)">
+  Require all denied
+</FilesMatch>
+
+# Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# Cache
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpeg     "access plus 30 days"
+  ExpiresByType image/png      "access plus 30 days"
+  ExpiresByType image/svg+xml  "access plus 30 days"
+  ExpiresByType image/webp     "access plus 30 days"
+  ExpiresByType text/css       "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+</IfModule>
+
+# Guvenlik basliklari
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(self), camera=(), microphone=()"
+</IfModule>

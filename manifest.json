@@ -1,0 +1,12 @@
+{
+    "name": "Mizan Sigorta",
+    "slug": "mizansigorta",
+    "version": "1.0.0",
+    "release_date": "2026-05-04",
+    "repo": "codegatr/mizansigorta",
+    "php_min": "8.3.0",
+    "description": "Mizan Sigorta - Sigorta aracilik hizmetleri kurumsal sitesi ve yonetim paneli. Teklif sistemi, teklif hatirlatma motoru, police takibi, hasar ihbari, CMS, blog, SSS, GitHub uzerinden surum guncelleme.",
+    "author": "CODEGA Yazilim",
+    "author_url": "https://codega.com.tr",
+    "support_email": "destek@codega.com.tr"
+}

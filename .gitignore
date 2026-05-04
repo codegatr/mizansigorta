@@ -1,0 +1,29 @@
+# Mizan Sigorta - .gitignore
+
+# Local config (real credentials never go to repo)
+/config/config.php
+
+# Uploads
+/uploads/teklif/*
+/uploads/hasar/*
+/uploads/blog/*
+/uploads/sayfa/*
+!/uploads/teklif/.gitkeep
+!/uploads/hasar/.gitkeep
+!/uploads/blog/.gitkeep
+!/uploads/sayfa/.gitkeep
+
+# Backups
+/backups/*
+!/backups/.gitkeep
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Logs
+/logs/*.log
+*.log
