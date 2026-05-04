@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db_exec('UPDATE ' . t('teklifler') . ' SET durum=?, guncelleme_tarihi=NOW() WHERE id=?', [$yeni, $id]);
             db_exec('INSERT INTO ' . t('teklif_notlari') . ' (teklif_id, kullanici_id, tip, baslik, icerik, olusturma_tarihi)
                      VALUES (?,?, "sistem", "Durum güncellendi", ?, NOW())', [$id, user_id(), 'Yeni durum: ' . $yeni]);
-            audit_log('teklif_durum', 'teklif', $id, ['eski' => $teklif['durum'], 'yeni' => $yeni]);
+            audit_log('teklif_durum', 'teklif', $id, 'Eski: '.$teklif['durum'].' → Yeni: '.$yeni);
             admin_redirect('teklif-detay.php?id=' . $id, 'success', 'Durum güncellendi.');
         }
     }
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($act === 'atama') {
         $u = (int)($_POST['atanan'] ?? 0);
         db_exec('UPDATE ' . t('teklifler') . ' SET atanan_kullanici_id=?, guncelleme_tarihi=NOW() WHERE id=?', [$u ?: null, $id]);
-        audit_log('teklif_atama', 'teklif', $id, ['kullanici' => $u]);
+        audit_log('teklif_atama', 'teklif', $id, 'Atanan: '.$u);
         admin_redirect('teklif-detay.php?id=' . $id, 'success', 'Atama güncellendi.');
     }
 

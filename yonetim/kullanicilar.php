@@ -3,7 +3,7 @@ define('MZ_ADMIN', true);
 $adminTitle = 'Kullanıcılar';
 require __DIR__ . '/_layout.php';
 require __DIR__ . '/_helpers.php';
-require_role(['superadmin','admin']);
+require_role('superadmin', 'admin');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_assert_post();

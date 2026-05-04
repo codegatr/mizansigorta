@@ -3,7 +3,7 @@ define('MZ_ADMIN', true);
 $adminTitle = 'İşlem Kayıtları (Audit Log)';
 require __DIR__ . '/_layout.php';
 require __DIR__ . '/_helpers.php';
-require_role(['superadmin','admin']);
+require_role('superadmin', 'admin');
 
 $q       = trim((string)($_GET['q'] ?? ''));
 $kid     = (int)($_GET['kullanici'] ?? 0);

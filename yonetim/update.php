@@ -20,7 +20,7 @@ $adminTitle = 'Akıllı Güncelleme';
 
 require __DIR__ . '/_layout.php';
 require __DIR__ . '/_helpers.php';
-require_role(['superadmin']);
+require_role('superadmin');
 
 // =================================================================
 //   KONFIGURASYON

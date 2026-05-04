@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toplu
     if ($ids && in_array($durum, $allowed, true)) {
         $in = implode(',', array_fill(0, count($ids), '?'));
         db_exec('UPDATE ' . t('teklifler') . " SET durum=?, guncelleme_tarihi=NOW() WHERE id IN ($in)", array_merge([$durum], $ids));
-        audit_log('teklif_toplu_durum', 'teklif', null, ['ids' => $ids, 'durum' => $durum]);
+        audit_log('teklif_toplu_durum', 'teklif', null, json_encode(['ids' => $ids, 'durum' => $durum], JSON_UNESCAPED_UNICODE));
         admin_redirect('teklifler.php', 'success', count($ids) . ' teklifin durumu güncellendi.');
     }
     admin_redirect('teklifler.php', 'danger', 'Geçersiz işlem.');
