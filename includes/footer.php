@@ -64,8 +64,6 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
   </div>
 </footer>
 
-<button type="button" class="mz-fab" title="Hızlı Teklif" data-bs-toggle="modal" data-bs-target="#teklifWizard" style="border:0;cursor:pointer"><i class="bi bi-lightning-charge-fill"></i></button>
-
 <?php require __DIR__ . '/teklif_wizard.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

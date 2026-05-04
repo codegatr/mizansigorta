@@ -59,18 +59,23 @@ $wa         = setting('whatsapp');
         <li class="nav-item"><a class="nav-link" href="<?= u('/') ?>">Anasayfa</a></li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Sigorta Ürünleri</a>
-          <ul class="dropdown-menu mz-mega" style="min-width:540px">
+          <ul class="dropdown-menu mz-mega-clean p-3 border-0 shadow-lg" style="min-width:560px;border-radius:14px">
             <li>
-              <div class="row g-2 px-2">
-                <?php foreach ($urunlerNav as $kat):
-                  $altList = db_all('SELECT slug, baslik FROM ' . t('urunler') . ' WHERE aktif=1 AND parent_id=? ORDER BY sira ASC LIMIT 6', [(int)$kat['id']]); ?>
-                  <div class="col-6">
-                    <a class="dropdown-item fw-bold pb-1" href="<?= u('/urun/' . $kat['slug']) ?>" style="color:var(--mz-navy)"><i class="bi <?= e($kat['icon'] ?: 'bi-shield') ?> text-warning"></i> <?= e($kat['baslik']) ?></a>
-                    <?php foreach ($altList as $alt): ?>
-                      <a class="dropdown-item small py-1 ps-4" href="<?= u('/urun/' . $alt['slug']) ?>" style="color:#555"><?= e($alt['baslik']) ?></a>
-                    <?php endforeach; ?>
+              <div class="row g-2">
+                <?php foreach ($urunlerNav as $kat): ?>
+                  <div class="col-md-6">
+                    <a class="mz-mega-item" href="<?= u('/urun/' . $kat['slug']) ?>">
+                      <span class="mz-mega-icon"><i class="bi <?= e($kat['icon'] ?: 'bi-shield-check') ?>"></i></span>
+                      <span class="mz-mega-text"><?= e($kat['baslik']) ?></span>
+                      <i class="bi bi-arrow-right ms-auto text-muted"></i>
+                    </a>
                   </div>
                 <?php endforeach; ?>
+              </div>
+              <hr class="my-2">
+              <div class="d-flex justify-content-between align-items-center px-2">
+                <small class="text-muted"><i class="bi bi-info-circle"></i> 35+ ürün, 12+ şirket</small>
+                <button class="btn btn-sm btn-warning fw-semibold" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-lightning-charge-fill"></i> Hızlı Teklif</button>
               </div>
             </li>
           </ul>

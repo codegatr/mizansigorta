@@ -53,311 +53,238 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             @send_mail($email, $ad, 'Başvurunuz alındı — Mizan Sigorta',
                 mail_template('Başvurunuz alındı',
                     '<p>Sayın <b>' . e($ad) . '</b>,</p>'
-                  . '<p>Mizan Sigorta ailesine katılma başvurunuzu aldık. Yetkili ekibimiz başvurunuzu değerlendirecek ve en kısa sürede sizinle iletişime geçecektir.</p>'
+                  . '<p>Mizan Sigorta temsilciliği başvurunuzu aldık. Yetkili ekibimiz başvurunuzu değerlendirecek ve en kısa sürede sizinle iletişime geçecektir.</p>'
                   . '<p>İlginiz için teşekkür ederiz.</p>'
-                  . '<p style="font-style:italic">Güven ve Özen İle<br><b>Mizan Sigorta</b></p>'));
+                  . '<p style="font-style:italic">Saygılarımızla,<br><b>Mizan Sigorta</b></p>'));
 
             $ok = true;
         }
     }
 }
 
-$pageTitle = 'Temsilcimiz Olun — ' . SITE_NAME;
-$pageDesc  = 'Mizan Sigorta ailesine katılın. Sigorta acentesi olarak güçlü altyapımızla yan yana çalışın, kurumsal kimlik desteği ile büyüyün.';
+$pageTitle = 'Temsilcimiz Olun - ' . SITE_NAME;
+$pageDesc  = 'Mizan Sigorta temsilcisi olun. Güçlü altyapı, geniş ürün yelpazesi ve profesyonel destek ile büyüyün.';
 require MIZAN_INC . '/header.php';
 ?>
 
-<style>
-.mz-royal-hero {
-  position: relative; min-height: 540px; overflow: hidden;
-  background: linear-gradient(135deg, #0f1e37 0%, #1a3354 50%, #0f1e37 100%);
-  color: #fff;
-}
-.mz-royal-hero::before {
-  content: ''; position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse at top right, rgba(227,11,48,.18) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom left, rgba(218,165,32,.12) 0%, transparent 50%);
-  pointer-events: none;
-}
-.mz-royal-hero::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 100px;
-  background: linear-gradient(to bottom, transparent, rgba(255,255,255,.04));
-}
-
-.mz-royal-crest {
-  width: 90px; height: 90px; margin: 0 auto 1.5rem;
-  background: linear-gradient(135deg, #f4d35e, #e8a83a, #d4af37);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.75rem; color: var(--mz-navy);
-  box-shadow: 0 0 0 4px rgba(244,211,94,.2), 0 25px 60px rgba(244,211,94,.3);
-  animation: royalPulse 3s ease-in-out infinite;
-}
-@keyframes royalPulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px rgba(244,211,94,.2), 0 25px 60px rgba(244,211,94,.3); }
-  50% { transform: scale(1.04); box-shadow: 0 0 0 8px rgba(244,211,94,.15), 0 35px 80px rgba(244,211,94,.4); }
-}
-
-.mz-royal-title {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: 800;
-  line-height: 1; letter-spacing: -.02em;
-  background: linear-gradient(135deg, #fff 0%, #f4d35e 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 4px 60px rgba(244,211,94,.2);
-}
-.mz-royal-script {
-  font-family: 'Allura', 'Pinyon Script', cursive;
-  font-size: 4rem; color: #f4d35e;
-  line-height: 1; margin-bottom: 1rem;
-  text-shadow: 0 4px 30px rgba(244,211,94,.3);
-}
-.mz-royal-sub { font-size: 1.25rem; color: rgba(255,255,255,.85); max-width: 720px; margin: 1.5rem auto; line-height: 1.6; }
-
-.mz-royal-divider { display: flex; align-items: center; gap: 1rem; max-width: 320px; margin: 2rem auto 1rem; }
-.mz-royal-divider::before, .mz-royal-divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, transparent, #f4d35e, transparent); }
-.mz-royal-divider i { color: #f4d35e; font-size: 1.25rem; }
-
-.mz-royal-stats { display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; margin-top: 3rem; }
-.mz-royal-stat { text-align: center; }
-.mz-royal-stat-num { font-size: 3rem; font-weight: 800; color: #f4d35e; line-height: 1; }
-.mz-royal-stat-lbl { font-size: .9rem; color: rgba(255,255,255,.7); text-transform: uppercase; letter-spacing: .1em; margin-top: .5rem; }
-
-.mz-pillar {
-  background: #fff; border-radius: 16px; padding: 2rem; height: 100%;
-  border: 2px solid transparent;
-  box-shadow: 0 10px 30px rgba(15,30,55,.08);
-  transition: all .3s;
-  position: relative; overflow: hidden;
-}
-.mz-pillar::before {
-  content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-  background: linear-gradient(90deg, #d4af37, #f4d35e, #d4af37);
-}
-.mz-pillar:hover { border-color: #f4d35e; transform: translateY(-4px); box-shadow: 0 20px 50px rgba(15,30,55,.15); }
-.mz-pillar-icon {
-  width: 60px; height: 60px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--mz-red), var(--mz-red-2));
-  color: #fff; display: inline-flex; align-items: center; justify-content: center;
-  font-size: 1.5rem; margin-bottom: 1rem;
-  box-shadow: 0 8px 20px var(--mz-red-glow);
-}
-.mz-pillar h5 { color: var(--mz-navy); font-weight: 800; margin-bottom: .75rem; }
-
-.mz-form-royal {
-  background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
-  border-radius: 20px;
-  padding: 2.5rem;
-  box-shadow: 0 30px 80px rgba(15,30,55,.12);
-  border-top: 6px solid #d4af37;
-  position: relative;
-}
-.mz-form-royal::before {
-  content: ''; position: absolute; top: -3px; right: 30px;
-  width: 60px; height: 60px;
-  background: #f4d35e; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 10px 30px rgba(244,211,94,.4);
-}
-.mz-form-royal::after {
-  content: '\F47A'; /* bi-stars */
-  font-family: 'bootstrap-icons';
-  position: absolute; top: 13px; right: 38px;
-  font-size: 1.75rem; color: var(--mz-navy);
-  z-index: 2;
-}
-
-.mz-quote {
-  background: linear-gradient(135deg, var(--mz-navy), var(--mz-navy-2));
-  color: #fff; border-radius: 16px; padding: 2.5rem;
-  position: relative; overflow: hidden;
-}
-.mz-quote::before {
-  content: '\201C';
-  position: absolute; top: -20px; left: 20px;
-  font-size: 9rem; color: rgba(244,211,94,.15); font-family: serif;
-  line-height: 1;
-}
-.mz-quote-text { font-size: 1.35rem; font-style: italic; line-height: 1.5; position: relative; }
-.mz-quote-author { color: #f4d35e; font-weight: 600; margin-top: 1rem; font-size: .95rem; }
-</style>
-
-<!-- ====== HERO ====== -->
-<section class="mz-royal-hero d-flex align-items-center text-center">
-  <div class="container py-5 position-relative">
-    <div class="mz-royal-crest"><i class="bi bi-stars"></i></div>
-    <span class="mz-royal-script d-block">Aileye Hoş Geldiniz</span>
-    <h1 class="mz-royal-title">Mizan Sigorta<br>Temsilciliği</h1>
-
-    <div class="mz-royal-divider"><i class="bi bi-gem"></i></div>
-
-    <p class="mz-royal-sub">Sigortacılık deneyiminizi kraliyet ailesinin gücüyle birleştirin. Köklü kurumsal yapı, geniş ürün yelpazesi ve <strong style="color:#f4d35e">Güven ve Özen İle</strong> sloganının ardındaki itinayla yan yana çalışalım.</p>
-
-    <a href="#basvuru" class="btn btn-warning btn-lg fw-bold px-5 py-3 mt-3" style="border-radius:50px;box-shadow:0 15px 40px rgba(244,211,94,.4)">
-      <i class="bi bi-stars"></i> Aileye Katılın
-    </a>
-
-    <div class="mz-royal-stats">
-      <div class="mz-royal-stat">
-        <div class="mz-royal-stat-num">12+</div>
-        <div class="mz-royal-stat-lbl">Anlaşmalı Şirket</div>
+<!-- HERO -->
+<section style="background:linear-gradient(135deg,var(--mz-navy),var(--mz-navy-2));color:#fff;padding:5rem 0 4rem;position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at top right,rgba(227,11,48,.15) 0%,transparent 50%);pointer-events:none"></div>
+  <div class="container position-relative">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <span class="badge bg-warning text-dark mb-3 px-3 py-2 fw-semibold"><i class="bi bi-briefcase"></i> Acente Başvurusu</span>
+        <h1 class="display-5 fw-bold mb-3">Mizan Sigorta Temsilcisi Olun</h1>
+        <p class="lead text-white-50 mb-0 mb-md-4" style="max-width:560px">Köklü kurumsal yapı, 12+ anlaşmalı şirket portföyü ve profesyonel destek altyapısı ile yan yana çalışalım. Bağımsız acente olarak büyümeniz için güçlü bir ortak.</p>
+        <div class="mt-4 d-flex gap-3 flex-wrap">
+          <a href="#basvuru" class="btn btn-warning fw-semibold"><i class="bi bi-arrow-down-circle"></i> Başvuru Formu</a>
+          <a href="#avantajlar" class="btn btn-outline-light"><i class="bi bi-info-circle"></i> Avantajları İncele</a>
+        </div>
       </div>
-      <div class="mz-royal-stat">
-        <div class="mz-royal-stat-num">9</div>
-        <div class="mz-royal-stat-lbl">Sigorta Kategorisi</div>
-      </div>
-      <div class="mz-royal-stat">
-        <div class="mz-royal-stat-num">35+</div>
-        <div class="mz-royal-stat-lbl">Ürün Çeşidi</div>
-      </div>
-      <div class="mz-royal-stat">
-        <div class="mz-royal-stat-num">4</div>
-        <div class="mz-royal-stat-lbl">Şehirde Şube</div>
+      <div class="col-lg-5 d-none d-lg-block text-center">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:200px;height:200px;border-radius:50%;background:rgba(227,11,48,.15);border:2px solid rgba(227,11,48,.3)">
+          <i class="bi bi-handshake" style="font-size:5rem;color:var(--mz-red)"></i>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ====== Neden Mizan Ailesi ====== -->
-<section class="mz-band">
+<!-- İSTATİSTİK STRIP -->
+<section style="background:#fff;border-bottom:1px solid #f1f5f9">
+  <div class="container py-4">
+    <div class="row text-center g-3">
+      <div class="col-6 col-md-3">
+        <div class="fw-bold" style="font-size:2rem;color:var(--mz-red)">12+</div>
+        <small class="text-muted">Anlaşmalı Şirket</small>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="fw-bold" style="font-size:2rem;color:var(--mz-red)">9</div>
+        <small class="text-muted">Sigorta Kategorisi</small>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="fw-bold" style="font-size:2rem;color:var(--mz-red)">35+</div>
+        <small class="text-muted">Ürün Çeşidi</small>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="fw-bold" style="font-size:2rem;color:var(--mz-red)">4</div>
+        <small class="text-muted">Şehirde Şube</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AVANTAJLAR -->
+<section class="mz-band" id="avantajlar">
   <div class="container">
     <div class="text-center mb-5">
-      <span class="mz-script mz-script-md mz-script-red">Avantajlar</span>
-      <h2 class="fw-bold display-6 mt-2">Neden Mizan'a Katılmalısınız?</h2>
-      <p class="text-muted lead">Bireysel acente olarak değil, ailenin parçası olarak çalışın</p>
+      <h2 class="fw-bold">Neden Mizan Sigorta?</h2>
+      <p class="text-muted">Acente olarak başarınızı destekleyen 6 temel avantaj</p>
     </div>
 
     <div class="row g-4">
-      <div class="col-md-6 col-lg-4">
-        <div class="mz-pillar">
-          <div class="mz-pillar-icon"><i class="bi bi-buildings"></i></div>
-          <h5>Köklü Kurumsal Yapı</h5>
-          <p class="text-muted mb-0">İstanbul'dan Aksaray'a uzanan 4 şehirli ağımız ve SBM'de levhalı kuruluşumuz ile arkanızda güçlü bir kurum.</p>
+      <?php
+      $avantajlar = [
+          ['bi-buildings', 'Köklü Kurumsal Yapı', 'İstanbul Genel Merkez ve 3 şube ağı; SBM\'de levhalı, mevzuata uyumlu kurumsal alt yapı.'],
+          ['bi-graph-up-arrow', '12+ Şirket Anlaşması', 'Anadolu, Allianz, AXA, Türkiye Sigorta, HDI, Quick, Neova, Ak, Doğa Sigorta gibi köklü şirketler tek elden.'],
+          ['bi-headset', '7/24 Operasyonel Destek', 'Hasar takibi, teklif desteği, mevzuat danışmanlığı. Yalnız değilsiniz; her aşamada uzman ekibimiz yanınızda.'],
+          ['bi-laptop', 'Dijital Altyapı', 'Modern teklif sistemi, otomatik hatırlatma motoru, müşteri yönetimi ve hasar takip yazılımları.'],
+          ['bi-cash-stack', 'Rekabetçi Komisyon', 'Şeffaf komisyon yapısı, performans bazlı ek primler. Üretiminize göre artan kazanç.'],
+          ['bi-mortarboard', 'Sürekli Eğitim', 'Yeni ürünler, mevzuat değişiklikleri, satış teknikleri. Her ay sektörel güncellemelerle bir adım önde olun.'],
+      ];
+      foreach ($avantajlar as $a): ?>
+        <div class="col-md-6 col-lg-4">
+          <div class="h-100 p-4 bg-white rounded-3" style="border:1px solid #e5e7eb;transition:all .2s" onmouseover="this.style.borderColor='var(--mz-red)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(15,30,55,.08)'" onmouseout="this.style.borderColor='#e5e7eb';this.style.transform='';this.style.boxShadow=''">
+            <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width:48px;height:48px;border-radius:10px;background:rgba(227,11,48,.08);color:var(--mz-red);font-size:1.4rem">
+              <i class="bi <?= $a[0] ?>"></i>
+            </div>
+            <h5 class="fw-bold" style="color:var(--mz-navy)"><?= e($a[1]) ?></h5>
+            <p class="text-muted mb-0 small"><?= e($a[2]) ?></p>
+          </div>
         </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="mz-pillar">
-          <div class="mz-pillar-icon"><i class="bi bi-graph-up-arrow"></i></div>
-          <h5>12+ Şirket Anlaşması</h5>
-          <p class="text-muted mb-0">Anadolu, Allianz, AXA, Türkiye Sigorta, HDI ve daha pek çok şirket portföyünüze katılır. Tek elden hepsine erişim.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="mz-pillar">
-          <div class="mz-pillar-icon"><i class="bi bi-headset"></i></div>
-          <h5>7/24 Destek</h5>
-          <p class="text-muted mb-0">Hasar takibi, teklif desteği, mevzuat danışmanlığı. Yalnız değilsiniz; her aşamada uzman ekibimiz yanınızda.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="mz-pillar">
-          <div class="mz-pillar-icon"><i class="bi bi-laptop"></i></div>
-          <h5>Dijital Altyapı</h5>
-          <p class="text-muted mb-0">Modern teklif sistemi, otomatik hatırlatma motoru, müşteri yönetim paneli ve hasar takibi yazılımları.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="mz-pillar">
-          <div class="mz-pillar-icon"><i class="bi bi-cash-stack"></i></div>
-          <h5>Rekabetçi Komisyon</h5>
-          <p class="text-muted mb-0">Şeffaf komisyon yapısı, performans bazlı ek primler. Ne kadar üretirseniz o kadar kazanırsınız.</p>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-4">
-        <div class="mz-pillar">
-          <div class="mz-pillar-icon"><i class="bi bi-mortarboard"></i></div>
-          <h5>Sürekli Eğitim</h5>
-          <p class="text-muted mb-0">Yeni ürünler, mevzuat değişiklikleri, satış teknikleri. Her ay sektörel güncellemelerle hep bir adım önde olun.</p>
-        </div>
-      </div>
+      <?php endforeach; ?>
     </div>
   </div>
 </section>
 
-<!-- ====== Quote ====== -->
+<!-- KİME UYGUN -->
 <section class="mz-band bg-light">
   <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-9">
-        <div class="mz-quote text-center">
-          <p class="mz-quote-text">Mizan adı, denge ve adalet anlamına gelir. Her temsilcimiz bu değerin taşıyıcısıdır — müşterimizin ihtiyacı ile çözümümüz arasındaki dengeyi kuran köprü.</p>
-          <p class="mb-0 mz-script mz-script-md mz-script-red mt-3" style="font-size:2rem;color:#f4d35e !important">Güven ve Özen İle</p>
-          <div class="mz-quote-author mt-2">— Mizan Sigorta Aile Felsefesi</div>
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <h3 class="fw-bold mb-3">Kimler Başvurabilir?</h3>
+        <p class="text-muted mb-4">Sigortacılık tecrübesi olan veya bu sektörde kariyerine yön vermek isteyen herkesi temsilci olarak değerlendiriyoruz.</p>
+
+        <div class="d-flex gap-3 mb-3">
+          <i class="bi bi-check-circle-fill text-success fs-4 flex-shrink-0"></i>
+          <div>
+            <strong>SBM Levhalı Acenteler</strong>
+            <p class="text-muted small mb-0">Mevcut acente sahipleri, portföyünü genişletmek isteyenler.</p>
+          </div>
+        </div>
+        <div class="d-flex gap-3 mb-3">
+          <i class="bi bi-check-circle-fill text-success fs-4 flex-shrink-0"></i>
+          <div>
+            <strong>Sigorta Sektörü Tecrübeli Profesyoneller</strong>
+            <p class="text-muted small mb-0">Brokerlikte, sigorta şirketinde çalışmış ve kendi acentesini açmak isteyenler.</p>
+          </div>
+        </div>
+        <div class="d-flex gap-3 mb-3">
+          <i class="bi bi-check-circle-fill text-success fs-4 flex-shrink-0"></i>
+          <div>
+            <strong>Ticari Geçmişi Olan Girişimciler</strong>
+            <p class="text-muted small mb-0">Sigorta sektörüne ilgi duyan, müşteri ilişkileri tecrübesi olan girişimciler.</p>
+          </div>
+        </div>
+        <div class="d-flex gap-3">
+          <i class="bi bi-check-circle-fill text-success fs-4 flex-shrink-0"></i>
+          <div>
+            <strong>Kurumsal Firmalar</strong>
+            <p class="text-muted small mb-0">Mevcut müşteri portföyüne sigorta hizmeti eklemek isteyen şirketler.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-list-check text-warning"></i> Başvuru Süreci</h5>
+
+            <div class="position-relative">
+              <?php
+              $adimlar = [
+                  ['Form Doldurma', 'Sağdaki başvuru formunu doldurun, bilgileriniz tarafımıza ulaşsın.'],
+                  ['Ön Görüşme', 'Yetkili ekibimiz 1-3 iş günü içinde sizi arar.'],
+                  ['Belge Hazırlama', 'Gerekli evrakları (levha, kimlik, vergi vb.) toplarsınız.'],
+                  ['Sözleşme', 'Karşılıklı uygunluk durumunda temsilci sözleşmesi imzalanır.'],
+                  ['Eğitim & Aktivasyon', 'Sistem eğitimleri verilir, üretime başlayabilirsiniz.'],
+              ];
+              foreach ($adimlar as $i => $ad): ?>
+                <div class="d-flex gap-3 mb-3">
+                  <div class="flex-shrink-0" style="width:32px;height:32px;border-radius:50%;background:var(--mz-red);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem"><?= $i + 1 ?></div>
+                  <div>
+                    <strong><?= e($ad[0]) ?></strong>
+                    <p class="text-muted small mb-0"><?= e($ad[1]) ?></p>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ====== Form ====== -->
+<!-- BAŞVURU FORMU -->
 <section class="mz-band" id="basvuru">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-9">
 
         <?php if ($ok): ?>
-          <div class="mz-form-royal text-center">
-            <div class="d-inline-flex align-items-center justify-content-center mb-4" style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#f4d35e,#d4af37);font-size:3rem;color:var(--mz-navy);box-shadow:0 20px 50px rgba(244,211,94,.3)">
+          <div class="card border-0 shadow-sm text-center p-5">
+            <div class="mx-auto mb-4 d-inline-flex align-items-center justify-content-center" style="width:80px;height:80px;border-radius:50%;background:rgba(34,197,94,.12);color:#16a34a;font-size:2.5rem">
               <i class="bi bi-check-circle-fill"></i>
             </div>
-            <span class="mz-script mz-script-lg mz-script-red d-block mb-2">Hoş geldiniz</span>
-            <h2 class="fw-bold mb-3">Aile Üyeliği Başvurunuz Alındı</h2>
-            <p class="text-muted lead mb-4">Yetkili ekibimiz başvurunuzu inceleyerek en kısa sürede sizinle iletişime geçecek. İlginiz için teşekkür ederiz.</p>
-            <a href="<?= u('/') ?>" class="btn btn-warning fw-semibold"><i class="bi bi-house"></i> Anasayfaya Dön</a>
+            <h2 class="fw-bold mb-2">Başvurunuz alındı</h2>
+            <p class="text-muted mb-4">Yetkili ekibimiz başvurunuzu inceleyerek 1-3 iş günü içinde sizinle iletişime geçecek. İlginiz için teşekkür ederiz.</p>
+            <div>
+              <a href="<?= u('/') ?>" class="btn btn-warning fw-semibold"><i class="bi bi-house"></i> Anasayfaya Dön</a>
+            </div>
           </div>
         <?php else: ?>
 
         <div class="text-center mb-4">
-          <span class="mz-script mz-script-md mz-script-red">Başvuru</span>
-          <h2 class="fw-bold mt-1">Aileye Katılma Formu</h2>
-          <p class="text-muted">Bilgilerinizi doldurun, yetkilimiz size dönüş yapsın.</p>
+          <h2 class="fw-bold">Başvuru Formu</h2>
+          <p class="text-muted">Bilgilerinizi girin, ekibimiz sizinle iletişime geçsin.</p>
         </div>
 
-        <div class="mz-form-royal">
-          <?php if ($err): ?><div class="alert alert-danger small"><i class="bi bi-exclamation-triangle"></i> <?= e($err) ?></div><?php endif; ?>
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4 p-md-5">
+            <?php if ($err): ?><div class="alert alert-danger small"><i class="bi bi-exclamation-triangle"></i> <?= e($err) ?></div><?php endif; ?>
 
-          <form method="post" novalidate data-mz-captcha>
-            <input type="hidden" name="<?= CSRF_TOKEN_NAME ?>" value="<?= e(csrf_token()) ?>">
+            <form method="post" novalidate data-mz-captcha>
+              <input type="hidden" name="<?= CSRF_TOKEN_NAME ?>" value="<?= e(csrf_token()) ?>">
 
-            <h5 class="fw-bold mb-3 mt-2" style="color:var(--mz-navy)"><i class="bi bi-person-badge text-warning"></i> Kimlik Bilgileri</h5>
-            <div class="row g-3">
-              <div class="col-md-6"><label class="form-label small fw-semibold">Ad Soyad *</label><input type="text" name="ad_soyad" required class="form-control" value="<?= e($_POST['ad_soyad'] ?? '') ?>"></div>
-              <div class="col-md-6"><label class="form-label small fw-semibold">Firma Adı (varsa)</label><input type="text" name="firma_adi" class="form-control" value="<?= e($_POST['firma_adi'] ?? '') ?>"></div>
-              <div class="col-md-6"><label class="form-label small fw-semibold">E-posta *</label><input type="email" name="email" required class="form-control" value="<?= e($_POST['email'] ?? '') ?>"></div>
-              <div class="col-md-6"><label class="form-label small fw-semibold">Cep Telefonu *</label><input type="tel" name="telefon" required class="form-control" placeholder="0XXX XXX XX XX" value="<?= e($_POST['telefon'] ?? '') ?>"></div>
-              <div class="col-md-6"><label class="form-label small fw-semibold">İl</label><input type="text" name="il" class="form-control" placeholder="Konya" value="<?= e($_POST['il'] ?? '') ?>"></div>
-              <div class="col-md-6"><label class="form-label small fw-semibold">İlçe</label><input type="text" name="ilce" class="form-control" value="<?= e($_POST['ilce'] ?? '') ?>"></div>
-            </div>
-
-            <h5 class="fw-bold mb-3 mt-4" style="color:var(--mz-navy)"><i class="bi bi-briefcase text-warning"></i> Mesleki Bilgiler</h5>
-            <div class="row g-3">
-              <div class="col-md-6"><label class="form-label small fw-semibold">Sigortacılık Tecrübesi (yıl)</label><input type="number" name="tecrube_yili" min="0" max="60" class="form-control" value="<?= e($_POST['tecrube_yili'] ?? '0') ?>"></div>
-              <div class="col-md-6"><label class="form-label small fw-semibold">SBM Levha No (varsa)</label><input type="text" name="levha_no" class="form-control" value="<?= e($_POST['levha_no'] ?? '') ?>"></div>
-              <div class="col-12"><label class="form-label small fw-semibold">Mevcut / Önceki Acentelikleriniz</label><input type="text" name="mevcut_acentelik" class="form-control" placeholder="Allianz, Anadolu Sigorta, Türkiye Sigorta..." value="<?= e($_POST['mevcut_acentelik'] ?? '') ?>"></div>
-              <div class="col-12"><label class="form-label small fw-semibold">Hedefleriniz / Mesajınız</label><textarea name="aciklama" rows="4" class="form-control" placeholder="Kendinizden, deneyiminizden ve hedeflerinizden bahsedin..."><?= e($_POST['aciklama'] ?? '') ?></textarea></div>
-
-              <div class="col-md-6">
-                <label class="form-label small fw-semibold">Doğrulama: <span data-mz-cap-a></span> + <span data-mz-cap-b></span> = ?</label>
-                <input type="number" name="cap_input" required class="form-control" data-mz-cap-input>
-                <input type="hidden" name="cap_correct" data-mz-cap-correct>
+              <h6 class="fw-bold text-uppercase text-muted small mb-3"><i class="bi bi-person"></i> Kimlik Bilgileri</h6>
+              <div class="row g-3 mb-4">
+                <div class="col-md-6"><label class="form-label small fw-semibold">Ad Soyad *</label><input type="text" name="ad_soyad" required class="form-control" value="<?= e($_POST['ad_soyad'] ?? '') ?>"></div>
+                <div class="col-md-6"><label class="form-label small fw-semibold">Firma Adı (varsa)</label><input type="text" name="firma_adi" class="form-control" value="<?= e($_POST['firma_adi'] ?? '') ?>"></div>
+                <div class="col-md-6"><label class="form-label small fw-semibold">E-posta *</label><input type="email" name="email" required class="form-control" value="<?= e($_POST['email'] ?? '') ?>"></div>
+                <div class="col-md-6"><label class="form-label small fw-semibold">Cep Telefonu *</label><input type="tel" name="telefon" required class="form-control" placeholder="0XXX XXX XX XX" value="<?= e($_POST['telefon'] ?? '') ?>"></div>
+                <div class="col-md-6"><label class="form-label small fw-semibold">İl</label><input type="text" name="il" class="form-control" placeholder="Konya" value="<?= e($_POST['il'] ?? '') ?>"></div>
+                <div class="col-md-6"><label class="form-label small fw-semibold">İlçe</label><input type="text" name="ilce" class="form-control" value="<?= e($_POST['ilce'] ?? '') ?>"></div>
               </div>
 
-              <div class="col-12">
-                <div class="form-check">
-                  <input type="checkbox" name="kvkk" id="kvkk" class="form-check-input" required <?= !empty($_POST['kvkk'])?'checked':'' ?>>
-                  <label for="kvkk" class="form-check-label small">
-                    <a href="<?= u('/sayfa/kvkk') ?>" target="_blank">KVKK Aydınlatma Metni</a>'ni okudum, kişisel verilerimin başvuru sürecinde işlenmesine rıza gösteriyorum. *
-                  </label>
+              <h6 class="fw-bold text-uppercase text-muted small mb-3"><i class="bi bi-briefcase"></i> Mesleki Bilgiler</h6>
+              <div class="row g-3 mb-4">
+                <div class="col-md-6"><label class="form-label small fw-semibold">Sigortacılık Tecrübesi (yıl)</label><input type="number" name="tecrube_yili" min="0" max="60" class="form-control" value="<?= e($_POST['tecrube_yili'] ?? '0') ?>"></div>
+                <div class="col-md-6"><label class="form-label small fw-semibold">SBM Levha No (varsa)</label><input type="text" name="levha_no" class="form-control" value="<?= e($_POST['levha_no'] ?? '') ?>"></div>
+                <div class="col-12"><label class="form-label small fw-semibold">Mevcut / Önceki Acentelikleriniz</label><input type="text" name="mevcut_acentelik" class="form-control" placeholder="Örn: Allianz, Anadolu Sigorta..." value="<?= e($_POST['mevcut_acentelik'] ?? '') ?>"></div>
+                <div class="col-12"><label class="form-label small fw-semibold">Hedefleriniz / Açıklama</label><textarea name="aciklama" rows="3" class="form-control" placeholder="Kendinizden, deneyiminizden ve hedeflerinizden kısaca bahsedin..."><?= e($_POST['aciklama'] ?? '') ?></textarea></div>
+              </div>
+
+              <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Doğrulama: <span data-mz-cap-a></span> + <span data-mz-cap-b></span> = ?</label>
+                  <input type="number" name="cap_input" required class="form-control" data-mz-cap-input>
+                  <input type="hidden" name="cap_correct" data-mz-cap-correct>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check">
+                    <input type="checkbox" name="kvkk" id="kvkk" class="form-check-input" required <?= !empty($_POST['kvkk'])?'checked':'' ?>>
+                    <label for="kvkk" class="form-check-label small">
+                      <a href="<?= u('/sayfa/kvkk') ?>" target="_blank">KVKK Aydınlatma Metni</a>'ni okudum, onaylıyorum. *
+                    </label>
+                  </div>
+                </div>
+                <div class="col-12 d-grid mt-3">
+                  <button class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-send"></i> Başvuruyu Gönder</button>
                 </div>
               </div>
-
-              <div class="col-12 d-grid">
-                <button class="btn btn-warning btn-lg fw-semibold" style="border-radius:50px;padding:1rem"><i class="bi bi-stars"></i> Aileye Katıl</button>
-              </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
 
         <?php endif; ?>

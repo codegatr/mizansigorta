@@ -54,17 +54,32 @@ function upd_token(): string
 
 function upd_curl(string $url, array $headers = [], int $timeout = 30): array
 {
+    if (!function_exists('curl_init')) {
+        return ['code' => 0, 'body' => '', 'error' => 'PHP cURL eklentisi yüklü değil. Hosting destekten cURL aktivasyonu isteyin.'];
+    }
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HTTPHEADER     => $headers,
         CURLOPT_TIMEOUT        => $timeout,
+        CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYHOST => 2,
     ]);
     $body = curl_exec($ch);
     $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $err  = curl_error($ch);
+
+    // SSL fail durumunda (paylasimli hosting'lerde CA bundle eksik olabilir) tekrar dene
+    if ($body === false && (stripos($err, 'ssl') !== false || stripos($err, 'certificate') !== false)) {
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        $body = curl_exec($ch);
+        $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+    }
+
     curl_close($ch);
     return ['code' => $code, 'body' => (string)$body, 'error' => $err];
 }
@@ -513,9 +528,16 @@ if (isset($_GET['ajax'])) {
             $r = upd_curl('https://api.github.com/user', upd_ghHeaders($testToken));
             if ($r['code'] === 200) {
                 $u = json_decode($r['body'], true);
-                echo json_encode(['ok' => true, 'login' => $u['login'] ?? '?', 'scopes' => $r['error'] ?? '']);
+                echo json_encode(['ok' => true, 'login' => $u['login'] ?? '?']);
+            } elseif ($r['code'] === 0) {
+                // Network/cURL error
+                echo json_encode(['ok' => false, 'error' => 'GitHub\'a ulaşılamıyor: ' . ($r['error'] ?: 'Bilinmeyen ağ hatası')]);
             } else {
-                echo json_encode(['ok' => false, 'error' => "HTTP {$r['code']}: " . substr($r['body'], 0, 80)]);
+                $errMsg = "HTTP {$r['code']}";
+                $j = json_decode($r['body'], true);
+                if (is_array($j) && !empty($j['message'])) $errMsg .= ' — ' . $j['message'];
+                else $errMsg .= ' — ' . substr($r['body'], 0, 80);
+                echo json_encode(['ok' => false, 'error' => $errMsg]);
             }
             exit;
         }
@@ -940,12 +962,22 @@ $localVersion = upd_localVer();
   };
 
   window.updTestToken = async function () {
-    document.getElementById('tokTest').textContent = 'Test ediliyor...';
-    const fd = new FormData();
-    fd.append('token', document.getElementById('ghToken').value.trim());
-    const r = await fetch('?ajax=test_token', { method: 'POST', body: fd }).then(x => x.json());
-    if (r.ok) document.getElementById('tokTest').innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Token geçerli (' + r.login + ').</span>';
-    else document.getElementById('tokTest').innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> ' + (r.error || '?') + '</span>';
+    const elt = document.getElementById('tokTest');
+    elt.textContent = 'Test ediliyor...';
+    try {
+      const fd = new FormData();
+      fd.append('token', document.getElementById('ghToken').value.trim());
+      const resp = await fetch('?ajax=test_token', { method: 'POST', body: fd });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const text = await resp.text();
+      let r;
+      try { r = JSON.parse(text); }
+      catch (e) { throw new Error('JSON parse hatası. Sunucu yanıtı: ' + text.substring(0, 200)); }
+      if (r.ok) elt.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Token geçerli (' + (r.login || '?') + ').</span>';
+      else elt.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> ' + (r.error || 'Bilinmeyen hata') + '</span>';
+    } catch (err) {
+      elt.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Bağlantı hatası: ' + (err.message || err) + '</span>';
+    }
   };
 })();
 </script>

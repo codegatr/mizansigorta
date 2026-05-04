@@ -45,6 +45,14 @@ main { flex: 1; }
 .mz-mega .dropdown-item:hover { background: var(--mz-red-soft); color: var(--mz-navy); }
 .mz-mega .dropdown-item i { color: var(--mz-red); margin-right: .5rem; }
 
+/* Yeni temiz mega menu */
+.mz-mega-clean { border-top: 3px solid var(--mz-red) !important; }
+.mz-mega-item { display: flex; align-items: center; gap: .6rem; padding: .65rem .75rem; border-radius: 8px; text-decoration: none; color: var(--mz-navy); font-weight: 500; font-size: .92rem; transition: background .15s, transform .15s; border: 1px solid transparent; }
+.mz-mega-item:hover { background: rgba(227,11,48,.06); color: var(--mz-red); border-color: rgba(227,11,48,.15); }
+.mz-mega-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(227,11,48,.08); color: var(--mz-red); display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.mz-mega-item:hover .mz-mega-icon { background: var(--mz-red); color: #fff; }
+.mz-mega-item .mz-mega-text { flex: 1; }
+
 /* ---------- Hero ---------- */
 .mz-hero { background: linear-gradient(135deg, var(--mz-navy) 0%, var(--mz-dark-2) 100%); color: #fff; padding: 4rem 0 5rem; position: relative; overflow: hidden; }
 .mz-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(227,11,48,.18), transparent 55%); pointer-events: none; }
