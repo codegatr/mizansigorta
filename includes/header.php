@@ -85,10 +85,7 @@ $wa         = setting('whatsapp');
         <li class="nav-item"><a class="nav-link fw-semibold" href="<?= u('/temsilcimiz-olun') ?>" style="color:var(--mz-red) !important"><i class="bi bi-stars"></i> Temsilcimiz Olun</a></li>
       </ul>
       <div class="d-flex gap-2">
-        <?php if ($wa): ?>
-          <a class="btn btn-outline-light btn-sm" target="_blank" rel="noopener" href="https://wa.me/<?= e($wa) ?>"><i class="bi bi-whatsapp"></i> WhatsApp</a>
-        <?php endif; ?>
-        <a class="btn btn-warning btn-sm fw-semibold" href="<?= u('/teklif-al') ?>"><i class="bi bi-shield-check"></i> Hızlı Teklif</a>
+        <button type="button" class="btn btn-warning btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-lightning-charge-fill"></i> Hızlı Teklif</button>
       </div>
     </div>
   </div>

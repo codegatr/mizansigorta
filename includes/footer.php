@@ -64,10 +64,9 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
   </div>
 </footer>
 
-<a href="<?= u('/teklif-al') ?>" class="mz-fab" title="Hızlı Teklif"><i class="bi bi-shield-check"></i></a>
-<?php if ($wa = setting('whatsapp')): ?>
-  <a href="https://wa.me/<?= e($wa) ?>" target="_blank" rel="noopener" class="mz-fab mz-fab-wa" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
-<?php endif; ?>
+<button type="button" class="mz-fab" title="Hızlı Teklif" data-bs-toggle="modal" data-bs-target="#teklifWizard" style="border:0;cursor:pointer"><i class="bi bi-lightning-charge-fill"></i></button>
+
+<?php require __DIR__ . '/teklif_wizard.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?= asset('assets/js/main.js') ?>"></script>

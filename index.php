@@ -40,6 +40,7 @@ $path = '/' . trim((string)$path, '/');
 $routes = [
     '#^/$#'                          => 'home.php',
     '#^/teklif-al$#'                 => 'teklif.php',
+    '#^/api/teklif-wizard$#'         => 'api-teklif-wizard.php',
     '#^/teklif-tesekkur$#'           => 'teklif-tesekkur.php',
     '#^/hasar-ihbari$#'              => 'hasar.php',
     '#^/iletisim$#'                  => 'iletisim.php',
