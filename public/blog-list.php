@@ -9,7 +9,7 @@ $per  = 9;
 $q    = trim((string)($_GET['q'] ?? ''));
 $cat  = trim((string)($_GET['kategori'] ?? ''));
 
-$where  = "yayinda=1 AND yayin_tarihi<=NOW()";
+$where  = "aktif=1 AND yayin_tarihi<=NOW()";
 $params = [];
 if ($q !== '')   { $where .= " AND (baslik LIKE ? OR ozet LIKE ?)"; $params[] = "%$q%"; $params[] = "%$q%"; }
 if ($cat !== '') { $where .= " AND kategori = ?"; $params[] = $cat; }
@@ -19,8 +19,8 @@ $pag   = paginate($total, $per, $page);
 
 $posts = db_all('SELECT * FROM ' . t('blog') . " WHERE $where ORDER BY yayin_tarihi DESC LIMIT $per OFFSET " . $pag['offset'], $params);
 
-$kategoriler = db_all('SELECT kategori, COUNT(*) c FROM ' . t('blog') . ' WHERE yayinda=1 AND kategori<>"" GROUP BY kategori ORDER BY c DESC');
-$populer     = db_all('SELECT slug, baslik, kapak FROM ' . t('blog') . ' WHERE yayinda=1 ORDER BY goruntuleme DESC LIMIT 5');
+$kategoriler = db_all('SELECT kategori, COUNT(*) c FROM ' . t('blog') . ' WHERE aktif=1 AND kategori<>"" GROUP BY kategori ORDER BY c DESC');
+$populer     = db_all('SELECT slug, baslik, kapak_gorseli FROM ' . t('blog') . ' WHERE aktif=1 ORDER BY goruntulenme DESC LIMIT 5');
 
 require MIZAN_INC . '/header.php';
 ?>
@@ -46,8 +46,8 @@ require MIZAN_INC . '/header.php';
             <div class="col-md-6">
               <article class="mz-blog-card h-100">
                 <a href="<?= u('/blog/' . $p['slug']) ?>" class="text-decoration-none text-dark">
-                  <?php if (!empty($p['kapak'])): ?>
-                    <div class="mz-blog-img" style="background-image:url('<?= e(asset('uploads/blog/' . $p['kapak'])) ?>')"></div>
+                  <?php if (!empty($p['kapak_gorseli'])): ?>
+                    <div class="mz-blog-img" style="background-image:url('<?= e(asset('uploads/blog/' . $p['kapak_gorseli'])) ?>')"></div>
                   <?php else: ?>
                     <div class="mz-blog-img mz-blog-img-ph"><i class="bi bi-journal-text"></i></div>
                   <?php endif; ?>
@@ -107,8 +107,8 @@ require MIZAN_INC . '/header.php';
         <h5 class="fw-bold mb-3"><i class="bi bi-fire text-warning"></i> En Çok Okunanlar</h5>
         <?php foreach ($populer as $pp): ?>
           <a href="<?= u('/blog/' . $pp['slug']) ?>" class="d-flex gap-2 align-items-center text-decoration-none text-dark mb-3">
-            <?php if (!empty($pp['kapak'])): ?>
-              <img src="<?= e(asset('uploads/blog/' . $pp['kapak'])) ?>" width="60" height="60" class="rounded object-fit-cover" alt="">
+            <?php if (!empty($pp['kapak_gorseli'])): ?>
+              <img src="<?= e(asset('uploads/blog/' . $pp['kapak_gorseli'])) ?>" width="60" height="60" class="rounded object-fit-cover" alt="">
             <?php else: ?>
               <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:60px;height:60px;"><i class="bi bi-journal-text text-muted"></i></div>
             <?php endif; ?>

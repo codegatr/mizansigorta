@@ -56,7 +56,6 @@ $wa         = setting('whatsapp');
     </button>
     <div class="collapse navbar-collapse" id="navMain">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="<?= u('/') ?>">Anasayfa</a></li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Sigorta Ürünleri</a>
           <ul class="dropdown-menu mz-mega" style="min-width:540px">
@@ -75,10 +74,9 @@ $wa         = setting('whatsapp');
             </li>
           </ul>
         </li>
-        <li class="nav-item"><a class="nav-link" href="<?= u('/teklif-al') ?>">Teklif Al</a></li>
         <li class="nav-item"><a class="nav-link" href="<?= u('/hasar-ihbari') ?>">Hasar İhbarı</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?= u('/blog') ?>">Blog</a></li>
         <li class="nav-item"><a class="nav-link" href="<?= u('/sss') ?>">S.S.S.</a></li>
+        <li class="nav-item"><a class="nav-link" href="<?= u('/blog') ?>">Blog</a></li>
         <?php foreach ($cmsNav as $c): ?>
           <li class="nav-item"><a class="nav-link" href="<?= u('/sayfa/' . $c['slug']) ?>"><?= e($c['baslik']) ?></a></li>
         <?php endforeach; ?>

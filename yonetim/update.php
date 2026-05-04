@@ -213,29 +213,73 @@ function upd_runMigrations(): array
     $sql = (string)file_get_contents($sqlFile);
     if ($sql === '') return ['ok' => false, 'error' => 'migration.sql boş'];
 
-    // Comment ve blok yorumlari at
+    // Yorumlari temizle
     $sql = preg_replace('!^--[^\n]*$!m', '', $sql);
     $sql = preg_replace('!/\*.*?\*/!s', '', (string)$sql);
-    $statements = array_filter(array_map('trim', explode(';', (string)$sql)));
+
+    // Statement'lari ayir - basit ; bazli, ama tirnak icindeki ;'leri korumaya calisalim
+    // SQL dump'lar genelde ; sonunda \n ile ayrilir
+    $statements = [];
+    $buf = '';
+    $inStr = false;
+    $strCh = '';
+    $len = strlen($sql);
+    for ($i = 0; $i < $len; $i++) {
+        $ch = $sql[$i];
+        if ($inStr) {
+            $buf .= $ch;
+            if ($ch === '\\' && $i + 1 < $len) { $buf .= $sql[++$i]; continue; }
+            if ($ch === $strCh) $inStr = false;
+        } else {
+            if ($ch === "'" || $ch === '"') { $inStr = true; $strCh = $ch; $buf .= $ch; continue; }
+            if ($ch === ';') { $st = trim($buf); if ($st !== '') $statements[] = $st; $buf = ''; continue; }
+            $buf .= $ch;
+        }
+    }
+    if (trim($buf) !== '') $statements[] = trim($buf);
+
+    // Idempotent hata pattern'leri (tum yaygin MySQL/MariaDB hata mesajlari)
+    $ignorablePatterns = [
+        '/Duplicate column name/i',
+        '/Duplicate key name/i',
+        '/Duplicate entry/i',
+        '/Table .* already exists/i',
+        '/Multiple primary key defined/i',
+        '/Can.t DROP .*; check that .* exists/i',
+        '/Column .* already exists/i',
+        '/Key .* already exists/i',
+        // INSERT IGNORE ile duplikatlar otomatik atlanır ama yine de:
+        '/cannot add foreign key constraint/i',
+    ];
 
     $ok = 0; $skip = 0; $err = 0; $errors = [];
     foreach ($statements as $st) {
-        if ($st === '') continue;
+        if ($st === '' || stripos($st, 'DELIMITER') === 0) continue;
         try {
-            db()->exec($st . ';');
+            db()->exec($st);
             $ok++;
         } catch (Throwable $e) {
-            // Idempotent: zaten var hatalarini atla
             $msg = $e->getMessage();
-            if (preg_match('/Duplicate|already exists|exists/i', $msg)) {
-                $skip++;
-            } else {
+            $ignored = false;
+            foreach ($ignorablePatterns as $pat) {
+                if (preg_match($pat, $msg)) { $skip++; $ignored = true; break; }
+            }
+            if (!$ignored) {
                 $err++;
-                $errors[] = mb_substr($st, 0, 80) . '... → ' . $msg;
+                if (count($errors) < 20) {  // sadece ilk 20 hatayı topla
+                    $errors[] = mb_substr(preg_replace('/\s+/', ' ', $st), 0, 100) . ' … → ' . mb_substr($msg, 0, 200);
+                }
             }
         }
     }
-    return ['ok' => $err === 0, 'executed' => $ok, 'skipped' => $skip, 'errors' => $err, 'error_list' => $errors];
+    return [
+        'ok'         => $err === 0,
+        'executed'   => $ok,
+        'skipped'    => $skip,
+        'errors'     => $err,
+        'error_list' => $errors,
+        'total'      => count($statements),
+    ];
 }
 
 function upd_humanSize(int $bytes): string

@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($act === 'save') {
         $id = (int)($_POST['id'] ?? 0);
         $data = [
-            'kural_adi'    => trim((string)($_POST['kural_adi'] ?? '')),
+            'ad'    => trim((string)($_POST['ad'] ?? '')),
             'tetikleyici'  => (string)($_POST['tetikleyici'] ?? 'teklif_yeni'),
             'gun_sayisi'   => (int)($_POST['gun_sayisi'] ?? 0),
             'kanal'        => (string)($_POST['kanal'] ?? 'email'),
@@ -20,18 +20,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'email_govde'  => (string)($_POST['email_govde'] ?? ''),
             'aktif'        => isset($_POST['aktif']) ? 1 : 0,
         ];
-        if ($data['kural_adi'] === '') admin_redirect('hatirlatma-kurallari.php', 'danger', 'Kural adı zorunlu.');
+        if ($data['ad'] === '') admin_redirect('hatirlatma-kurallari.php', 'danger', 'Kural adı zorunlu.');
 
         if ($id) {
             db_exec('UPDATE ' . t('hatirlatma_kurallari') . '
-                     SET kural_adi=?, tetikleyici=?, gun_sayisi=?, kanal=?, email_konu=?, email_govde=?, aktif=?, guncelleme_tarihi=NOW()
+                     SET ad=?, tetikleyici=?, gun_sayisi=?, kanal=?, email_konu=?, email_govde=?, aktif=?, guncelleme_tarihi=NOW()
                      WHERE id=?',
                 array_merge(array_values($data), [$id]));
             audit_log('hatirlatma_kural_guncelle', 'kural', $id);
             admin_redirect('hatirlatma-kurallari.php', 'success', 'Kural güncellendi.');
         } else {
             db_exec('INSERT INTO ' . t('hatirlatma_kurallari') .
-                ' (kural_adi, tetikleyici, gun_sayisi, kanal, email_konu, email_govde, aktif, olusturma_tarihi)
+                ' (ad, tetikleyici, gun_sayisi, kanal, email_konu, email_govde, aktif, olusturma_tarihi)
                   VALUES (?,?,?,?,?,?,?,NOW())', array_values($data));
             audit_log('hatirlatma_kural_ekle', 'kural', db_last_id());
             admin_redirect('hatirlatma-kurallari.php', 'success', 'Yeni kural eklendi.');
@@ -83,7 +83,7 @@ $kanallar = ['email' => 'E-posta', 'sms' => 'SMS', 'panel' => 'Panel Bildirimi']
             <tbody>
             <?php foreach ($rows as $r): ?>
               <tr>
-                <td class="fw-semibold"><?= e($r['kural_adi']) ?></td>
+                <td class="fw-semibold"><?= e($r['ad']) ?></td>
                 <td class="small"><?= e($tetikleyiciler[$r['tetikleyici']] ?? $r['tetikleyici']) ?></td>
                 <td><span class="badge bg-light text-dark"><?= (int)$r['gun_sayisi'] ?></span></td>
                 <td><span class="badge bg-info"><?= e($kanallar[$r['kanal']] ?? $r['kanal']) ?></span></td>
@@ -139,7 +139,7 @@ $kanallar = ['email' => 'E-posta', 'sms' => 'SMS', 'panel' => 'Panel Bildirimi']
 
           <div class="mb-3">
             <label class="form-label small fw-semibold">Kural Adı *</label>
-            <input type="text" name="kural_adi" class="form-control form-control-sm" required value="<?= e($edit['kural_adi'] ?? '') ?>" placeholder="Örn. Yeni Teklif Karşılama">
+            <input type="text" name="ad" class="form-control form-control-sm" required value="<?= e($edit['ad'] ?? '') ?>" placeholder="Örn. Yeni Teklif Karşılama">
           </div>
 
           <div class="row g-2 mb-3">

@@ -28,8 +28,8 @@ require MIZAN_INC . '/header.php';
 <section class="container py-5">
   <div class="row">
     <div class="col-lg-9 mx-auto">
-      <?php if (!empty($sayfa['kapak'])): ?>
-        <img src="<?= e(asset('uploads/sayfa/' . $sayfa['kapak'])) ?>" class="img-fluid rounded shadow-sm mb-4 w-100" alt="">
+      <?php if (!empty($sayfa['kapak_gorseli'])): ?>
+        <img src="<?= e(asset('uploads/sayfa/' . $sayfa['kapak_gorseli'])) ?>" class="img-fluid rounded shadow-sm mb-4 w-100" alt="">
       <?php endif; ?>
       <div class="mz-prose">
         <?= $sayfa['icerik'] /* admin panelden gelen HTML */ ?>

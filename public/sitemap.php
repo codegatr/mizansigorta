@@ -19,7 +19,7 @@ foreach (db_all('SELECT slug, guncelleme_tarihi FROM ' . t('urunler') . ' WHERE 
 foreach (db_all('SELECT slug, guncelleme_tarihi FROM ' . t('sayfalar') . ' WHERE aktif=1') as $r) {
     $urls[] = ['loc' => $base . '/sayfa/' . $r['slug'], 'pri' => '0.5', 'cf' => 'monthly', 'lm' => $r['guncelleme_tarihi'] ?? null];
 }
-foreach (db_all('SELECT slug, guncelleme_tarihi, yayin_tarihi FROM ' . t('blog') . ' WHERE yayinda=1 AND yayin_tarihi<=NOW()') as $r) {
+foreach (db_all('SELECT slug, guncelleme_tarihi, yayin_tarihi FROM ' . t('blog') . ' WHERE aktif=1 AND yayin_tarihi<=NOW()') as $r) {
     $urls[] = ['loc' => $base . '/blog/' . $r['slug'], 'pri' => '0.6', 'cf' => 'weekly', 'lm' => $r['guncelleme_tarihi'] ?: $r['yayin_tarihi']];
 }
 

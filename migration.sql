@@ -541,12 +541,9 @@ INSERT IGNORE INTO `mz_ayarlar` (`anahtar`,`deger`,`aciklama`,`grup`,`tip`) VALU
 -- ====================================================
 
 -- 1) Urunler tablosuna parent_id ekle (hiyerarsi icin)
-SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'mz_urunler' AND COLUMN_NAME = 'parent_id');
-SET @sql := IF(@col = 0,
-    'ALTER TABLE `mz_urunler` ADD COLUMN `parent_id` INT UNSIGNED DEFAULT NULL AFTER `id`, ADD KEY `idx_parent` (`parent_id`)',
-    'SELECT 1');
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+-- Not: Sade ALTER kullaniyoruz; runMigrations() Duplicate hata mesajini sessizce atlar
+ALTER TABLE `mz_urunler` ADD COLUMN `parent_id` INT UNSIGNED DEFAULT NULL AFTER `id`;
+ALTER TABLE `mz_urunler` ADD KEY `idx_parent` (`parent_id`);
 
 -- 2) Bayi basvurulari tablosu (Temsilcimiz Olun)
 CREATE TABLE IF NOT EXISTS `mz_bayi_basvurulari` (
@@ -673,10 +670,13 @@ INSERT IGNORE INTO `mz_ayarlar` (`anahtar`,`deger`,`aciklama`,`grup`,`tip`) VALU
 -- v1.0.4 - Eksik kolonlar (ALTER idempotent)
 -- ====================================================
 
--- iletisim_mesajlari'na user_agent kolonu ekle
-SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
-    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'mz_iletisim_mesajlari' AND COLUMN_NAME = 'user_agent');
-SET @sql := IF(@col = 0,
-    'ALTER TABLE `mz_iletisim_mesajlari` ADD COLUMN `user_agent` VARCHAR(255) DEFAULT NULL AFTER `ip_adresi`',
-    'SELECT 1');
-PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+-- iletisim_mesajlari'na user_agent kolonu ekle (MariaDB 10+ IF NOT EXISTS)
+ALTER TABLE `mz_iletisim_mesajlari` ADD COLUMN IF NOT EXISTS `user_agent` VARCHAR(255) DEFAULT NULL AFTER `ip_adresi`;
+
+-- ====================================================
+-- v1.0.5 - Ek bug fix kolonlari
+-- ====================================================
+ALTER TABLE `mz_urunler`        ADD COLUMN IF NOT EXISTS `parent_id` INT UNSIGNED DEFAULT NULL AFTER `id`;
+ALTER TABLE `mz_urunler`        ADD KEY    IF NOT EXISTS `idx_parent` (`parent_id`);
+ALTER TABLE `mz_teklif_notlari` ADD COLUMN IF NOT EXISTS `baslik`     VARCHAR(160) DEFAULT NULL AFTER `tip`;
+ALTER TABLE `mz_hatirlatma_log` ADD COLUMN IF NOT EXISTS `olusturma_tarihi` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;

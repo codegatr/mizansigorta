@@ -59,7 +59,7 @@ clog(count($kurallar) . ' aktif kural bulundu.', $logLines);
  */
 function alreadyLogged(int $kuralId, int $teklifId, int $policeId): bool
 {
-    $where = 'kural_id=? AND DATE(olusturma_tarihi)=CURDATE() AND durum=?';
+    $where = 'kural_id=? AND DATE(gonderim_tarihi)=CURDATE() AND durum=?';
     $args = [$kuralId, 'basarili'];
     if ($teklifId) { $where .= ' AND teklif_id=?'; $args[] = $teklifId; }
     elseif ($policeId) { $where .= ' AND police_id=?'; $args[] = $policeId; }
@@ -204,7 +204,7 @@ foreach ($kurallar as $kural) {
         // Log kaydet
         try {
             db_exec(
-                'INSERT INTO ' . t('hatirlatma_log') . ' (kural_id, teklif_id, police_id, musteri_id, kanal, alici, konu, durum, hata_mesaji, olusturma_tarihi) VALUES (?,?,?,?,?,?,?,?,?,NOW())',
+                'INSERT INTO ' . t('hatirlatma_log') . ' (kural_id, teklif_id, police_id, musteri_id, kanal, alici, konu, durum, hata_mesaji, gonderim_tarihi) VALUES (?,?,?,?,?,?,?,?,?,NOW())',
                 [
                     (int)$kural['id'],
                     $teklifId ?: null,

@@ -21,7 +21,7 @@ $total = (int)db_value('SELECT COUNT(*) FROM ' . t('hatirlatma_log') . " l WHERE
 $pag   = paginate($total, $per, $page);
 
 $rows = db_all(
-    'SELECT l.*, k.kural_adi, t.teklif_no, p.police_no
+    'SELECT l.*, k.ad, t.teklif_no, p.police_no
        FROM ' . t('hatirlatma_log') . ' l
        LEFT JOIN ' . t('hatirlatma_kurallari') . ' k ON k.id=l.kural_id
        LEFT JOIN ' . t('teklifler') . ' t ON t.id=l.teklif_id
@@ -32,7 +32,7 @@ $rows = db_all(
     $args
 );
 
-$kurallar = db_all('SELECT id, kural_adi FROM ' . t('hatirlatma_kurallari') . ' ORDER BY kural_adi');
+$kurallar = db_all('SELECT id, ad FROM ' . t('hatirlatma_kurallari') . ' ORDER BY ad');
 ?>
 
 <form method="get" class="card border-0 shadow-sm mb-3">
@@ -45,7 +45,7 @@ $kurallar = db_all('SELECT id, kural_adi FROM ' . t('hatirlatma_kurallari') . ' 
         <select name="kural" class="form-select form-select-sm">
           <option value="">Tüm Kurallar</option>
           <?php foreach ($kurallar as $k): ?>
-            <option value="<?= (int)$k['id'] ?>" <?= $kural===(int)$k['id']?'selected':'' ?>><?= e($k['kural_adi']) ?></option>
+            <option value="<?= (int)$k['id'] ?>" <?= $kural===(int)$k['id']?'selected':'' ?>><?= e($k['ad']) ?></option>
           <?php endforeach; ?>
         </select>
       </div>
@@ -85,7 +85,7 @@ $kurallar = db_all('SELECT id, kural_adi FROM ' . t('hatirlatma_kurallari') . ' 
         <?php foreach ($rows as $r): ?>
           <tr>
             <td class="small text-muted"><?= tr_datetime($r['olusturma_tarihi']) ?></td>
-            <td class="small"><?= e($r['kural_adi'] ?: '-') ?></td>
+            <td class="small"><?= e($r['ad'] ?: '-') ?></td>
             <td class="small">
               <?php if ($r['teklif_no']): ?>
                 <a href="teklif-detay.php?id=<?= (int)$r['teklif_id'] ?>" class="text-decoration-none">Teklif <?= e($r['teklif_no']) ?></a>

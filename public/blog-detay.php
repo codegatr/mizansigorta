@@ -2,7 +2,7 @@
 if (!defined('MIZAN_BOOT')) { http_response_code(403); exit; }
 
 $slug = $params[0] ?? '';
-$post = db_row('SELECT * FROM ' . t('blog') . ' WHERE slug=? AND yayinda=1 AND yayin_tarihi<=NOW() LIMIT 1', [$slug]);
+$post = db_row('SELECT * FROM ' . t('blog') . ' WHERE slug=? AND aktif=1 AND yayin_tarihi<=NOW() LIMIT 1', [$slug]);
 
 if (!$post) {
     http_response_code(404);
@@ -20,7 +20,7 @@ $pageTitle = $post['seo_baslik'] ?: ($post['baslik'] . ' - ' . SITE_NAME);
 $pageDesc  = $post['seo_aciklama'] ?: mb_substr($post['ozet'] ?? '', 0, 160);
 
 $benzer = db_all('SELECT slug, baslik, kapak, yayin_tarihi FROM ' . t('blog') . '
-                  WHERE yayinda=1 AND id<>? AND (kategori=? OR kategori="")
+                  WHERE aktif=1 AND id<>? AND (kategori=? OR kategori="")
                   ORDER BY yayin_tarihi DESC LIMIT 3', [(int)$post['id'], $post['kategori']]);
 
 require MIZAN_INC . '/header.php';
@@ -49,8 +49,8 @@ require MIZAN_INC . '/header.php';
         <?php endif; ?>
       </div>
 
-      <?php if (!empty($post['kapak'])): ?>
-        <img src="<?= e(asset('uploads/blog/' . $post['kapak'])) ?>" class="img-fluid rounded shadow-sm mb-4 w-100" alt="<?= e($post['baslik']) ?>" style="max-height:480px;object-fit:cover;">
+      <?php if (!empty($post['kapak_gorseli'])): ?>
+        <img src="<?= e(asset('uploads/blog/' . $post['kapak_gorseli'])) ?>" class="img-fluid rounded shadow-sm mb-4 w-100" alt="<?= e($post['baslik']) ?>" style="max-height:480px;object-fit:cover;">
       <?php endif; ?>
 
       <?php if (!empty($post['ozet'])): ?>
@@ -85,8 +85,8 @@ require MIZAN_INC . '/header.php';
         <div class="col-md-4">
           <a href="<?= u('/blog/' . $b['slug']) ?>" class="text-decoration-none text-dark">
             <article class="mz-blog-card h-100">
-              <?php if (!empty($b['kapak'])): ?>
-                <div class="mz-blog-img" style="background-image:url('<?= e(asset('uploads/blog/' . $b['kapak'])) ?>')"></div>
+              <?php if (!empty($b['kapak_gorseli'])): ?>
+                <div class="mz-blog-img" style="background-image:url('<?= e(asset('uploads/blog/' . $b['kapak_gorseli'])) ?>')"></div>
               <?php else: ?>
                 <div class="mz-blog-img mz-blog-img-ph"><i class="bi bi-journal-text"></i></div>
               <?php endif; ?>
