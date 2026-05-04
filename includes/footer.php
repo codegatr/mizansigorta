@@ -58,6 +58,16 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
       </div>
     </div>
   </div>
+  <div class="mz-legal-bar text-center small py-2" style="background:#0a1428;color:#94a3b8;border-top:1px solid rgba(255,255,255,.05)">
+    <div class="container d-flex flex-wrap justify-content-center gap-3 gap-md-4">
+      <a href="<?= u('/sayfa/kvkk') ?>" style="color:#cbd5e1;text-decoration:none">KVKK Aydınlatma</a>
+      <a href="<?= u('/sayfa/gizlilik-politikasi') ?>" style="color:#cbd5e1;text-decoration:none">Gizlilik</a>
+      <a href="<?= u('/sayfa/cerez-politikasi') ?>" style="color:#cbd5e1;text-decoration:none">Çerezler</a>
+      <a href="<?= u('/sayfa/kullanim-sartlari') ?>" style="color:#cbd5e1;text-decoration:none">Kullanım Şartları</a>
+      <a href="<?= u('/sayfa/uye-aydinlatma') ?>" style="color:#cbd5e1;text-decoration:none">Üye Aydınlatma</a>
+      <a href="<?= u('/sayfa/acik-riza') ?>" style="color:#cbd5e1;text-decoration:none">Açık Rıza</a>
+    </div>
+  </div>
   <div class="mz-copy text-center small">
     © <?= date('Y') ?> <?= e(setting('firma_adi', SITE_NAME)) ?> — Tüm hakları saklıdır.
     &nbsp;|&nbsp; v<?= e(SITE_VERSION) ?> &nbsp;|&nbsp; <span class="text-light-emphasis">Yazılım: <a href="https://codega.com.tr" target="_blank" rel="noopener">CODEGA</a></span>
@@ -65,6 +75,59 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
 </footer>
 
 <?php require __DIR__ . '/teklif_wizard.php'; ?>
+
+<!-- Çerez onay banner'ı -->
+<div id="mzCookieBanner" class="mz-cookie-banner" style="display:none">
+  <div class="mz-cookie-content">
+    <div class="d-flex align-items-start gap-3">
+      <i class="bi bi-cookie text-warning fs-3 flex-shrink-0"></i>
+      <div class="flex-grow-1">
+        <strong class="d-block mb-1">Çerez Kullanımı Hakkında</strong>
+        <p class="small mb-2 mb-md-0" style="color:#cbd5e1">
+          Web sitemizde deneyiminizi iyileştirmek için çerezler kullanıyoruz. Detaylı bilgi için
+          <a href="<?= u('/sayfa/cerez-politikasi') ?>" style="color:#f4d35e;text-decoration:underline">Çerez Politikamızı</a> inceleyebilirsiniz.
+        </p>
+      </div>
+    </div>
+    <div class="d-flex gap-2 mt-3 flex-wrap">
+      <button type="button" class="btn btn-warning btn-sm fw-semibold" id="mzCookieAcceptAll"><i class="bi bi-check2"></i> Tümünü Kabul Et</button>
+      <button type="button" class="btn btn-outline-light btn-sm" id="mzCookieAcceptEssential">Sadece Zorunlu</button>
+      <a href="<?= u('/sayfa/cerez-politikasi') ?>" class="btn btn-link btn-sm text-decoration-none" style="color:#cbd5e1">Detaylar →</a>
+    </div>
+  </div>
+</div>
+
+<style>
+.mz-cookie-banner {
+  position: fixed; bottom: 16px; left: 16px; right: 16px;
+  max-width: 520px; margin-left: auto; z-index: 1050;
+  background: #0f1e37; color: #fff;
+  border-radius: 14px; padding: 1.25rem;
+  border: 1px solid rgba(244, 211, 94, .35);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, .4);
+}
+.mz-cookie-content { font-size: .92rem; line-height: 1.4; }
+@media (max-width: 576px) { .mz-cookie-banner { right: 10px; left: 10px; bottom: 10px; padding: 1rem; } }
+</style>
+
+<script>
+(function () {
+  'use strict';
+  const KEY = 'mz_cookie_consent';
+  const stored = localStorage.getItem(KEY);
+  const banner = document.getElementById('mzCookieBanner');
+  if (!banner) return;
+  if (!stored) {
+    banner.style.display = 'block';
+  }
+  function setConsent(level) {
+    localStorage.setItem(KEY, JSON.stringify({ level: level, ts: Date.now() }));
+    banner.style.display = 'none';
+  }
+  document.getElementById('mzCookieAcceptAll').addEventListener('click', () => setConsent('all'));
+  document.getElementById('mzCookieAcceptEssential').addEventListener('click', () => setConsent('essential'));
+})();
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?= asset('assets/js/main.js') ?>"></script>

@@ -692,6 +692,12 @@ ALTER TABLE `mz_urunler`        ADD KEY    IF NOT EXISTS `idx_parent` (`parent_i
 ALTER TABLE `mz_teklif_notlari` ADD COLUMN IF NOT EXISTS `baslik`     VARCHAR(160) DEFAULT NULL AFTER `tip`;
 ALTER TABLE `mz_hatirlatma_log` ADD COLUMN IF NOT EXISTS `olusturma_tarihi` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
+-- v1.1.2 - EKSIK SIRA KOLONLARI (CRITICAL: bunlar eksikti, butun seed'ler fail oluyordu)
+ALTER TABLE `mz_urunler`  ADD COLUMN IF NOT EXISTS `sira`         INT UNSIGNED NOT NULL DEFAULT 0 AFTER `aciklama`;
+ALTER TABLE `mz_sss`      ADD COLUMN IF NOT EXISTS `sira`         INT UNSIGNED NOT NULL DEFAULT 0 AFTER `cevap`;
+ALTER TABLE `mz_sayfalar` ADD COLUMN IF NOT EXISTS `menu_sirasi`  INT UNSIGNED NOT NULL DEFAULT 99 AFTER `menude_goster`;
+ALTER TABLE `mz_blog`     ADD COLUMN IF NOT EXISTS `goruntulenme` INT UNSIGNED NOT NULL DEFAULT 0;
+
 -- ====================================================
 -- v1.0.8 - Hakkimizda zengin icerik + 30+ SSS + Temsilcimiz Olun ipuclari
 -- ====================================================
@@ -843,3 +849,795 @@ UPDATE `mz_urunler` SET `icon` = 'bi-house-fill'     WHERE `slug` = 'konut-sigor
 UPDATE `mz_urunler` SET `icon` = 'bi-building'       WHERE `slug` = 'isyeri-sigortasi';
 UPDATE `mz_urunler` SET `icon` = 'bi-heart-pulse-fill' WHERE `slug` = 'saglik-sigortasi';
 UPDATE `mz_urunler` SET `icon` = 'bi-shield-check'   WHERE `slug` = 'hayat-sigortasi';
+
+-- ====================================================
+-- v1.1.2 - HUKUKI SAYFALAR (KVKK, Cerez, Gizlilik, Kullanim Sartlari)
+-- Profesyonel mevzuat-uyumlu icerikler
+-- ====================================================
+
+-- Mevcut/eksik hukuki sayfalari INSERT IGNORE ile ekle (zaten varsa skip)
+INSERT IGNORE INTO `mz_sayfalar` (`slug`, `baslik`, `icerik`, `seo_baslik`, `seo_aciklama`, `menude_goster`, `menu_sirasi`, `aktif`, `sistem`) VALUES
+('kvkk', 'KVKK Aydınlatma Metni', '<div class="mz-prose">
+<p class="lead">İşbu Aydınlatma Metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu (&ldquo;KVKK&rdquo;) kapsamında, veri sorumlusu sıfatıyla <strong>Mizan Sigorta Aracılık Hizmetleri</strong> tarafından kişisel verilerinizin işlenmesine ilişkin esasları açıklamak amacıyla hazırlanmıştır.</p>
+
+<h3>1. Veri Sorumlusunun Kimliği</h3>
+<p>
+<strong>Veri Sorumlusu:</strong> Mizan Sigorta Aracılık Hizmetleri<br>
+<strong>Adres:</strong> Fetih Mah. Libadiye Cad. Tahralı Sok. Kavakyeli İş Merkezi D-Blok K:9 D:24 ATAŞEHİR / İSTANBUL<br>
+<strong>E-posta:</strong> info@mizansigorta.com.tr<br>
+<strong>Telefon:</strong> +90 332 000 00 00
+</p>
+
+<h3>2. İşlenen Kişisel Veriler ve Toplama Yöntemi</h3>
+<p>Mizan Sigorta, sigorta aracılık hizmetlerinin sunulması, müşteri ilişkilerinin yönetimi ve yasal yükümlülüklerin yerine getirilmesi amacıyla aşağıdaki kişisel verilerinizi işleyebilir:</p>
+<ul>
+<li><strong>Kimlik Bilgileri:</strong> Ad, soyad, T.C. kimlik numarası, doğum tarihi, cinsiyet</li>
+<li><strong>İletişim Bilgileri:</strong> Telefon, e-posta, ikametgâh adresi</li>
+<li><strong>Müşteri İşlem Bilgileri:</strong> Sigorta talepleriniz, poliçe bilgileriniz, hasar dosyalarınız</li>
+<li><strong>Finansal Bilgiler:</strong> Ödeme bilgileriniz, prim ödemeleriniz</li>
+<li><strong>Görsel/İşitsel Kayıtlar:</strong> Çağrı merkezi ses kayıtları (kalite ve güvenlik amacıyla)</li>
+<li><strong>İşlem Güvenliği:</strong> IP adresi, çerez bilgileri, oturum bilgileri</li>
+<li><strong>Araç Bilgileri:</strong> Plaka, marka, model, ruhsat bilgileri (oto sigortaları için)</li>
+<li><strong>Sağlık Bilgileri (Özel Nitelikli):</strong> Sağlık sigortası kapsamında, açık rızanızla</li>
+</ul>
+
+<p>Bu veriler; web sitemiz üzerinden doldurduğunuz formlar, telefon görüşmelerimiz, e-posta yazışmaları, fiziki olarak iletilen belgeler veya yetkili sigorta şirketleri aracılığıyla toplanmaktadır.</p>
+
+<h3>3. Kişisel Verilerin İşlenme Amaçları</h3>
+<p>Kişisel verileriniz, KVKK&rsquo;nın 5. ve 6. maddelerinde belirtilen kişisel veri işleme şartları çerçevesinde aşağıdaki amaçlarla işlenmektedir:</p>
+<ul>
+<li>Sigorta teklifi hazırlanması ve sunulması</li>
+<li>Sigorta poliçesi düzenleme ve aracılık faaliyetlerinin yürütülmesi</li>
+<li>Müşteri kayıtlarının oluşturulması ve müşteri ilişkilerinin yönetimi</li>
+<li>Hasar süreçlerinin takibi ve yönetimi</li>
+<li>Yenileme dönemlerinde poliçe yenileme bildirimleri</li>
+<li>Müşteri memnuniyetinin ölçülmesi ve iyileştirme çalışmaları</li>
+<li>Yasal yükümlülüklerin yerine getirilmesi (SBM, MASAK, Hazine ve Maliye Bakanlığı vb.)</li>
+<li>Bilgi güvenliği süreçlerinin yürütülmesi</li>
+<li>İletişim faaliyetlerinin yürütülmesi (yalnızca açık rızanız varsa pazarlama amaçlı)</li>
+</ul>
+
+<h3>4. İşlenen Kişisel Verilerin Aktarımı</h3>
+<p>Kişisel verileriniz, KVKK&rsquo;nın 8. ve 9. maddelerine uygun şekilde, aşağıdaki taraflara aktarılabilir:</p>
+<ul>
+<li><strong>Anlaşmalı Sigorta Şirketleri:</strong> Anadolu Sigorta, Allianz, AXA, Türkiye Sigorta, HDI, Quick Sigorta, Neova, Ak Sigorta, Doğa Sigorta vb. (poliçe düzenlenmesi amacıyla)</li>
+<li><strong>Sigorta Bilgi ve Gözetim Merkezi (SBM):</strong> Yasal yükümlülük gereği</li>
+<li><strong>Hazine ve Maliye Bakanlığı:</strong> Mevzuat gereği</li>
+<li><strong>Yetkili Kamu Kurumları ve Yargı Mercileri:</strong> Yasal talep halinde</li>
+<li><strong>Hizmet Aldığımız Tedarikçiler:</strong> IT altyapısı, hosting, e-posta gönderim hizmetleri</li>
+<li><strong>Hukuk Müşavirleri ve Bağımsız Denetçiler:</strong> Hukuki süreçlerde gerektiği ölçüde</li>
+</ul>
+
+<h3>5. Kişisel Veri İşlemenin Hukuki Sebepleri</h3>
+<p>Kişisel verileriniz aşağıdaki hukuki sebeplere dayanılarak işlenmektedir:</p>
+<ul>
+<li><strong>Kanunlarda açıkça öngörülmesi</strong> (5684 sayılı Sigortacılık Kanunu, KVKK)</li>
+<li><strong>Sözleşmenin kurulması veya ifası</strong> (sigorta aracılık sözleşmesi)</li>
+<li><strong>Veri sorumlusunun hukuki yükümlülüğünü yerine getirebilmesi</strong></li>
+<li><strong>Bir hakkın tesisi, kullanılması veya korunması</strong></li>
+<li><strong>Açık rızanız</strong> (özel nitelikli kişisel veriler ve pazarlama amaçlı kullanımlar için)</li>
+</ul>
+
+<h3>6. KVKK Kapsamındaki Haklarınız</h3>
+<p>KVKK&rsquo;nın 11. maddesi uyarınca, veri sorumlusu olarak Mizan Sigorta&rsquo;ya başvurarak:</p>
+<ul>
+<li>Kişisel verilerinizin işlenip işlenmediğini öğrenme,</li>
+<li>İşlenmişse buna ilişkin bilgi talep etme,</li>
+<li>İşlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme,</li>
+<li>Yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme,</li>
+<li>Eksik veya yanlış işlenmişse düzeltilmesini isteme,</li>
+<li>KVKK&rsquo;da öngörülen şartlar çerçevesinde silinmesini veya yok edilmesini isteme,</li>
+<li>Düzeltme/silme/yok etme işlemlerinin verilerin aktarıldığı üçüncü kişilere bildirilmesini isteme,</li>
+<li>Otomatik sistemlerle analiz edilmesi sonucu aleyhinize bir sonuç çıkmasına itiraz etme,</li>
+<li>Kanuna aykırı işleme nedeniyle uğradığınız zararın giderilmesini talep etme</li>
+</ul>
+<p>haklarına sahipsiniz.</p>
+
+<h3>7. Başvuru Yöntemi</h3>
+<p>Yukarıdaki haklarınızı kullanmak için, aşağıdaki yöntemlerden biriyle başvuruda bulunabilirsiniz:</p>
+<ul>
+<li><strong>E-posta:</strong> kvkk@mizansigorta.com.tr (güvenli elektronik imzalı)</li>
+<li><strong>Posta:</strong> Fetih Mah. Libadiye Cad. Tahralı Sok. Kavakyeli İş Merkezi D-Blok K:9 D:24 ATAŞEHİR / İSTANBUL (ıslak imzalı dilekçe ile)</li>
+<li><strong>Noter Kanalıyla:</strong> Yukarıdaki adrese noter aracılığıyla</li>
+</ul>
+<p>Başvurunuz, talebin niteliğine göre en kısa sürede ve en geç <strong>30 gün içinde</strong> ücretsiz olarak sonuçlandırılacaktır. İşlemin ayrıca bir maliyet gerektirmesi halinde KVKK Kurulu&rsquo;nun belirlediği tarifedeki ücret talep edilebilir.</p>
+
+<h3>8. Veri Saklama Süresi</h3>
+<p>Kişisel verileriniz, ilgili mevzuatta öngörülen veya işleme amacının gerektirdiği süreler boyunca saklanır. Saklama süreleri sona erdiğinde verileriniz, KVKK ve ilgili yönetmelikler çerçevesinde silinir, yok edilir veya anonim hale getirilir. Sigortacılık mevzuatı gereği genel saklama süresi <strong>10 yıldır</strong>.</p>
+
+<h3>9. Güncellemeler</h3>
+<p>İşbu Aydınlatma Metni, ilgili mevzuat veya iş süreçlerimizdeki değişiklikler doğrultusunda güncellenebilir. Güncel metni daima web sitemizde bulabilirsiniz.</p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>', 'KVKK Aydınlatma Metni - Mizan Sigorta', '6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında aydınlatma metnimiz.', 0, 91, 1, 1),
+('gizlilik-politikasi', 'Gizlilik Politikası', '<div class="mz-prose">
+<p class="lead">Mizan Sigorta Aracılık Hizmetleri olarak, müşterilerimizin ve web sitemizi ziyaret eden kullanıcılarımızın gizliliğine saygı duyuyoruz. Bu Gizlilik Politikası, kişisel bilgilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.</p>
+
+<h3>1. Toplanan Bilgiler</h3>
+<p>Web sitemiz üzerinden veya hizmetlerimiz vesilesiyle aşağıdaki tür bilgileri toplayabiliriz:</p>
+<ul>
+<li><strong>Doğrudan sağladığınız bilgiler:</strong> İletişim formları, teklif başvuruları, müşteri kayıt formları, hasar bildirim formları üzerinden ilettiğiniz bilgiler.</li>
+<li><strong>Otomatik olarak toplanan bilgiler:</strong> IP adresi, tarayıcı türü, ziyaret edilen sayfalar, ziyaret süresi ve çerez verileri.</li>
+<li><strong>Üçüncü taraflardan elde edilen bilgiler:</strong> Anlaşmalı sigorta şirketleri ile yürüttüğümüz iş süreçleri kapsamında elde edilen bilgiler.</li>
+</ul>
+
+<h3>2. Bilgilerin Kullanımı</h3>
+<p>Topladığımız bilgileri yalnızca aşağıdaki amaçlarla kullanırız:</p>
+<ul>
+<li>Sigorta tekliflerinin hazırlanması ve hizmet sunumu,</li>
+<li>Müşteri ilişkilerinin yönetimi,</li>
+<li>Hasar süreçlerinin yönetimi,</li>
+<li>Yasal ve düzenleyici yükümlülüklerin yerine getirilmesi,</li>
+<li>Web sitesi performansının analizi ve iyileştirilmesi,</li>
+<li>Açık rızanız varsa pazarlama ve bilgilendirme iletişimleri.</li>
+</ul>
+
+<h3>3. Bilgilerin Korunması</h3>
+<p>Mizan Sigorta, kişisel bilgilerinizin güvenliğini sağlamak için endüstri standartlarında teknik ve idari tedbirleri uygulamaktadır:</p>
+<ul>
+<li>SSL şifrelemeli güvenli veri aktarımı (HTTPS),</li>
+<li>Erişim kontrolü ve yetkilendirme sistemleri,</li>
+<li>Düzenli güvenlik denetimleri,</li>
+<li>Veri yedekleme ve felaket kurtarma planları,</li>
+<li>Çalışan eğitimleri ve gizlilik sözleşmeleri,</li>
+<li>Şifre güvenliği ve iki faktörlü doğrulama (2FA) altyapısı.</li>
+</ul>
+
+<h3>4. Bilgi Paylaşımı</h3>
+<p>Kişisel bilgileriniz <strong>hiçbir koşulda satılmaz, kiralanmaz veya pazarlanmaz</strong>. Bilgileriniz yalnızca aşağıdaki durumlarda paylaşılabilir:</p>
+<ul>
+<li>Hizmet sunmak için gerekli olan anlaşmalı sigorta şirketleri ile,</li>
+<li>Yasal zorunluluklar gereği yetkili kamu kurumları ile (Hazine ve Maliye Bakanlığı, SBM, MASAK, mahkemeler vb.),</li>
+<li>Açık rızanızla belirttiğiniz üçüncü taraflarla.</li>
+</ul>
+
+<h3>5. Çerezler (Cookies)</h3>
+<p>Web sitemiz çerezler kullanmaktadır. Çerezler hakkında detaylı bilgi için <a href="/v2/sayfa/cerez-politikasi">Çerez Politikamızı</a> inceleyebilirsiniz.</p>
+
+<h3>6. Üçüncü Taraf Bağlantıları</h3>
+<p>Web sitemiz, üçüncü taraf web sitelerine bağlantılar içerebilir. Mizan Sigorta, bu sitelerin gizlilik uygulamalarından sorumlu değildir. Söz konusu sitelerin gizlilik politikalarını ayrıca incelemenizi öneririz.</p>
+
+<h3>7. Çocukların Gizliliği</h3>
+<p>Web sitemiz 18 yaşın altındaki bireylere yönelik olarak tasarlanmamıştır. 18 yaşın altındaki kişilerden bilerek kişisel veri toplamayız. 18 yaşın altında olduğunu bildiğimiz bir kişiden veri toplandığını fark edersek, söz konusu verileri derhal sileriz.</p>
+
+<h3>8. Gizlilik Politikasında Değişiklikler</h3>
+<p>Bu Gizlilik Politikası zaman zaman güncellenebilir. Güncel sürüm her zaman web sitemizde yayınlanır. Önemli değişikliklerde sizleri ayrıca bilgilendireceğiz.</p>
+
+<h3>9. İletişim</h3>
+<p>Gizlilik Politikamız ile ilgili soru, görüş veya endişelerinizi <strong>info@mizansigorta.com.tr</strong> adresine veya yukarıda belirtilen iletişim kanallarımızdan birine iletebilirsiniz.</p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>', 'Gizlilik Politikası - Mizan Sigorta', 'Mizan Sigorta gizlilik ilkeleri ve veri işleme politikamız.', 0, 92, 1, 1),
+('cerez-politikasi', 'Çerez Politikası', '<div class="mz-prose">
+<p class="lead">Bu Çerez Politikası, Mizan Sigorta Aracılık Hizmetleri (&ldquo;Mizan Sigorta&rdquo;) tarafından işletilen <strong>mizansigorta.com.tr</strong> web sitesinde kullanılan çerezler hakkında sizi bilgilendirmek amacıyla hazırlanmıştır.</p>
+
+<h3>1. Çerez (Cookie) Nedir?</h3>
+<p>Çerezler, ziyaret ettiğiniz web sitelerinin tarayıcınız üzerinden cihazınıza yerleştirdiği küçük metin dosyalarıdır. Çerezler, sitenin çalışması, kullanıcı deneyimini iyileştirilmesi ve trafik analizi gibi amaçlarla kullanılır.</p>
+
+<h3>2. Kullandığımız Çerez Türleri</h3>
+
+<h5>a) Zorunlu Çerezler</h5>
+<p>Web sitesinin temel işlevlerini yerine getirmesi için gereklidir. Devre dışı bırakılamazlar. Örnekler:</p>
+<ul>
+<li>Oturum çerezleri (giriş/çıkış işlemleri)</li>
+<li>Güvenlik çerezleri (CSRF token)</li>
+<li>Form doldurma sırasındaki geçici veri çerezleri</li>
+</ul>
+
+<h5>b) Performans / Analitik Çerezleri</h5>
+<p>Ziyaretçilerin siteyi nasıl kullandığını anlamamızı sağlayan çerezlerdir. Tüm bilgiler anonim olarak toplanır.</p>
+<ul>
+<li>Sayfa görüntüleme sayıları</li>
+<li>Ziyaret süresi ve yolculuğu</li>
+<li>Hata raporlama</li>
+</ul>
+
+<h5>c) İşlevsel Çerezler</h5>
+<p>Tercihlerinizi (dil seçimi, çerez onayı vb.) hatırlamak için kullanılır.</p>
+
+<h5>d) Hedefleme/Pazarlama Çerezleri</h5>
+<p>İlgi alanlarınıza yönelik içerik göstermek amacıyla kullanılır. Yalnızca açık rızanızla aktif edilir.</p>
+
+<h3>3. Çerez Yönetimi</h3>
+<p>Çerez tercihlerinizi istediğiniz zaman değiştirebilirsiniz:</p>
+<ul>
+<li>Web sitemizdeki çerez bandındaki <strong>&ldquo;Tercihleri Yönet&rdquo;</strong> seçeneğini kullanarak,</li>
+<li>Tarayıcınızın ayarlarından çerezleri kabul etmeyi reddedebilir veya bazı çerezleri silebilirsiniz.</li>
+</ul>
+
+<p>Tarayıcı bazlı çerez yönetimi adresleri:</p>
+<ul>
+<li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener">Google Chrome</a></li>
+<li><a href="https://support.mozilla.org/tr/kb/cerezler-web-sitelerinin-bilgisayariniza-koyduklari" target="_blank" rel="noopener">Mozilla Firefox</a></li>
+<li><a href="https://support.microsoft.com/tr-tr/microsoft-edge" target="_blank" rel="noopener">Microsoft Edge</a></li>
+<li><a href="https://support.apple.com/tr-tr/safari" target="_blank" rel="noopener">Safari</a></li>
+</ul>
+
+<p><strong>Önemli:</strong> Çerezleri tamamen devre dışı bırakırsanız web sitemizin bazı bölümleri düzgün çalışmayabilir.</p>
+
+<h3>4. Üçüncü Taraf Çerezleri</h3>
+<p>Web sitemizde, hizmet sağlayıcılar tarafından sağlanan bazı üçüncü taraf çerezler bulunabilir:</p>
+<ul>
+<li>Google Maps (iletişim sayfasındaki harita için)</li>
+<li>Bootstrap CDN ve font kaynakları</li>
+<li>Sosyal medya entegrasyonları (paylaşım butonları)</li>
+</ul>
+
+<h3>5. Çerez Saklama Süreleri</h3>
+<table class="table table-sm table-bordered mt-2">
+<thead><tr><th>Çerez Türü</th><th>Süre</th></tr></thead>
+<tbody>
+<tr><td>Oturum çerezleri</td><td>Tarayıcı kapatılana kadar</td></tr>
+<tr><td>Çerez onay çerezi</td><td>12 ay</td></tr>
+<tr><td>Analitik çerezler</td><td>24 ay</td></tr>
+<tr><td>İşlevsel çerezler</td><td>12 ay</td></tr>
+</tbody>
+</table>
+
+<h3>6. Politika Güncellemeleri</h3>
+<p>Bu Çerez Politikası, gerektiğinde güncellenebilir. Güncel sürüm her zaman bu sayfada yayınlanır.</p>
+
+<h3>7. İletişim</h3>
+<p>Çerez politikamız hakkında soru ve görüşleriniz için: <strong>info@mizansigorta.com.tr</strong></p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>', 'Çerez Politikası - Mizan Sigorta', 'Web sitemizde kullanılan çerezler ve çerez yönetim politikamız.', 0, 93, 1, 1),
+('kullanim-sartlari', 'Kullanım Şartları', '<div class="mz-prose">
+<p class="lead">Bu Kullanım Şartları, Mizan Sigorta Aracılık Hizmetleri (&ldquo;Mizan Sigorta&rdquo; veya &ldquo;Şirket&rdquo;) tarafından işletilen <strong>mizansigorta.com.tr</strong> web sitesinin kullanımına ilişkin koşulları belirler. Web sitemizi kullanarak bu şartları kabul etmiş sayılırsınız.</p>
+
+<h3>1. Tanımlar</h3>
+<ul>
+<li><strong>Site:</strong> mizansigorta.com.tr alan adı altında yayınlanan tüm sayfalar ve içerikler.</li>
+<li><strong>Kullanıcı:</strong> Siteyi ziyaret eden, bilgi alan, teklif talep eden veya hizmetlerden yararlanan gerçek/tüzel kişiler.</li>
+<li><strong>İçerik:</strong> Site üzerinde yer alan metin, görsel, kod, logo, marka ve diğer her türlü materyal.</li>
+</ul>
+
+<h3>2. Hizmet Kapsamı</h3>
+<p>Mizan Sigorta, 5684 sayılı Sigortacılık Kanunu çerçevesinde sigorta aracılık (acentecilik) hizmeti sunmaktadır. Site üzerinden:</p>
+<ul>
+<li>Sigorta ürünleri hakkında bilgi sunulur,</li>
+<li>Teklif talebi alınır,</li>
+<li>Müşteri iletişim ve destek sağlanır,</li>
+<li>Hasar süreçleri yönetilir.</li>
+</ul>
+
+<p>Sitedeki bilgiler bilgilendirme amaçlıdır; bağlayıcı sigorta sözleşmesi yerine geçmez. Kesin teminat ve şartlar, ilgili sigorta şirketinin düzenlediği poliçede belirtilir.</p>
+
+<h3>3. Kullanım Kuralları</h3>
+<p>Web sitemizi kullanırken aşağıdaki kurallara uymanız gerekmektedir:</p>
+<ul>
+<li>Doğru, güncel ve eksiksiz bilgi sağlamak,</li>
+<li>Yetkisiz erişim girişiminde bulunmamak,</li>
+<li>Site altyapısına zarar verecek faaliyetlerde bulunmamak (DDoS, exploit, SQL injection vb.),</li>
+<li>Telif haklı içerikleri izinsiz kopyalamamak veya yeniden yayınlamamak,</li>
+<li>Başka kullanıcıların haklarına saygı göstermek,</li>
+<li>Türkiye Cumhuriyeti yasalarına ve uluslararası yasalara uygun davranmak.</li>
+</ul>
+
+<h3>4. Fikri Mülkiyet Hakları</h3>
+<p>Sitedeki tüm içerik (metin, görsel, marka, logo, tasarım, kod), Mizan Sigorta&rsquo;ya veya lisans alanlarına aittir ve telif hakkı yasaları ile korunmaktadır. Önceden yazılı izin alınmadıkça hiçbir içerik kopyalanamaz, dağıtılamaz veya ticari amaçla kullanılamaz.</p>
+
+<h3>5. Sorumluluk Sınırlamaları</h3>
+<p>Mizan Sigorta:</p>
+<ul>
+<li>Sitedeki bilgilerin daima güncel ve hatasız olduğunu garanti etmez,</li>
+<li>Sitenin kesintisiz veya hatasız çalışacağını taahhüt etmez,</li>
+<li>Üçüncü taraf hizmetleri (Google Maps vb.) için sorumluluk taşımaz,</li>
+<li>Force majeure (deprem, savaş, salgın, siber saldırı vb.) durumlarda hizmet kesintilerinden sorumlu tutulamaz.</li>
+</ul>
+
+<p>Sitedeki bilgilere dayanarak alınan kararlardan kullanıcı kendisi sorumludur. Kesin sigorta kararı için poliçeyi ve mevzuatı incelemeniz önerilir.</p>
+
+<h3>6. Hesap Güvenliği</h3>
+<p>Eğer Mizan Sigorta&rsquo;da müşteri kaydınız varsa:</p>
+<ul>
+<li>Şifrenizi gizli tutmak ve düzenli güncellemek sizin sorumluluğunuzdadır,</li>
+<li>Hesabınızdan yapılan tüm işlemlerden siz sorumlusunuz,</li>
+<li>Yetkisiz erişim şüphesinde derhal bize bildirmelisiniz.</li>
+</ul>
+
+<h3>7. Üçüncü Taraf Bağlantıları</h3>
+<p>Site, üçüncü taraf web sitelerine bağlantılar içerebilir. Bu sitelerin içeriği, gizlilik politikası veya hizmetlerinden Mizan Sigorta sorumlu değildir.</p>
+
+<h3>8. Şartlarda Değişiklik</h3>
+<p>Mizan Sigorta, bu Kullanım Şartlarını dilediği zaman değiştirme hakkını saklı tutar. Değişiklikler bu sayfada yayınlandığı andan itibaren geçerli olur. Önemli değişikliklerde mevcut müşterilerimizi e-posta ile bilgilendiririz.</p>
+
+<h3>9. Uygulanacak Hukuk ve Yetki</h3>
+<p>Bu Kullanım Şartları Türkiye Cumhuriyeti yasalarına tabidir. Doğacak tüm uyuşmazlıklarda <strong>İstanbul (Anadolu) Mahkemeleri ve İcra Daireleri</strong> yetkilidir.</p>
+
+<h3>10. İletişim</h3>
+<p>Kullanım Şartları ile ilgili soru ve görüşleriniz için:<br>
+<strong>E-posta:</strong> info@mizansigorta.com.tr<br>
+<strong>Telefon:</strong> +90 332 000 00 00<br>
+<strong>Adres:</strong> Fetih Mah. Libadiye Cad. Tahralı Sok. Kavakyeli İş Merkezi D-Blok K:9 D:24 ATAŞEHİR / İSTANBUL</p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>', 'Kullanım Şartları - Mizan Sigorta', 'Web sitemizin kullanım koşulları ve şartları.', 0, 94, 1, 1),
+('uye-aydinlatma', 'Üye Aydınlatma Metni', '<div class="mz-prose">
+<p class="lead">İşbu Üye Aydınlatma Metni, web sitemiz üzerinden teklif başvurusu, iletişim formu doldurma veya kullanıcı kaydı yaptırma yoluyla bizlere ilettiğiniz kişisel verilerinizin işlenmesi süreçlerinde sizleri aydınlatmak amacıyla hazırlanmıştır.</p>
+
+<h3>1. Hangi Verileriniz İşlenir?</h3>
+<p>Web sitemizdeki form ve iletişim kanalları aracılığıyla:</p>
+<ul>
+<li>Ad, soyad, firma adı (kurumsal müşteriler için)</li>
+<li>Telefon, e-posta, adres bilgileri</li>
+<li>Sigorta talep konusu, açıklama, mesaj içerikleri</li>
+<li>IP adresi ve oturum bilgisi (güvenlik amacıyla)</li>
+</ul>
+
+<h3>2. Hangi Amaçla İşlenir?</h3>
+<ul>
+<li>Sigorta teklifi hazırlanması ve sunulması,</li>
+<li>Tarafınızla iletişim kurulması,</li>
+<li>Mesajınıza/talebinize yanıt verilmesi,</li>
+<li>Müşteri kaydı oluşturulması (talep ederseniz),</li>
+<li>Yasal yükümlülüklerin yerine getirilmesi,</li>
+<li>Bilgi güvenliği süreçlerinin yürütülmesi.</li>
+</ul>
+
+<h3>3. Hangi Hukuki Sebebe Dayanır?</h3>
+<p>Verileriniz; sözleşmenin kurulması veya ifası için zorunlu olması (KVKK m.5/2-c), Mizan Sigorta&rsquo;nın meşru menfaatleri (KVKK m.5/2-f) ve açık rızanız (KVKK m.5/1) hukuki sebeplerine dayanılarak işlenir.</p>
+
+<h3>4. Aktarılır mı?</h3>
+<p>Verileriniz; teklif ürettiğimiz anlaşmalı sigorta şirketleri, yasal yükümlülükler kapsamında yetkili kamu kurumları ve iş süreçlerimizi yürüten hizmet tedarikçileri ile sınırlı olarak paylaşılabilir.</p>
+
+<h3>5. Saklama Süresi</h3>
+<p>Sigortacılık mevzuatı gereği genel saklama süresi 10 yıldır. Talep ettiğiniz hizmet sonuçlanmazsa veriler 1 yıl içinde silinir veya anonimleştirilir.</p>
+
+<h3>6. Haklarınız</h3>
+<p>KVKK&rsquo;nın 11. maddesi kapsamındaki tüm haklarınız (bilgi alma, düzeltme, silme vb.) için <strong>kvkk@mizansigorta.com.tr</strong> adresine başvurabilirsiniz. Detaylı bilgi için <a href="/v2/sayfa/kvkk">KVKK Aydınlatma Metnimizi</a> inceleyiniz.</p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>', 'Üye Aydınlatma Metni - Mizan Sigorta', 'Web üyeliği veya teklif başvurusu kapsamında aydınlatma metni.', 0, 95, 1, 1),
+('acik-riza', 'Açık Rıza Metni', '<div class="mz-prose">
+<p class="lead">İşbu Açık Rıza Metni, Mizan Sigorta Aracılık Hizmetleri tarafından kişisel verilerinizin 6698 sayılı Kişisel Verilerin Korunması Kanunu (&ldquo;KVKK&rdquo;) kapsamında açık rızaya tabi olarak işlenmesi durumunda alınan onayınızı belgelemek üzere hazırlanmıştır.</p>
+
+<h3>1. Açık Rıza Kapsamı</h3>
+<p>Aşağıdaki işlemler için <strong>ayrı ayrı</strong> açık rıza alınmaktadır:</p>
+
+<h5>a) Pazarlama ve Bilgilendirme İletişimi</h5>
+<p>Tarafınıza:</p>
+<ul>
+<li>Sigorta ürünlerine ilişkin promosyon ve kampanya bilgileri,</li>
+<li>Yeni ürün ve hizmet duyuruları,</li>
+<li>Sektörel bilgilendirmeler ve haber bültenleri,</li>
+<li>Anket ve memnuniyet ölçümü çağrıları</li>
+</ul>
+<p>için e-posta, SMS veya telefon yoluyla iletişim kurulmasına onay vermeniz halinde, söz konusu iletişim faaliyetleri yürütülecektir.</p>
+
+<h5>b) Özel Nitelikli Kişisel Verilerin İşlenmesi</h5>
+<p>Sağlık sigortası başvurularında, KVKK m.6 kapsamında özel nitelikli kişisel veri sayılan sağlık verilerinizin işlenmesi açık rızanıza tabidir.</p>
+
+<h5>c) Veri Aktarımı</h5>
+<p>Yurt içindeki anlaşmalı sigorta şirketlerine sözleşme kurulması ve ifası için aktarım sözleşme kapsamında değerlendirilse de; pazarlama amaçlı paylaşım için açık rıza alınır.</p>
+
+<h3>2. Rızanın Geri Alınması</h3>
+<p>Verdiğiniz açık rızayı dilediğiniz zaman, herhangi bir gerekçe göstermeden geri alabilirsiniz. Bu durumda:</p>
+<ul>
+<li>İlgili işleme faaliyeti durdurulur,</li>
+<li>Pazarlama listelerinden çıkarılırsınız,</li>
+<li>Geri alma tarihinden önceki yasal işlemler etkilenmez.</li>
+</ul>
+
+<h3>3. Rıza Geri Alma Yöntemleri</h3>
+<ul>
+<li><strong>E-posta:</strong> kvkk@mizansigorta.com.tr (&ldquo;Açık rızamı geri alıyorum&rdquo; konusu ile)</li>
+<li><strong>Posta:</strong> Yukarıdaki adresimize ıslak imzalı dilekçe</li>
+<li><strong>Pazarlama bültenleri için:</strong> E-postadaki &ldquo;abonelikten çık&rdquo; bağlantısı</li>
+</ul>
+
+<h3>4. Önemli Bilgiler</h3>
+<ul>
+<li>Açık rıza vermek <strong>tamamen isteğe bağlıdır</strong>; rıza vermemeniz hizmet alma hakkınızı etkilemez.</li>
+<li>Rıza geri alındıktan sonra verileriniz, mevzuatın gerektirmediği sürece silinir veya anonim hale getirilir.</li>
+<li>Rıza alınmasına rağmen, mevzuat gereği saklanması zorunlu olan veriler ilgili sürelerin sonuna kadar muhafaza edilir.</li>
+</ul>
+
+<h3>5. İletişim</h3>
+<p>Açık Rıza Metni hakkında soru ve görüşleriniz için: <strong>kvkk@mizansigorta.com.tr</strong></p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>', 'Açık Rıza Metni - Mizan Sigorta', 'Kişisel verilerin işlenmesine ilişkin açık rıza beyanı.', 0, 96, 1, 1);
+
+-- Mevcut hukuki sayfalari da guncel icerikle UPDATE (idempotent)
+UPDATE `mz_sayfalar` SET `icerik` = '<div class="mz-prose">
+<p class="lead">İşbu Aydınlatma Metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu (&ldquo;KVKK&rdquo;) kapsamında, veri sorumlusu sıfatıyla <strong>Mizan Sigorta Aracılık Hizmetleri</strong> tarafından kişisel verilerinizin işlenmesine ilişkin esasları açıklamak amacıyla hazırlanmıştır.</p>
+
+<h3>1. Veri Sorumlusunun Kimliği</h3>
+<p>
+<strong>Veri Sorumlusu:</strong> Mizan Sigorta Aracılık Hizmetleri<br>
+<strong>Adres:</strong> Fetih Mah. Libadiye Cad. Tahralı Sok. Kavakyeli İş Merkezi D-Blok K:9 D:24 ATAŞEHİR / İSTANBUL<br>
+<strong>E-posta:</strong> info@mizansigorta.com.tr<br>
+<strong>Telefon:</strong> +90 332 000 00 00
+</p>
+
+<h3>2. İşlenen Kişisel Veriler ve Toplama Yöntemi</h3>
+<p>Mizan Sigorta, sigorta aracılık hizmetlerinin sunulması, müşteri ilişkilerinin yönetimi ve yasal yükümlülüklerin yerine getirilmesi amacıyla aşağıdaki kişisel verilerinizi işleyebilir:</p>
+<ul>
+<li><strong>Kimlik Bilgileri:</strong> Ad, soyad, T.C. kimlik numarası, doğum tarihi, cinsiyet</li>
+<li><strong>İletişim Bilgileri:</strong> Telefon, e-posta, ikametgâh adresi</li>
+<li><strong>Müşteri İşlem Bilgileri:</strong> Sigorta talepleriniz, poliçe bilgileriniz, hasar dosyalarınız</li>
+<li><strong>Finansal Bilgiler:</strong> Ödeme bilgileriniz, prim ödemeleriniz</li>
+<li><strong>Görsel/İşitsel Kayıtlar:</strong> Çağrı merkezi ses kayıtları (kalite ve güvenlik amacıyla)</li>
+<li><strong>İşlem Güvenliği:</strong> IP adresi, çerez bilgileri, oturum bilgileri</li>
+<li><strong>Araç Bilgileri:</strong> Plaka, marka, model, ruhsat bilgileri (oto sigortaları için)</li>
+<li><strong>Sağlık Bilgileri (Özel Nitelikli):</strong> Sağlık sigortası kapsamında, açık rızanızla</li>
+</ul>
+
+<p>Bu veriler; web sitemiz üzerinden doldurduğunuz formlar, telefon görüşmelerimiz, e-posta yazışmaları, fiziki olarak iletilen belgeler veya yetkili sigorta şirketleri aracılığıyla toplanmaktadır.</p>
+
+<h3>3. Kişisel Verilerin İşlenme Amaçları</h3>
+<p>Kişisel verileriniz, KVKK&rsquo;nın 5. ve 6. maddelerinde belirtilen kişisel veri işleme şartları çerçevesinde aşağıdaki amaçlarla işlenmektedir:</p>
+<ul>
+<li>Sigorta teklifi hazırlanması ve sunulması</li>
+<li>Sigorta poliçesi düzenleme ve aracılık faaliyetlerinin yürütülmesi</li>
+<li>Müşteri kayıtlarının oluşturulması ve müşteri ilişkilerinin yönetimi</li>
+<li>Hasar süreçlerinin takibi ve yönetimi</li>
+<li>Yenileme dönemlerinde poliçe yenileme bildirimleri</li>
+<li>Müşteri memnuniyetinin ölçülmesi ve iyileştirme çalışmaları</li>
+<li>Yasal yükümlülüklerin yerine getirilmesi (SBM, MASAK, Hazine ve Maliye Bakanlığı vb.)</li>
+<li>Bilgi güvenliği süreçlerinin yürütülmesi</li>
+<li>İletişim faaliyetlerinin yürütülmesi (yalnızca açık rızanız varsa pazarlama amaçlı)</li>
+</ul>
+
+<h3>4. İşlenen Kişisel Verilerin Aktarımı</h3>
+<p>Kişisel verileriniz, KVKK&rsquo;nın 8. ve 9. maddelerine uygun şekilde, aşağıdaki taraflara aktarılabilir:</p>
+<ul>
+<li><strong>Anlaşmalı Sigorta Şirketleri:</strong> Anadolu Sigorta, Allianz, AXA, Türkiye Sigorta, HDI, Quick Sigorta, Neova, Ak Sigorta, Doğa Sigorta vb. (poliçe düzenlenmesi amacıyla)</li>
+<li><strong>Sigorta Bilgi ve Gözetim Merkezi (SBM):</strong> Yasal yükümlülük gereği</li>
+<li><strong>Hazine ve Maliye Bakanlığı:</strong> Mevzuat gereği</li>
+<li><strong>Yetkili Kamu Kurumları ve Yargı Mercileri:</strong> Yasal talep halinde</li>
+<li><strong>Hizmet Aldığımız Tedarikçiler:</strong> IT altyapısı, hosting, e-posta gönderim hizmetleri</li>
+<li><strong>Hukuk Müşavirleri ve Bağımsız Denetçiler:</strong> Hukuki süreçlerde gerektiği ölçüde</li>
+</ul>
+
+<h3>5. Kişisel Veri İşlemenin Hukuki Sebepleri</h3>
+<p>Kişisel verileriniz aşağıdaki hukuki sebeplere dayanılarak işlenmektedir:</p>
+<ul>
+<li><strong>Kanunlarda açıkça öngörülmesi</strong> (5684 sayılı Sigortacılık Kanunu, KVKK)</li>
+<li><strong>Sözleşmenin kurulması veya ifası</strong> (sigorta aracılık sözleşmesi)</li>
+<li><strong>Veri sorumlusunun hukuki yükümlülüğünü yerine getirebilmesi</strong></li>
+<li><strong>Bir hakkın tesisi, kullanılması veya korunması</strong></li>
+<li><strong>Açık rızanız</strong> (özel nitelikli kişisel veriler ve pazarlama amaçlı kullanımlar için)</li>
+</ul>
+
+<h3>6. KVKK Kapsamındaki Haklarınız</h3>
+<p>KVKK&rsquo;nın 11. maddesi uyarınca, veri sorumlusu olarak Mizan Sigorta&rsquo;ya başvurarak:</p>
+<ul>
+<li>Kişisel verilerinizin işlenip işlenmediğini öğrenme,</li>
+<li>İşlenmişse buna ilişkin bilgi talep etme,</li>
+<li>İşlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme,</li>
+<li>Yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme,</li>
+<li>Eksik veya yanlış işlenmişse düzeltilmesini isteme,</li>
+<li>KVKK&rsquo;da öngörülen şartlar çerçevesinde silinmesini veya yok edilmesini isteme,</li>
+<li>Düzeltme/silme/yok etme işlemlerinin verilerin aktarıldığı üçüncü kişilere bildirilmesini isteme,</li>
+<li>Otomatik sistemlerle analiz edilmesi sonucu aleyhinize bir sonuç çıkmasına itiraz etme,</li>
+<li>Kanuna aykırı işleme nedeniyle uğradığınız zararın giderilmesini talep etme</li>
+</ul>
+<p>haklarına sahipsiniz.</p>
+
+<h3>7. Başvuru Yöntemi</h3>
+<p>Yukarıdaki haklarınızı kullanmak için, aşağıdaki yöntemlerden biriyle başvuruda bulunabilirsiniz:</p>
+<ul>
+<li><strong>E-posta:</strong> kvkk@mizansigorta.com.tr (güvenli elektronik imzalı)</li>
+<li><strong>Posta:</strong> Fetih Mah. Libadiye Cad. Tahralı Sok. Kavakyeli İş Merkezi D-Blok K:9 D:24 ATAŞEHİR / İSTANBUL (ıslak imzalı dilekçe ile)</li>
+<li><strong>Noter Kanalıyla:</strong> Yukarıdaki adrese noter aracılığıyla</li>
+</ul>
+<p>Başvurunuz, talebin niteliğine göre en kısa sürede ve en geç <strong>30 gün içinde</strong> ücretsiz olarak sonuçlandırılacaktır. İşlemin ayrıca bir maliyet gerektirmesi halinde KVKK Kurulu&rsquo;nun belirlediği tarifedeki ücret talep edilebilir.</p>
+
+<h3>8. Veri Saklama Süresi</h3>
+<p>Kişisel verileriniz, ilgili mevzuatta öngörülen veya işleme amacının gerektirdiği süreler boyunca saklanır. Saklama süreleri sona erdiğinde verileriniz, KVKK ve ilgili yönetmelikler çerçevesinde silinir, yok edilir veya anonim hale getirilir. Sigortacılık mevzuatı gereği genel saklama süresi <strong>10 yıldır</strong>.</p>
+
+<h3>9. Güncellemeler</h3>
+<p>İşbu Aydınlatma Metni, ilgili mevzuat veya iş süreçlerimizdeki değişiklikler doğrultusunda güncellenebilir. Güncel metni daima web sitemizde bulabilirsiniz.</p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>' WHERE `slug` = 'kvkk' AND CHAR_LENGTH(`icerik`) < 800;
+UPDATE `mz_sayfalar` SET `icerik` = '<div class="mz-prose">
+<p class="lead">Mizan Sigorta Aracılık Hizmetleri olarak, müşterilerimizin ve web sitemizi ziyaret eden kullanıcılarımızın gizliliğine saygı duyuyoruz. Bu Gizlilik Politikası, kişisel bilgilerinizin nasıl toplandığını, kullanıldığını ve korunduğunu açıklamaktadır.</p>
+
+<h3>1. Toplanan Bilgiler</h3>
+<p>Web sitemiz üzerinden veya hizmetlerimiz vesilesiyle aşağıdaki tür bilgileri toplayabiliriz:</p>
+<ul>
+<li><strong>Doğrudan sağladığınız bilgiler:</strong> İletişim formları, teklif başvuruları, müşteri kayıt formları, hasar bildirim formları üzerinden ilettiğiniz bilgiler.</li>
+<li><strong>Otomatik olarak toplanan bilgiler:</strong> IP adresi, tarayıcı türü, ziyaret edilen sayfalar, ziyaret süresi ve çerez verileri.</li>
+<li><strong>Üçüncü taraflardan elde edilen bilgiler:</strong> Anlaşmalı sigorta şirketleri ile yürüttüğümüz iş süreçleri kapsamında elde edilen bilgiler.</li>
+</ul>
+
+<h3>2. Bilgilerin Kullanımı</h3>
+<p>Topladığımız bilgileri yalnızca aşağıdaki amaçlarla kullanırız:</p>
+<ul>
+<li>Sigorta tekliflerinin hazırlanması ve hizmet sunumu,</li>
+<li>Müşteri ilişkilerinin yönetimi,</li>
+<li>Hasar süreçlerinin yönetimi,</li>
+<li>Yasal ve düzenleyici yükümlülüklerin yerine getirilmesi,</li>
+<li>Web sitesi performansının analizi ve iyileştirilmesi,</li>
+<li>Açık rızanız varsa pazarlama ve bilgilendirme iletişimleri.</li>
+</ul>
+
+<h3>3. Bilgilerin Korunması</h3>
+<p>Mizan Sigorta, kişisel bilgilerinizin güvenliğini sağlamak için endüstri standartlarında teknik ve idari tedbirleri uygulamaktadır:</p>
+<ul>
+<li>SSL şifrelemeli güvenli veri aktarımı (HTTPS),</li>
+<li>Erişim kontrolü ve yetkilendirme sistemleri,</li>
+<li>Düzenli güvenlik denetimleri,</li>
+<li>Veri yedekleme ve felaket kurtarma planları,</li>
+<li>Çalışan eğitimleri ve gizlilik sözleşmeleri,</li>
+<li>Şifre güvenliği ve iki faktörlü doğrulama (2FA) altyapısı.</li>
+</ul>
+
+<h3>4. Bilgi Paylaşımı</h3>
+<p>Kişisel bilgileriniz <strong>hiçbir koşulda satılmaz, kiralanmaz veya pazarlanmaz</strong>. Bilgileriniz yalnızca aşağıdaki durumlarda paylaşılabilir:</p>
+<ul>
+<li>Hizmet sunmak için gerekli olan anlaşmalı sigorta şirketleri ile,</li>
+<li>Yasal zorunluluklar gereği yetkili kamu kurumları ile (Hazine ve Maliye Bakanlığı, SBM, MASAK, mahkemeler vb.),</li>
+<li>Açık rızanızla belirttiğiniz üçüncü taraflarla.</li>
+</ul>
+
+<h3>5. Çerezler (Cookies)</h3>
+<p>Web sitemiz çerezler kullanmaktadır. Çerezler hakkında detaylı bilgi için <a href="/v2/sayfa/cerez-politikasi">Çerez Politikamızı</a> inceleyebilirsiniz.</p>
+
+<h3>6. Üçüncü Taraf Bağlantıları</h3>
+<p>Web sitemiz, üçüncü taraf web sitelerine bağlantılar içerebilir. Mizan Sigorta, bu sitelerin gizlilik uygulamalarından sorumlu değildir. Söz konusu sitelerin gizlilik politikalarını ayrıca incelemenizi öneririz.</p>
+
+<h3>7. Çocukların Gizliliği</h3>
+<p>Web sitemiz 18 yaşın altındaki bireylere yönelik olarak tasarlanmamıştır. 18 yaşın altındaki kişilerden bilerek kişisel veri toplamayız. 18 yaşın altında olduğunu bildiğimiz bir kişiden veri toplandığını fark edersek, söz konusu verileri derhal sileriz.</p>
+
+<h3>8. Gizlilik Politikasında Değişiklikler</h3>
+<p>Bu Gizlilik Politikası zaman zaman güncellenebilir. Güncel sürüm her zaman web sitemizde yayınlanır. Önemli değişikliklerde sizleri ayrıca bilgilendireceğiz.</p>
+
+<h3>9. İletişim</h3>
+<p>Gizlilik Politikamız ile ilgili soru, görüş veya endişelerinizi <strong>info@mizansigorta.com.tr</strong> adresine veya yukarıda belirtilen iletişim kanallarımızdan birine iletebilirsiniz.</p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>' WHERE `slug` = 'gizlilik-politikasi' AND CHAR_LENGTH(`icerik`) < 800;
+UPDATE `mz_sayfalar` SET `icerik` = '<div class="mz-prose">
+<p class="lead">Bu Çerez Politikası, Mizan Sigorta Aracılık Hizmetleri (&ldquo;Mizan Sigorta&rdquo;) tarafından işletilen <strong>mizansigorta.com.tr</strong> web sitesinde kullanılan çerezler hakkında sizi bilgilendirmek amacıyla hazırlanmıştır.</p>
+
+<h3>1. Çerez (Cookie) Nedir?</h3>
+<p>Çerezler, ziyaret ettiğiniz web sitelerinin tarayıcınız üzerinden cihazınıza yerleştirdiği küçük metin dosyalarıdır. Çerezler, sitenin çalışması, kullanıcı deneyimini iyileştirilmesi ve trafik analizi gibi amaçlarla kullanılır.</p>
+
+<h3>2. Kullandığımız Çerez Türleri</h3>
+
+<h5>a) Zorunlu Çerezler</h5>
+<p>Web sitesinin temel işlevlerini yerine getirmesi için gereklidir. Devre dışı bırakılamazlar. Örnekler:</p>
+<ul>
+<li>Oturum çerezleri (giriş/çıkış işlemleri)</li>
+<li>Güvenlik çerezleri (CSRF token)</li>
+<li>Form doldurma sırasındaki geçici veri çerezleri</li>
+</ul>
+
+<h5>b) Performans / Analitik Çerezleri</h5>
+<p>Ziyaretçilerin siteyi nasıl kullandığını anlamamızı sağlayan çerezlerdir. Tüm bilgiler anonim olarak toplanır.</p>
+<ul>
+<li>Sayfa görüntüleme sayıları</li>
+<li>Ziyaret süresi ve yolculuğu</li>
+<li>Hata raporlama</li>
+</ul>
+
+<h5>c) İşlevsel Çerezler</h5>
+<p>Tercihlerinizi (dil seçimi, çerez onayı vb.) hatırlamak için kullanılır.</p>
+
+<h5>d) Hedefleme/Pazarlama Çerezleri</h5>
+<p>İlgi alanlarınıza yönelik içerik göstermek amacıyla kullanılır. Yalnızca açık rızanızla aktif edilir.</p>
+
+<h3>3. Çerez Yönetimi</h3>
+<p>Çerez tercihlerinizi istediğiniz zaman değiştirebilirsiniz:</p>
+<ul>
+<li>Web sitemizdeki çerez bandındaki <strong>&ldquo;Tercihleri Yönet&rdquo;</strong> seçeneğini kullanarak,</li>
+<li>Tarayıcınızın ayarlarından çerezleri kabul etmeyi reddedebilir veya bazı çerezleri silebilirsiniz.</li>
+</ul>
+
+<p>Tarayıcı bazlı çerez yönetimi adresleri:</p>
+<ul>
+<li><a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener">Google Chrome</a></li>
+<li><a href="https://support.mozilla.org/tr/kb/cerezler-web-sitelerinin-bilgisayariniza-koyduklari" target="_blank" rel="noopener">Mozilla Firefox</a></li>
+<li><a href="https://support.microsoft.com/tr-tr/microsoft-edge" target="_blank" rel="noopener">Microsoft Edge</a></li>
+<li><a href="https://support.apple.com/tr-tr/safari" target="_blank" rel="noopener">Safari</a></li>
+</ul>
+
+<p><strong>Önemli:</strong> Çerezleri tamamen devre dışı bırakırsanız web sitemizin bazı bölümleri düzgün çalışmayabilir.</p>
+
+<h3>4. Üçüncü Taraf Çerezleri</h3>
+<p>Web sitemizde, hizmet sağlayıcılar tarafından sağlanan bazı üçüncü taraf çerezler bulunabilir:</p>
+<ul>
+<li>Google Maps (iletişim sayfasındaki harita için)</li>
+<li>Bootstrap CDN ve font kaynakları</li>
+<li>Sosyal medya entegrasyonları (paylaşım butonları)</li>
+</ul>
+
+<h3>5. Çerez Saklama Süreleri</h3>
+<table class="table table-sm table-bordered mt-2">
+<thead><tr><th>Çerez Türü</th><th>Süre</th></tr></thead>
+<tbody>
+<tr><td>Oturum çerezleri</td><td>Tarayıcı kapatılana kadar</td></tr>
+<tr><td>Çerez onay çerezi</td><td>12 ay</td></tr>
+<tr><td>Analitik çerezler</td><td>24 ay</td></tr>
+<tr><td>İşlevsel çerezler</td><td>12 ay</td></tr>
+</tbody>
+</table>
+
+<h3>6. Politika Güncellemeleri</h3>
+<p>Bu Çerez Politikası, gerektiğinde güncellenebilir. Güncel sürüm her zaman bu sayfada yayınlanır.</p>
+
+<h3>7. İletişim</h3>
+<p>Çerez politikamız hakkında soru ve görüşleriniz için: <strong>info@mizansigorta.com.tr</strong></p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>' WHERE `slug` = 'cerez-politikasi' AND CHAR_LENGTH(`icerik`) < 800;
+UPDATE `mz_sayfalar` SET `icerik` = '<div class="mz-prose">
+<p class="lead">Bu Kullanım Şartları, Mizan Sigorta Aracılık Hizmetleri (&ldquo;Mizan Sigorta&rdquo; veya &ldquo;Şirket&rdquo;) tarafından işletilen <strong>mizansigorta.com.tr</strong> web sitesinin kullanımına ilişkin koşulları belirler. Web sitemizi kullanarak bu şartları kabul etmiş sayılırsınız.</p>
+
+<h3>1. Tanımlar</h3>
+<ul>
+<li><strong>Site:</strong> mizansigorta.com.tr alan adı altında yayınlanan tüm sayfalar ve içerikler.</li>
+<li><strong>Kullanıcı:</strong> Siteyi ziyaret eden, bilgi alan, teklif talep eden veya hizmetlerden yararlanan gerçek/tüzel kişiler.</li>
+<li><strong>İçerik:</strong> Site üzerinde yer alan metin, görsel, kod, logo, marka ve diğer her türlü materyal.</li>
+</ul>
+
+<h3>2. Hizmet Kapsamı</h3>
+<p>Mizan Sigorta, 5684 sayılı Sigortacılık Kanunu çerçevesinde sigorta aracılık (acentecilik) hizmeti sunmaktadır. Site üzerinden:</p>
+<ul>
+<li>Sigorta ürünleri hakkında bilgi sunulur,</li>
+<li>Teklif talebi alınır,</li>
+<li>Müşteri iletişim ve destek sağlanır,</li>
+<li>Hasar süreçleri yönetilir.</li>
+</ul>
+
+<p>Sitedeki bilgiler bilgilendirme amaçlıdır; bağlayıcı sigorta sözleşmesi yerine geçmez. Kesin teminat ve şartlar, ilgili sigorta şirketinin düzenlediği poliçede belirtilir.</p>
+
+<h3>3. Kullanım Kuralları</h3>
+<p>Web sitemizi kullanırken aşağıdaki kurallara uymanız gerekmektedir:</p>
+<ul>
+<li>Doğru, güncel ve eksiksiz bilgi sağlamak,</li>
+<li>Yetkisiz erişim girişiminde bulunmamak,</li>
+<li>Site altyapısına zarar verecek faaliyetlerde bulunmamak (DDoS, exploit, SQL injection vb.),</li>
+<li>Telif haklı içerikleri izinsiz kopyalamamak veya yeniden yayınlamamak,</li>
+<li>Başka kullanıcıların haklarına saygı göstermek,</li>
+<li>Türkiye Cumhuriyeti yasalarına ve uluslararası yasalara uygun davranmak.</li>
+</ul>
+
+<h3>4. Fikri Mülkiyet Hakları</h3>
+<p>Sitedeki tüm içerik (metin, görsel, marka, logo, tasarım, kod), Mizan Sigorta&rsquo;ya veya lisans alanlarına aittir ve telif hakkı yasaları ile korunmaktadır. Önceden yazılı izin alınmadıkça hiçbir içerik kopyalanamaz, dağıtılamaz veya ticari amaçla kullanılamaz.</p>
+
+<h3>5. Sorumluluk Sınırlamaları</h3>
+<p>Mizan Sigorta:</p>
+<ul>
+<li>Sitedeki bilgilerin daima güncel ve hatasız olduğunu garanti etmez,</li>
+<li>Sitenin kesintisiz veya hatasız çalışacağını taahhüt etmez,</li>
+<li>Üçüncü taraf hizmetleri (Google Maps vb.) için sorumluluk taşımaz,</li>
+<li>Force majeure (deprem, savaş, salgın, siber saldırı vb.) durumlarda hizmet kesintilerinden sorumlu tutulamaz.</li>
+</ul>
+
+<p>Sitedeki bilgilere dayanarak alınan kararlardan kullanıcı kendisi sorumludur. Kesin sigorta kararı için poliçeyi ve mevzuatı incelemeniz önerilir.</p>
+
+<h3>6. Hesap Güvenliği</h3>
+<p>Eğer Mizan Sigorta&rsquo;da müşteri kaydınız varsa:</p>
+<ul>
+<li>Şifrenizi gizli tutmak ve düzenli güncellemek sizin sorumluluğunuzdadır,</li>
+<li>Hesabınızdan yapılan tüm işlemlerden siz sorumlusunuz,</li>
+<li>Yetkisiz erişim şüphesinde derhal bize bildirmelisiniz.</li>
+</ul>
+
+<h3>7. Üçüncü Taraf Bağlantıları</h3>
+<p>Site, üçüncü taraf web sitelerine bağlantılar içerebilir. Bu sitelerin içeriği, gizlilik politikası veya hizmetlerinden Mizan Sigorta sorumlu değildir.</p>
+
+<h3>8. Şartlarda Değişiklik</h3>
+<p>Mizan Sigorta, bu Kullanım Şartlarını dilediği zaman değiştirme hakkını saklı tutar. Değişiklikler bu sayfada yayınlandığı andan itibaren geçerli olur. Önemli değişikliklerde mevcut müşterilerimizi e-posta ile bilgilendiririz.</p>
+
+<h3>9. Uygulanacak Hukuk ve Yetki</h3>
+<p>Bu Kullanım Şartları Türkiye Cumhuriyeti yasalarına tabidir. Doğacak tüm uyuşmazlıklarda <strong>İstanbul (Anadolu) Mahkemeleri ve İcra Daireleri</strong> yetkilidir.</p>
+
+<h3>10. İletişim</h3>
+<p>Kullanım Şartları ile ilgili soru ve görüşleriniz için:<br>
+<strong>E-posta:</strong> info@mizansigorta.com.tr<br>
+<strong>Telefon:</strong> +90 332 000 00 00<br>
+<strong>Adres:</strong> Fetih Mah. Libadiye Cad. Tahralı Sok. Kavakyeli İş Merkezi D-Blok K:9 D:24 ATAŞEHİR / İSTANBUL</p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>' WHERE `slug` = 'kullanim-sartlari' AND CHAR_LENGTH(`icerik`) < 800;
+UPDATE `mz_sayfalar` SET `icerik` = '<div class="mz-prose">
+<p class="lead">İşbu Üye Aydınlatma Metni, web sitemiz üzerinden teklif başvurusu, iletişim formu doldurma veya kullanıcı kaydı yaptırma yoluyla bizlere ilettiğiniz kişisel verilerinizin işlenmesi süreçlerinde sizleri aydınlatmak amacıyla hazırlanmıştır.</p>
+
+<h3>1. Hangi Verileriniz İşlenir?</h3>
+<p>Web sitemizdeki form ve iletişim kanalları aracılığıyla:</p>
+<ul>
+<li>Ad, soyad, firma adı (kurumsal müşteriler için)</li>
+<li>Telefon, e-posta, adres bilgileri</li>
+<li>Sigorta talep konusu, açıklama, mesaj içerikleri</li>
+<li>IP adresi ve oturum bilgisi (güvenlik amacıyla)</li>
+</ul>
+
+<h3>2. Hangi Amaçla İşlenir?</h3>
+<ul>
+<li>Sigorta teklifi hazırlanması ve sunulması,</li>
+<li>Tarafınızla iletişim kurulması,</li>
+<li>Mesajınıza/talebinize yanıt verilmesi,</li>
+<li>Müşteri kaydı oluşturulması (talep ederseniz),</li>
+<li>Yasal yükümlülüklerin yerine getirilmesi,</li>
+<li>Bilgi güvenliği süreçlerinin yürütülmesi.</li>
+</ul>
+
+<h3>3. Hangi Hukuki Sebebe Dayanır?</h3>
+<p>Verileriniz; sözleşmenin kurulması veya ifası için zorunlu olması (KVKK m.5/2-c), Mizan Sigorta&rsquo;nın meşru menfaatleri (KVKK m.5/2-f) ve açık rızanız (KVKK m.5/1) hukuki sebeplerine dayanılarak işlenir.</p>
+
+<h3>4. Aktarılır mı?</h3>
+<p>Verileriniz; teklif ürettiğimiz anlaşmalı sigorta şirketleri, yasal yükümlülükler kapsamında yetkili kamu kurumları ve iş süreçlerimizi yürüten hizmet tedarikçileri ile sınırlı olarak paylaşılabilir.</p>
+
+<h3>5. Saklama Süresi</h3>
+<p>Sigortacılık mevzuatı gereği genel saklama süresi 10 yıldır. Talep ettiğiniz hizmet sonuçlanmazsa veriler 1 yıl içinde silinir veya anonimleştirilir.</p>
+
+<h3>6. Haklarınız</h3>
+<p>KVKK&rsquo;nın 11. maddesi kapsamındaki tüm haklarınız (bilgi alma, düzeltme, silme vb.) için <strong>kvkk@mizansigorta.com.tr</strong> adresine başvurabilirsiniz. Detaylı bilgi için <a href="/v2/sayfa/kvkk">KVKK Aydınlatma Metnimizi</a> inceleyiniz.</p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>' WHERE `slug` = 'uye-aydinlatma' AND CHAR_LENGTH(`icerik`) < 500;
+UPDATE `mz_sayfalar` SET `icerik` = '<div class="mz-prose">
+<p class="lead">İşbu Açık Rıza Metni, Mizan Sigorta Aracılık Hizmetleri tarafından kişisel verilerinizin 6698 sayılı Kişisel Verilerin Korunması Kanunu (&ldquo;KVKK&rdquo;) kapsamında açık rızaya tabi olarak işlenmesi durumunda alınan onayınızı belgelemek üzere hazırlanmıştır.</p>
+
+<h3>1. Açık Rıza Kapsamı</h3>
+<p>Aşağıdaki işlemler için <strong>ayrı ayrı</strong> açık rıza alınmaktadır:</p>
+
+<h5>a) Pazarlama ve Bilgilendirme İletişimi</h5>
+<p>Tarafınıza:</p>
+<ul>
+<li>Sigorta ürünlerine ilişkin promosyon ve kampanya bilgileri,</li>
+<li>Yeni ürün ve hizmet duyuruları,</li>
+<li>Sektörel bilgilendirmeler ve haber bültenleri,</li>
+<li>Anket ve memnuniyet ölçümü çağrıları</li>
+</ul>
+<p>için e-posta, SMS veya telefon yoluyla iletişim kurulmasına onay vermeniz halinde, söz konusu iletişim faaliyetleri yürütülecektir.</p>
+
+<h5>b) Özel Nitelikli Kişisel Verilerin İşlenmesi</h5>
+<p>Sağlık sigortası başvurularında, KVKK m.6 kapsamında özel nitelikli kişisel veri sayılan sağlık verilerinizin işlenmesi açık rızanıza tabidir.</p>
+
+<h5>c) Veri Aktarımı</h5>
+<p>Yurt içindeki anlaşmalı sigorta şirketlerine sözleşme kurulması ve ifası için aktarım sözleşme kapsamında değerlendirilse de; pazarlama amaçlı paylaşım için açık rıza alınır.</p>
+
+<h3>2. Rızanın Geri Alınması</h3>
+<p>Verdiğiniz açık rızayı dilediğiniz zaman, herhangi bir gerekçe göstermeden geri alabilirsiniz. Bu durumda:</p>
+<ul>
+<li>İlgili işleme faaliyeti durdurulur,</li>
+<li>Pazarlama listelerinden çıkarılırsınız,</li>
+<li>Geri alma tarihinden önceki yasal işlemler etkilenmez.</li>
+</ul>
+
+<h3>3. Rıza Geri Alma Yöntemleri</h3>
+<ul>
+<li><strong>E-posta:</strong> kvkk@mizansigorta.com.tr (&ldquo;Açık rızamı geri alıyorum&rdquo; konusu ile)</li>
+<li><strong>Posta:</strong> Yukarıdaki adresimize ıslak imzalı dilekçe</li>
+<li><strong>Pazarlama bültenleri için:</strong> E-postadaki &ldquo;abonelikten çık&rdquo; bağlantısı</li>
+</ul>
+
+<h3>4. Önemli Bilgiler</h3>
+<ul>
+<li>Açık rıza vermek <strong>tamamen isteğe bağlıdır</strong>; rıza vermemeniz hizmet alma hakkınızı etkilemez.</li>
+<li>Rıza geri alındıktan sonra verileriniz, mevzuatın gerektirmediği sürece silinir veya anonim hale getirilir.</li>
+<li>Rıza alınmasına rağmen, mevzuat gereği saklanması zorunlu olan veriler ilgili sürelerin sonuna kadar muhafaza edilir.</li>
+</ul>
+
+<h3>5. İletişim</h3>
+<p>Açık Rıza Metni hakkında soru ve görüşleriniz için: <strong>kvkk@mizansigorta.com.tr</strong></p>
+
+<p class="text-muted small mt-4"><em>Son güncelleme tarihi: 2026</em></p>
+</div>' WHERE `slug` = 'acik-riza' AND CHAR_LENGTH(`icerik`) < 500;
+
+-- ====================================================
+-- v1.1.2 - 12+ Anlasmali sigorta sirketleri seed
+-- ====================================================
+INSERT IGNORE INTO `mz_sigorta_sirketleri` (`ad`, `web_sitesi`, `aciklama`, `aktif`) VALUES
+('Anadolu Sigorta', 'https://www.anadolusigorta.com.tr', 'Türkiye''nin köklü ve güçlü sigorta şirketi.', 1),
+('Allianz Sigorta', 'https://www.allianz.com.tr', 'Global ölçekte güvenilir Alman sigorta devi.', 1),
+('AXA Sigorta', 'https://www.axasigorta.com.tr', 'Avrupa''nın önde gelen sigorta şirketlerinden.', 1),
+('Türkiye Sigorta', 'https://www.turkiyesigorta.com.tr', 'Türkiye''nin yerli ve milli sigorta şirketi.', 1),
+('HDI Sigorta', 'https://www.hdisigorta.com.tr', 'Köklü Alman sigorta grubu, Türkiye''de güvenilir hizmet.', 1),
+('Quick Sigorta', 'https://www.quicksigorta.com', 'Hızlı ve dijital sigortacılığın öncüsü.', 1),
+('Neova Sigorta', 'https://www.neova.com.tr', 'Yenilikçi sigorta çözümleri sunan kurum.', 1),
+('Ak Sigorta', 'https://www.aksigorta.com.tr', 'Sabancı Holding bünyesinde köklü sigorta şirketi.', 1),
+('Doğa Sigorta', 'https://www.dogasigorta.com', 'Türk sermayeli, çevre dostu sigorta yaklaşımı.', 1),
+('Atlas Sigorta', 'https://www.atlassigorta.com', 'Ihracat/ithalat odaklı sigorta deneyimi.', 1),
+('Corpus Sigorta', 'https://www.corpussigorta.com.tr', 'Kurumsal sigorta çözümlerinde deneyimli.', 1),
+('Magdeburger Sigorta', 'https://www.magdeburger.com.tr', 'Köklü Alman kökenli sigorta deneyimi.', 1),
+('Mapfre Sigorta', 'https://www.mapfre.com.tr', 'Global İspanyol kökenli sigorta grubu.', 1),
+('Ray Sigorta', 'https://www.raysigorta.com.tr', 'Türk-Avusturya ortaklığı, geniş ürün yelpazesi.', 1),
+('Sompo Sigorta', 'https://www.sompo.com.tr', 'Japon kökenli, kurumsal güçlü yapı.', 1);
