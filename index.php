@@ -43,6 +43,7 @@ $routes = [
     '#^/teklif-tesekkur$#'           => 'teklif-tesekkur.php',
     '#^/hasar-ihbari$#'              => 'hasar.php',
     '#^/iletisim$#'                  => 'iletisim.php',
+    '#^/temsilcimiz-olun$#'          => 'temsilcimiz-olun.php',
     '#^/sss$#'                       => 'sss.php',
     '#^/blog$#'                      => 'blog-list.php',
     '#^/blog/([a-z0-9\-]+)$#'        => 'blog-detay.php',

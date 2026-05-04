@@ -1,5 +1,5 @@
 <?php if (!defined('MIZAN_BOOT')) { http_response_code(403); exit; }
-$footerUrunler = $footerUrunler ?? db_all('SELECT slug, baslik FROM ' . t('urunler') . " WHERE aktif=1 ORDER BY sira ASC LIMIT 8");
+$footerUrunler = $footerUrunler ?? db_all('SELECT slug, baslik FROM ' . t('urunler') . " WHERE aktif=1 AND parent_id IS NULL ORDER BY sira ASC LIMIT 9");
 $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfalar') . ' WHERE aktif=1 ORDER BY menu_sirasi ASC LIMIT 8');
 ?>
 </main>
@@ -38,6 +38,7 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
           <li><a href="<?= u('/blog') ?>">Blog</a></li>
           <li><a href="<?= u('/sss') ?>">S.S.S.</a></li>
           <li><a href="<?= u('/iletisim') ?>">İletişim</a></li>
+          <li class="mt-2"><a href="<?= u('/temsilcimiz-olun') ?>" style="color:var(--mz-red);font-weight:600"><i class="bi bi-stars"></i> Temsilcimiz Olun</a></li>
         </ul>
       </div>
       <div class="col-md-3">

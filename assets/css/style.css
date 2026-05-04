@@ -33,7 +33,7 @@ main { flex: 1; }
 /* ---------- Navbar ---------- */
 .mz-navbar { background: var(--mz-dark); border-bottom: 3px solid var(--mz-red); padding: .55rem 0; }
 .mz-navbar .navbar-brand { color: #fff !important; padding: 0; display: inline-flex; align-items: center; }
-.mz-navbar .navbar-brand img { display: block; height: 44px; width: auto; }
+.mz-navbar .navbar-brand img { display: block; height: 55px; width: auto; }
 .mz-navbar .nav-link { color: rgba(255,255,255,.85) !important; font-weight: 500; padding: .5rem 1rem !important; border-radius: 6px; transition: all .15s; }
 .mz-navbar .nav-link:hover, .mz-navbar .nav-link.active { color: var(--mz-red) !important; background: rgba(255,255,255,.05); }
 .mz-navbar .navbar-toggler { border-color: rgba(255,255,255,.3); }
@@ -176,3 +176,31 @@ main { flex: 1; }
 .bg-warning, .bg-warning-subtle { background: var(--mz-red-soft) !important; }
 .border-warning { border-color: var(--mz-red) !important; }
 .badge.bg-warning { background: var(--mz-red) !important; color: #fff !important; }
+
+/* ---------- Marka Slogan (Guven ve Ozen Ile) - dekoratif el yazisi ---------- */
+.mz-script { font-family: 'Allura', 'Pinyon Script', 'Brush Script MT', cursive; font-weight: 400; font-style: normal; line-height: 1; }
+.mz-script-lg { font-size: 2.5rem; }
+.mz-script-md { font-size: 1.75rem; }
+.mz-script-sm { font-size: 1.25rem; }
+.mz-script-red { color: var(--mz-red); }
+.mz-script-light { color: rgba(255,255,255,.92); }
+
+/* ---------- Hero v2 (gelismiş Teklif Al kartı) ---------- */
+.mz-hero-quote { background: #fff; border-radius: 16px; box-shadow: 0 25px 60px rgba(0,0,0,.25); padding: 2rem; position: relative; overflow: hidden; }
+.mz-hero-quote::before { content: ''; position: absolute; top: -3px; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, var(--mz-red), var(--mz-red-2), var(--mz-red)); }
+.mz-hero-quote-head { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; }
+.mz-hero-quote-icon { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--mz-red), var(--mz-red-2)); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0; box-shadow: 0 6px 20px var(--mz-red-glow); }
+.mz-hero-quote-title { color: var(--mz-navy); font-weight: 800; font-size: 1.15rem; line-height: 1.1; }
+.mz-hero-quote-sub { color: var(--mz-muted); font-size: .82rem; }
+.mz-hero-quote .form-control, .mz-hero-quote .form-select { border-radius: 10px; padding: .85rem 1rem; font-size: .98rem; border: 2px solid #e5e7eb; transition: all .15s; }
+.mz-hero-quote .form-control:focus, .mz-hero-quote .form-select:focus { border-color: var(--mz-red); box-shadow: 0 0 0 4px var(--mz-red-glow); }
+.mz-hero-quote .btn-warning { padding: 1rem; border-radius: 10px; font-size: 1.05rem; font-weight: 700; }
+
+/* Adim gostergesi (multi-step Teklif Al) */
+.mz-steps { display: flex; gap: .5rem; margin-bottom: 1.5rem; }
+.mz-step { flex: 1; height: 6px; border-radius: 3px; background: #e5e7eb; transition: background .25s; }
+.mz-step.on { background: var(--mz-red); }
+.mz-step.done { background: var(--mz-red-2); }
+
+/* Trust badges (KVKK, BDDK vb.) */
+.mz-trust-badge { display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .65rem; background: rgba(227,11,48,.08); color: var(--mz-red); border-radius: 100px; font-size: .75rem; font-weight: 600; }

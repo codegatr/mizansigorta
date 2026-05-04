@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$errors) {
             db_exec(
                 'INSERT INTO ' . t('iletisim_mesajlari') .
-                ' (ad_soyad, email, telefon, konu, mesaj, ip, user_agent, olusturma_tarihi)
+                ' (ad_soyad, email, telefon, konu, mesaj, ip_adresi, user_agent, olusturma_tarihi)
                   VALUES (?,?,?,?,?,?,?,NOW())',
                 [$ad, $email, normalize_phone($tel), $konu, $msg, client_ip(), substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)]
             );
@@ -93,6 +93,38 @@ require MIZAN_INC . '/header.php';
         <small class="text-muted"><?= e(setting('calisma_saatleri', 'Pzt-Cum 09:00-18:00')) ?></small>
       </div>
     </div>
+  </div>
+
+  <!-- 4 Sube Adresleri -->
+  <div class="text-center mb-4">
+    <span class="mz-script mz-script-md mz-script-red d-inline-block mb-1">Şubelerimiz</span>
+    <h3 class="fw-bold">4 Şehirde, Yanınızda</h3>
+  </div>
+  <div class="row g-3 mb-5">
+    <?php
+    $subeler = [
+        ['key' => 'istanbul_adres', 'sehir' => 'İstanbul', 'badge' => 'Genel Merkez'],
+        ['key' => 'konya_adres',    'sehir' => 'Konya',    'badge' => null],
+        ['key' => 'ankara_adres',   'sehir' => 'Ankara',   'badge' => null],
+        ['key' => 'aksaray_adres',  'sehir' => 'Aksaray',  'badge' => null],
+    ];
+    foreach ($subeler as $s):
+        $adr = setting($s['key']);
+        if (!$adr) continue;
+    ?>
+      <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <h6 class="fw-bold mb-0 text-warning"><i class="bi bi-geo-alt-fill"></i> <?= e($s['sehir']) ?></h6>
+              <?php if ($s['badge']): ?><span class="badge bg-warning text-dark"><?= e($s['badge']) ?></span><?php endif; ?>
+            </div>
+            <p class="small text-muted mb-2"><?= nl2br(e($adr)) ?></p>
+            <a href="https://www.google.com/maps/search/<?= rawurlencode($adr) ?>" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-map"></i> Haritada Göster</a>
+          </div>
+        </div>
+      </div>
+    <?php endforeach; ?>
   </div>
 
   <div class="row g-4">

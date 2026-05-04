@@ -4,7 +4,7 @@ $pageTitle  = $pageTitle  ?? setting('site_basligi', SITE_NAME);
 $pageDesc   = $pageDesc   ?? setting('site_aciklamasi', '');
 $pageKeys   = $pageKeys   ?? setting('site_anahtar_kelimeler', '');
 $canonical  = $canonical  ?? (SITE_BASE_URL . ($_SERVER['REQUEST_URI'] ?? '/'));
-$urunlerNav = db_all('SELECT slug, baslik FROM ' . t('urunler') . " WHERE aktif=1 ORDER BY sira ASC LIMIT 12");
+$urunlerNav = db_all('SELECT id, slug, baslik, icon FROM ' . t('urunler') . ' WHERE aktif=1 AND parent_id IS NULL ORDER BY sira ASC LIMIT 12');
 $cmsNav     = db_all('SELECT slug, baslik FROM ' . t('sayfalar') . ' WHERE aktif=1 AND menude_goster=1 ORDER BY menu_sirasi ASC');
 $tel        = setting('telefon');
 $wa         = setting('whatsapp');
@@ -21,8 +21,11 @@ $wa         = setting('whatsapp');
 <meta property="og:description" content="<?= e($pageDesc) ?>">
 <meta property="og:type" content="website">
 <meta property="og:url"  content="<?= e($canonical) ?>">
-<meta name="theme-color" content="#0d1b2a">
+<meta name="theme-color" content="#0f1e37">
 <link rel="icon" href="<?= asset('assets/img/favicon.svg') ?>" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Allura&family=Pinyon+Script&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
@@ -56,10 +59,20 @@ $wa         = setting('whatsapp');
         <li class="nav-item"><a class="nav-link" href="<?= u('/') ?>">Anasayfa</a></li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Sigorta Ürünleri</a>
-          <ul class="dropdown-menu mz-mega">
-            <?php foreach ($urunlerNav as $u): ?>
-              <li><a class="dropdown-item" href="<?= u('/urun/' . $u['slug']) ?>"><?= e($u['baslik']) ?></a></li>
-            <?php endforeach; ?>
+          <ul class="dropdown-menu mz-mega" style="min-width:540px">
+            <li>
+              <div class="row g-2 px-2">
+                <?php foreach ($urunlerNav as $kat):
+                  $altList = db_all('SELECT slug, baslik FROM ' . t('urunler') . ' WHERE aktif=1 AND parent_id=? ORDER BY sira ASC LIMIT 6', [(int)$kat['id']]); ?>
+                  <div class="col-6">
+                    <a class="dropdown-item fw-bold pb-1" href="<?= u('/urun/' . $kat['slug']) ?>" style="color:var(--mz-navy)"><i class="bi <?= e($kat['icon'] ?: 'bi-shield') ?> text-warning"></i> <?= e($kat['baslik']) ?></a>
+                    <?php foreach ($altList as $alt): ?>
+                      <a class="dropdown-item small py-1 ps-4" href="<?= u('/urun/' . $alt['slug']) ?>" style="color:#555"><?= e($alt['baslik']) ?></a>
+                    <?php endforeach; ?>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            </li>
           </ul>
         </li>
         <li class="nav-item"><a class="nav-link" href="<?= u('/teklif-al') ?>">Teklif Al</a></li>
@@ -70,6 +83,7 @@ $wa         = setting('whatsapp');
           <li class="nav-item"><a class="nav-link" href="<?= u('/sayfa/' . $c['slug']) ?>"><?= e($c['baslik']) ?></a></li>
         <?php endforeach; ?>
         <li class="nav-item"><a class="nav-link" href="<?= u('/iletisim') ?>">İletişim</a></li>
+        <li class="nav-item"><a class="nav-link fw-semibold" href="<?= u('/temsilcimiz-olun') ?>" style="color:var(--mz-red) !important"><i class="bi bi-stars"></i> Temsilcimiz Olun</a></li>
       </ul>
       <div class="d-flex gap-2">
         <?php if ($wa): ?>

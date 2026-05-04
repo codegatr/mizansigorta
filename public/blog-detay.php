@@ -14,7 +14,7 @@ if (!$post) {
 }
 
 // Goruntuleme++
-db_exec('UPDATE ' . t('blog') . ' SET goruntuleme=goruntuleme+1 WHERE id=?', [(int)$post['id']]);
+db_exec('UPDATE ' . t('blog') . ' SET goruntulenme=goruntulenme+1 WHERE id=?', [(int)$post['id']]);
 
 $pageTitle = $post['seo_baslik'] ?: ($post['baslik'] . ' - ' . SITE_NAME);
 $pageDesc  = $post['seo_aciklama'] ?: mb_substr($post['ozet'] ?? '', 0, 160);
@@ -43,7 +43,7 @@ require MIZAN_INC . '/header.php';
 
       <div class="d-flex gap-3 text-muted small mb-4">
         <span><i class="bi bi-calendar3"></i> <?= tr_date($post['yayin_tarihi']) ?></span>
-        <span><i class="bi bi-eye"></i> <?= number_format((int)$post['goruntuleme'], 0, ',', '.') ?> okunma</span>
+        <span><i class="bi bi-eye"></i> <?= number_format((int)$post['goruntulenme'], 0, ',', '.') ?> okunma</span>
         <?php if (!empty($post['yazar'])): ?>
           <span><i class="bi bi-person"></i> <?= e($post['yazar']) ?></span>
         <?php endif; ?>

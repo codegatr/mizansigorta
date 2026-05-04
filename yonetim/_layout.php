@@ -89,6 +89,11 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
       <i class="bi bi-envelope"></i> İletişim Mesajları
       <?php if ($cnt_yeni_mesaj): ?><span class="badge bg-warning text-dark ms-auto"><?= $cnt_yeni_mesaj ?></span><?php endif; ?>
     </a>
+    <a href="bayi-basvurulari.php"     class="<?= $current === 'bayi-basvurulari.php' ? 'active' : '' ?>">
+      <i class="bi bi-stars"></i> Temsilci Başvuruları
+      <?php $cnt_bayi = (int)db_value('SELECT COUNT(*) FROM ' . t('bayi_basvurulari') . ' WHERE okundu=0'); ?>
+      <?php if ($cnt_bayi): ?><span class="badge bg-warning text-dark ms-auto"><?= $cnt_bayi ?></span><?php endif; ?>
+    </a>
 
     <?php if (is_admin()): ?>
     <div class="mz-admin-section">Sistem</div>
