@@ -46,6 +46,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         admin_redirect('teklif-detay.php?id=' . $id, 'success', 'Atama güncellendi.');
     }
 
+    if ($act === 'arsivle') {
+        db_exec('UPDATE ' . t('teklifler') . ' SET arsivli=1, arsiv_tarihi=NOW(), guncelleme_tarihi=NOW() WHERE id=?', [$id]);
+        audit_log('teklif_arsivle', 'teklif', $id);
+        admin_redirect('teklifler.php', 'success', 'Teklif arşive taşındı.');
+    }
+
+    if ($act === 'arsivden_cikar') {
+        db_exec('UPDATE ' . t('teklifler') . ' SET arsivli=0, arsiv_tarihi=NULL, guncelleme_tarihi=NOW() WHERE id=?', [$id]);
+        audit_log('teklif_arsivden_cikar', 'teklif', $id);
+        admin_redirect('teklif-detay.php?id=' . $id, 'success', 'Teklif arşivden çıkarıldı.');
+    }
+
     if ($act === 'oncelik') {
         $o = (string)($_POST['oncelik'] ?? 'normal');
         db_exec('UPDATE ' . t('teklifler') . ' SET oncelik=? WHERE id=?', [$o, $id]);
@@ -285,6 +297,30 @@ Saygılarımızla,
             <?php endforeach; ?>
           </select>
         </form>
+
+        <hr class="my-3">
+
+        <!-- Arsiv butonu -->
+        <?php if (empty($teklif['arsivli'])): ?>
+          <form method="post" onsubmit="return confirm('Bu teklif arşive taşınsın mı?\n\nAktif tekliflerden çıkar, Arşiv sekmesinden geri alabilirsin.');">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="arsivle">
+            <button class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-archive"></i> Arşive Taşı</button>
+            <small class="form-text text-muted d-block mt-1">İşi biten teklifler arşive taşınır — silinmez, geri alınabilir.</small>
+          </form>
+        <?php else: ?>
+          <div class="alert alert-info small py-2 mb-2">
+            <i class="bi bi-archive-fill"></i> Bu teklif arşivde
+            <?php if (!empty($teklif['arsiv_tarihi'])): ?>
+              <br><small class="text-muted"><?= tr_datetime($teklif['arsiv_tarihi']) ?></small>
+            <?php endif; ?>
+          </div>
+          <form method="post" onsubmit="return confirm('Teklif arşivden çıkarılıp aktif tekliflere geri alınsın mı?');">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="arsivden_cikar">
+            <button class="btn btn-outline-success btn-sm w-100"><i class="bi bi-arrow-counterclockwise"></i> Arşivden Çıkar</button>
+          </form>
+        <?php endif; ?>
       </div>
     </div>
 

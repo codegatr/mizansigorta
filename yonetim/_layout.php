@@ -41,7 +41,7 @@ $adminTitle = $adminTitle ?? 'Yönetim Paneli';
 $flash     = flash_get();
 
 // Bildirim sayilari (sidebar rozetleri)
-$cnt_yeni_teklif = (int)db_value("SELECT COUNT(*) FROM " . t('teklifler') . " WHERE durum='yeni'");
+$cnt_yeni_teklif = (int)db_value("SELECT COUNT(*) FROM " . t('teklifler') . " WHERE durum='yeni' AND arsivli=0");
 $cnt_yeni_mesaj  = (int)db_value("SELECT COUNT(*) FROM " . t('iletisim_mesajlari') . " WHERE okundu=0");
 $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHERE durum='yeni'");
 ?><!DOCTYPE html>

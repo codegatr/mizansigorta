@@ -8,15 +8,15 @@ $bugun     = date('Y-m-d');
 $ayBas     = date('Y-m-01');
 $ay30Once  = date('Y-m-d', strtotime('-30 days'));
 
-// Ozet kartlari
-$st_yeni_teklif       = (int)db_value("SELECT COUNT(*) FROM " . t('teklifler') . " WHERE durum='yeni'");
-$st_aktif_teklif      = (int)db_value("SELECT COUNT(*) FROM " . t('teklifler') . " WHERE durum IN ('yeni','islemde','teklif_hazir','teklif_gonderildi')");
+// Ozet kartlari (arsivlenenler haric tutulur - Yunus arsive aldigini takip etmek istemiyor)
+$st_yeni_teklif       = (int)db_value("SELECT COUNT(*) FROM " . t('teklifler') . " WHERE durum='yeni' AND arsivli=0");
+$st_aktif_teklif      = (int)db_value("SELECT COUNT(*) FROM " . t('teklifler') . " WHERE durum IN ('yeni','islemde','teklif_hazir','teklif_gonderildi') AND arsivli=0");
 $st_bu_ay_police      = (int)db_value("SELECT COUNT(*) FROM " . t('teklifler') . " WHERE durum='police_oldu' AND DATE(guncelleme_tarihi)>=?", [$ayBas]);
 $st_acik_hasar        = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHERE durum IN ('yeni','inceleniyor','eksper_atandi')");
 $st_musteri_toplam    = (int)db_value("SELECT COUNT(*) FROM " . t('musteriler'));
 $st_police_yenileme   = (int)db_value("SELECT COUNT(*) FROM " . t('policeler') . " WHERE bitis_tarihi BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY) AND durum='aktif'");
 $st_yeni_mesaj        = (int)db_value("SELECT COUNT(*) FROM " . t('iletisim_mesajlari') . " WHERE okundu=0");
-$st_hatirlatma_bekley = (int)db_value("SELECT COUNT(*) FROM " . t('teklifler') . " WHERE hatirlatma_aktif=1 AND bir_sonraki_takip_tarihi<=CURDATE() AND durum NOT IN ('police_oldu','iptal','kayip')");
+$st_hatirlatma_bekley = (int)db_value("SELECT COUNT(*) FROM " . t('teklifler') . " WHERE hatirlatma_aktif=1 AND bir_sonraki_takip_tarihi<=CURDATE() AND durum NOT IN ('police_oldu','iptal','kayip') AND arsivli=0");
 
 // Son 30 gunde teklif sayisi (gunluk)
 $gunluk = db_all(

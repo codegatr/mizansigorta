@@ -3107,3 +3107,44 @@ UPDATE `mz_ayarlar`
 -- v1.1.33 - Musteri teyit mailleri BCC + detay modal hep goster
 -- (sadece kod, SQL yok)
 -- ============================================================
+
+-- ============================================================
+-- v1.1.34 - Teklif arsiv sistemi
+-- Yunus istegi: 'Teklif ile islemimiz bittikten sonra Arsivimiz olmali,
+-- isi biten Teklifleri oraya aktarmak icin'
+-- ============================================================
+
+-- mz_teklifler tablosuna arsivli + arsiv_tarihi kolonu ekle (idempotent)
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME   = 'mz_teklifler'
+       AND COLUMN_NAME  = 'arsivli'
+);
+SET @sql := IF(@col_exists = 0,
+    'ALTER TABLE `mz_teklifler` ADD COLUMN `arsivli` TINYINT(1) NOT NULL DEFAULT 0 AFTER `kvkk_onay`',
+    'SELECT "arsivli kolonu zaten var" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME   = 'mz_teklifler'
+       AND COLUMN_NAME  = 'arsiv_tarihi'
+);
+SET @sql := IF(@col_exists = 0,
+    'ALTER TABLE `mz_teklifler` ADD COLUMN `arsiv_tarihi` DATETIME NULL DEFAULT NULL AFTER `arsivli`',
+    'SELECT "arsiv_tarihi kolonu zaten var" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- Index (filtreleme hizi icin)
+SET @idx_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
+     WHERE TABLE_SCHEMA = DATABASE()
+       AND TABLE_NAME   = 'mz_teklifler'
+       AND INDEX_NAME   = 'idx_arsivli'
+);
+SET @sql := IF(@idx_exists = 0,
+    'ALTER TABLE `mz_teklifler` ADD KEY `idx_arsivli` (`arsivli`)',
+    'SELECT "idx_arsivli zaten var" AS info');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;

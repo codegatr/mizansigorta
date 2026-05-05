@@ -58,6 +58,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'sil')
     admin_redirect('teklifler.php', 'danger', 'Geçersiz teklif.');
 }
 
+// Tekil arsivleme (isi biten teklifi listeden gizle)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'arsivle') {
+    csrf_assert_post();
+    $id = (int)($_POST['id'] ?? 0);
+    if ($id) {
+        db_exec('UPDATE ' . t('teklifler') . ' SET arsivli=1, arsiv_tarihi=NOW(), guncelleme_tarihi=NOW() WHERE id=?', [$id]);
+        audit_log('teklif_arsivle', 'teklif', $id);
+        admin_redirect('teklifler.php', 'success', 'Teklif arşive taşındı.');
+    }
+    admin_redirect('teklifler.php', 'danger', 'Geçersiz teklif.');
+}
+
+// Tekil arsivden cikarma (geri aktif teklifler arasina)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'arsivden_cikar') {
+    csrf_assert_post();
+    $id = (int)($_POST['id'] ?? 0);
+    if ($id) {
+        db_exec('UPDATE ' . t('teklifler') . ' SET arsivli=0, arsiv_tarihi=NULL, guncelleme_tarihi=NOW() WHERE id=?', [$id]);
+        audit_log('teklif_arsivden_cikar', 'teklif', $id);
+        admin_redirect('teklifler.php?arsiv=1', 'success', 'Teklif arşivden çıkarıldı.');
+    }
+    admin_redirect('teklifler.php?arsiv=1', 'danger', 'Geçersiz teklif.');
+}
+
+// Toplu arsivleme
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toplu_arsivle') {
+    csrf_assert_post();
+    $ids = array_map('intval', $_POST['ids'] ?? []);
+    if ($ids) {
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        db_exec('UPDATE ' . t('teklifler') . " SET arsivli=1, arsiv_tarihi=NOW(), guncelleme_tarihi=NOW() WHERE id IN ($in)", $ids);
+        audit_log('teklif_toplu_arsivle', 'teklif', null, json_encode(['ids' => $ids, 'count' => count($ids)], JSON_UNESCAPED_UNICODE));
+        admin_redirect('teklifler.php', 'success', count($ids) . ' teklif arşive taşındı.');
+    }
+    admin_redirect('teklifler.php', 'danger', 'Arşivlenecek teklif seçilmedi.');
+}
+
 // Filtreler
 $durum    = admin_filter_input('durum');
 $oncelik  = admin_filter_input('oncelik');
@@ -66,9 +103,11 @@ $atanan   = admin_filter_input('atanan', 'int');
 $q        = admin_filter_input('q');
 $tarih_b  = admin_filter_input('tarih_b');
 $tarih_s  = admin_filter_input('tarih_s');
+$arsivMod = !empty($_GET['arsiv']); // Arsiv sekmesi aktif mi?
 
 $where = ['1=1'];
 $args  = [];
+$where[] = $arsivMod ? 't.arsivli=1' : 't.arsivli=0';
 if ($durum)   { $where[] = 't.durum=?';                  $args[] = $durum; }
 if ($oncelik) { $where[] = 't.oncelik=?';                $args[] = $oncelik; }
 if ($urun_id) { $where[] = 't.urun_id=?';                $args[] = $urun_id; }
@@ -86,6 +125,10 @@ $per   = 25;
 $total = (int)db_value('SELECT COUNT(*) FROM ' . t('teklifler') . " t WHERE $wsql", $args);
 $pag   = paginate($total, $per, $page);
 
+// Tab sayilari (filtresiz - tum aktif/arsiv)
+$aktifSayi  = (int)db_value('SELECT COUNT(*) FROM ' . t('teklifler') . ' WHERE arsivli=0');
+$arsivSayi  = (int)db_value('SELECT COUNT(*) FROM ' . t('teklifler') . ' WHERE arsivli=1');
+
 $rows = db_all(
     'SELECT t.*, u.baslik urun_baslik, k.ad_soyad atanan_ad
        FROM ' . t('teklifler') . ' t
@@ -101,7 +144,24 @@ $urunler   = db_all('SELECT id, baslik FROM ' . t('urunler') . ' WHERE aktif=1 O
 $personel  = db_all('SELECT id, ad_soyad FROM ' . t('kullanicilar') . " WHERE aktif=1 ORDER BY ad_soyad");
 ?>
 
+<!-- Aktif / Arsiv Tab Navigation -->
+<ul class="nav nav-pills mb-3">
+  <li class="nav-item">
+    <a class="nav-link <?= !$arsivMod ? 'active' : '' ?>" href="teklifler.php">
+      <i class="bi bi-inbox"></i> Aktif Teklifler
+      <span class="badge <?= !$arsivMod ? 'bg-light text-dark' : 'bg-secondary' ?> ms-1"><?= $aktifSayi ?></span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link <?= $arsivMod ? 'active' : '' ?>" href="teklifler.php?arsiv=1">
+      <i class="bi bi-archive"></i> Arşiv
+      <span class="badge <?= $arsivMod ? 'bg-light text-dark' : 'bg-secondary' ?> ms-1"><?= $arsivSayi ?></span>
+    </a>
+  </li>
+</ul>
+
 <form method="get" class="card border-0 shadow-sm mb-3">
+  <?php if ($arsivMod): ?><input type="hidden" name="arsiv" value="1"><?php endif; ?>
   <div class="card-body">
     <div class="row g-2">
       <div class="col-md-3">
@@ -195,10 +255,29 @@ $personel  = db_all('SELECT id, ad_soyad FROM ' . t('kullanicilar') . " WHERE ak
             <td><?= badge_durum($r['durum']) ?></td>
             <td><?= badge_oncelik($r['oncelik'] ?: 'normal') ?></td>
             <td class="small text-muted"><?= e($r['atanan_ad'] ?: '-') ?></td>
-            <td class="small text-muted"><?= tr_datetime($r['olusturma_tarihi']) ?></td>
+            <td class="small text-muted"><?= tr_datetime($r['olusturma_tarihi']) ?>
+              <?php if ($arsivMod && !empty($r['arsiv_tarihi'])): ?>
+                <br><small class="text-info"><i class="bi bi-archive"></i> <?= tr_datetime($r['arsiv_tarihi']) ?></small>
+              <?php endif; ?>
+            </td>
             <td class="text-nowrap">
               <a href="teklif-detay.php?id=<?= (int)$r['id'] ?>" class="btn btn-sm btn-outline-primary" title="Görüntüle"><i class="bi bi-eye"></i></a>
-              <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Sil"
+
+              <?php if ($arsivMod): ?>
+                <!-- Arsivden cikar butonu -->
+                <button type="button" class="btn btn-sm btn-outline-success ms-1" title="Arşivden Çıkar"
+                        onclick="if(confirm('“<?= e(addslashes($r['teklif_no'])) ?>” arşivden çıkarılıp aktif tekliflere geri alınsın mı?')){var f=document.getElementById('singleArchOutForm');document.getElementById('singleArchOutId').value='<?= (int)$r['id'] ?>';f.submit();}">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+              <?php else: ?>
+                <!-- Arsivle butonu -->
+                <button type="button" class="btn btn-sm btn-outline-secondary ms-1" title="Arşivle (işi bitti)"
+                        onclick="if(confirm('“<?= e(addslashes($r['teklif_no'])) ?>” arşive taşınsın mı?\n\nArşiv sekmesinden geri alabilirsiniz.')){var f=document.getElementById('singleArchForm');document.getElementById('singleArchId').value='<?= (int)$r['id'] ?>';f.submit();}">
+                  <i class="bi bi-archive"></i>
+                </button>
+              <?php endif; ?>
+
+              <button type="button" class="btn btn-sm btn-outline-danger ms-1" title="Kalıcı Sil"
                       onclick="if(confirm('“<?= e(addslashes($r['teklif_no'])) ?>” numaralı teklif KALICI olarak silinsin mi?\n\nBu işlem geri alınamaz.')){var f=document.getElementById('singleDelForm');document.getElementById('singleDelId').value='<?= (int)$r['id'] ?>';f.submit();}">
                 <i class="bi bi-trash"></i>
               </button>
@@ -206,7 +285,10 @@ $personel  = db_all('SELECT id, ad_soyad FROM ' . t('kullanicilar') . " WHERE ak
           </tr>
         <?php endforeach; ?>
         <?php if (!$rows): ?>
-          <tr><td colspan="10" class="text-center text-muted py-5"><i class="bi bi-inbox display-4 d-block"></i>Filtre kriterine uygun teklif bulunamadı.</td></tr>
+          <tr><td colspan="10" class="text-center text-muted py-5">
+            <i class="bi bi-<?= $arsivMod ? 'archive' : 'inbox' ?> display-4 d-block"></i>
+            <?= $arsivMod ? 'Arşivde teklif yok.' : 'Filtre kriterine uygun teklif bulunamadı.' ?>
+          </td></tr>
         <?php endif; ?>
         </tbody>
       </table>
@@ -216,25 +298,31 @@ $personel  = db_all('SELECT id, ad_soyad FROM ' . t('kullanicilar') . " WHERE ak
 
 <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 gap-2">
   <div class="d-flex flex-wrap gap-2 align-items-center">
-    <select name="yeni_durum" class="form-select form-select-sm" style="width:auto;">
-      <option value="">Toplu durum değiştir...</option>
-      <?php foreach (['islemde'=>'İşlemde','teklif_hazir'=>'Teklif Hazır','teklif_gonderildi'=>'Gönderildi','onaylandi'=>'Onaylandı','police_oldu'=>'Poliçe Oldu','iptal'=>'İptal','kayip'=>'Kayıp'] as $k=>$v): ?>
-        <option value="<?= $k ?>"><?= $v ?></option>
-      <?php endforeach; ?>
-    </select>
+    <?php if (!$arsivMod): ?>
+      <select name="yeni_durum" class="form-select form-select-sm" style="width:auto;">
+        <option value="">Toplu durum değiştir...</option>
+        <?php foreach (['islemde'=>'İşlemde','teklif_hazir'=>'Teklif Hazır','teklif_gonderildi'=>'Gönderildi','onaylandi'=>'Onaylandı','police_oldu'=>'Poliçe Oldu','iptal'=>'İptal','kayip'=>'Kayıp'] as $k=>$v): ?>
+          <option value="<?= $k ?>"><?= $v ?></option>
+        <?php endforeach; ?>
+      </select>
 
-    <div class="form-check form-check-inline ms-1" title="İşaretliyse durum değişikliği maili müşteriye otomatik gönderilir">
-      <input class="form-check-input" type="checkbox" name="bildirim" id="ckBildirim" value="1" checked>
-      <label class="form-check-label small fw-semibold" for="ckBildirim">
-        <i class="bi bi-envelope-check text-primary"></i> Müşteriye mail gönder
-      </label>
-    </div>
+      <div class="form-check form-check-inline ms-1" title="İşaretliyse durum değişikliği maili müşteriye otomatik gönderilir">
+        <input class="form-check-input" type="checkbox" name="bildirim" id="ckBildirim" value="1" checked>
+        <label class="form-check-label small fw-semibold" for="ckBildirim">
+          <i class="bi bi-envelope-check text-primary"></i> Müşteriye mail gönder
+        </label>
+      </div>
 
-    <button type="button" class="btn btn-sm btn-warning" onclick="bulkSubmit('toplu_durum')"><i class="bi bi-arrow-repeat"></i> Durumu Uygula</button>
+      <button type="button" class="btn btn-sm btn-warning" onclick="bulkSubmit('toplu_durum')"><i class="bi bi-arrow-repeat"></i> Durumu Uygula</button>
 
-    <span class="vr mx-1 d-none d-md-inline"></span>
+      <span class="vr mx-1 d-none d-md-inline"></span>
 
-    <button type="button" class="btn btn-sm btn-outline-danger" onclick="bulkSubmit('toplu_sil')" title="Sahte/spam teklifleri toplu silmek için seçili teklifleri kalıcı olarak sil">
+      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="bulkSubmit('toplu_arsivle')" title="İşi biten teklifleri arşive taşı (silme değil — geri alabilirsin)">
+        <i class="bi bi-archive"></i> Seçilenleri Arşivle
+      </button>
+    <?php endif; ?>
+
+    <button type="button" class="btn btn-sm btn-outline-danger" onclick="bulkSubmit('toplu_sil')" title="Seçili teklifleri kalıcı olarak sil">
       <i class="bi bi-trash"></i> Seçilenleri Sil
     </button>
   </div>
@@ -255,11 +343,21 @@ $personel  = db_all('SELECT id, ad_soyad FROM ' . t('kullanicilar') . " WHERE ak
 
 </form>
 
-<!-- Tekil silme icin gizli form (her satirdaki cop ikonu bu forma baglanir) -->
+<!-- Tekil aksiyonlar icin gizli formlar (her satirdaki butonlar bu formlara baglanir) -->
 <form method="post" id="singleDelForm" style="display:none">
   <?= csrf_field() ?>
   <input type="hidden" name="action" value="sil">
   <input type="hidden" name="id" id="singleDelId" value="">
+</form>
+<form method="post" id="singleArchForm" style="display:none">
+  <?= csrf_field() ?>
+  <input type="hidden" name="action" value="arsivle">
+  <input type="hidden" name="id" id="singleArchId" value="">
+</form>
+<form method="post" id="singleArchOutForm" style="display:none">
+  <?= csrf_field() ?>
+  <input type="hidden" name="action" value="arsivden_cikar">
+  <input type="hidden" name="id" id="singleArchOutId" value="">
 </form>
 
 <script>
@@ -273,6 +371,14 @@ function bulkSubmit(action) {
   var checked = form.querySelectorAll('.ck-row:checked');
   if (checked.length === 0) {
     alert('Lutfen en az bir teklif secin.');
+    return;
+  }
+
+  if (action === 'toplu_arsivle') {
+    var ok = confirm(checked.length + ' teklif arsive tasinsin mi?\n\n(Silme degil, Arsiv sekmesinden geri alabilirsiniz.)');
+    if (!ok) return;
+    form.querySelector('input[name="action"]').value = 'toplu_arsivle';
+    form.submit();
     return;
   }
 
