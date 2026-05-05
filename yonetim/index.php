@@ -150,7 +150,9 @@ $yenilemeler = db_all(
     <div class="card border-0 shadow-sm h-100">
       <div class="card-body">
         <h6 class="fw-bold mb-3"><i class="bi bi-graph-up text-warning"></i> Son 30 Gün - Günlük Teklif</h6>
-        <canvas id="dailyChart" height="80"></canvas>
+        <div style="position:relative; height:240px; width:100%;">
+          <canvas id="dailyChart"></canvas>
+        </div>
       </div>
     </div>
   </div>
