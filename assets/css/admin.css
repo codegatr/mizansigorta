@@ -38,9 +38,9 @@ body.mz-admin { background: var(--mz-bg); font-family: 'Inter', system-ui, -appl
 .mz-admin-sidebar::-webkit-scrollbar-thumb { background: var(--mz-dark-2); border-radius: 3px; }
 .mz-admin-sidebar::-webkit-scrollbar-thumb:hover { background: var(--mz-red); }
 
-.mz-admin-brand { padding: 1.15rem 1.25rem; border-bottom: 2px solid var(--mz-red); display: flex; align-items: center; gap: .65rem; flex-shrink: 0; background: var(--mz-navy-deep); }
-.mz-admin-brand img { height: 38px; width: auto; max-width: 200px; display: block; }
-.mz-admin-brand .mz-brand-sub { font-size: .68rem; color: var(--mz-red); font-weight: 600; opacity: .85; letter-spacing: .8px; text-transform: uppercase; margin-left: auto; }
+.mz-admin-brand { padding: 1.25rem 1.25rem 1rem; border-bottom: 2px solid var(--mz-red); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem; flex-shrink: 0; background: var(--mz-navy-deep); }
+.mz-admin-brand img { height: 50px; width: auto; max-width: 220px; display: block; }
+.mz-admin-brand .mz-brand-sub { font-size: .72rem; color: var(--mz-red); font-weight: 700; opacity: .9; letter-spacing: 1.2px; text-transform: uppercase; margin: 0; padding: 2px 10px; background: rgba(227,11,48,.1); border-radius: 4px; }
 
 .mz-admin-nav { padding: .5rem 0; flex: 1; }
 .mz-admin-section { padding: 1rem 1.25rem .35rem; font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(227,11,48,.85); font-weight: 700; }
