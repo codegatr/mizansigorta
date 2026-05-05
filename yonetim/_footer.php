@@ -9,7 +9,7 @@ $current = basename($_SERVER['SCRIPT_NAME']);
   <footer class="mz-admin-foot">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
       <small class="text-muted">&copy; <?= date('Y') ?> Mizan Sigorta. Tüm hakları saklıdır.</small>
-      <small class="text-muted">v<?= e(SITE_VERSION) ?> · <a href="https://codega.com.tr" target="_blank" class="text-decoration-none">CODEGA Yazılım</a></small>
+      <small class="text-muted">v<?= e(MIZAN_RUNTIME_VERSION) ?> · <a href="https://codega.com.tr" target="_blank" class="text-decoration-none">CODEGA Yazılım</a></small>
     </div>
   </footer>
 </div><!-- /mz-admin-main -->

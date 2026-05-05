@@ -800,6 +800,113 @@ $localVersion = upd_localVer();
 .upd-file:last-child { border-bottom: 0; }
 .upd-status-card { background: linear-gradient(135deg, var(--mz-navy) 0%, var(--mz-navy-2) 100%); color: #fff; border-radius: 12px; padding: 1.5rem; }
 .upd-status-card h3 { color: var(--mz-red); font-weight: 800; }
+
+/* ===== Animasyonlu Süreç Göstergesi ===== */
+.upd-progress {
+  background: linear-gradient(135deg, #0f1e37 0%, #1b263b 100%);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.1);
+  box-shadow: 0 12px 40px rgba(15, 30, 55, .35);
+}
+.upd-progress-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+  margin-bottom: 1.25rem;
+}
+.upd-progress-spinner {
+  position: relative; width: 48px; height: 48px; flex-shrink: 0;
+}
+.upd-spinner-ring {
+  position: absolute; inset: 0;
+  border: 3px solid transparent;
+  border-top-color: var(--mz-red);
+  border-radius: 50%;
+  animation: upd-spin 1.4s linear infinite;
+}
+.upd-spinner-ring:nth-child(2) { inset: 6px; border-top-color: #f4d35e; animation-duration: 1s; animation-direction: reverse; }
+.upd-spinner-ring:nth-child(3) { inset: 12px; border-top-color: #fff; animation-duration: 1.8s; }
+@keyframes upd-spin { to { transform: rotate(360deg); } }
+.upd-progress-title { flex-grow: 1; }
+.upd-progress-elapsed {
+  background: rgba(255,255,255,.1);
+  border-radius: 100px;
+  padding: .35rem .9rem;
+  font-family: 'SF Mono', monospace;
+  font-size: .85rem;
+  font-weight: 600;
+  color: #f4d35e;
+}
+.upd-steps { display: flex; flex-direction: column; gap: .5rem; }
+.upd-step {
+  display: flex; align-items: center; gap: .9rem;
+  padding: .85rem 1rem;
+  background: rgba(255,255,255,.04);
+  border-radius: 10px;
+  border-left: 3px solid transparent;
+  transition: all .35s cubic-bezier(.34,1.56,.64,1);
+  opacity: .55;
+}
+.upd-step.active {
+  background: rgba(244,211,94,.1);
+  border-left-color: #f4d35e;
+  opacity: 1;
+  transform: translateX(4px);
+}
+.upd-step.done {
+  background: rgba(34,197,94,.08);
+  border-left-color: #22c55e;
+  opacity: .85;
+}
+.upd-step.error {
+  background: rgba(227,11,48,.1);
+  border-left-color: var(--mz-red);
+  opacity: 1;
+}
+.upd-step-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(255,255,255,.08);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; flex-shrink: 0;
+  transition: all .25s;
+}
+.upd-step.active .upd-step-icon {
+  background: linear-gradient(135deg, #f4d35e, #e30b30);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(244,211,94,.2);
+  animation: upd-pulse 1.5s ease-in-out infinite;
+}
+.upd-step.done .upd-step-icon { background: #22c55e; color: #fff; }
+.upd-step.error .upd-step-icon { background: var(--mz-red); color: #fff; }
+@keyframes upd-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(244,211,94,.2); }
+  50% { box-shadow: 0 0 0 8px rgba(244,211,94,.05); }
+}
+.upd-step-text { flex-grow: 1; min-width: 0; }
+.upd-step-name { font-weight: 600; font-size: .92rem; color: #fff; }
+.upd-step-desc { font-size: .78rem; color: rgba(255,255,255,.55); margin-top: 1px; }
+.upd-step.active .upd-step-name { color: #f4d35e; }
+.upd-step-status { width: 24px; flex-shrink: 0; text-align: center; font-size: 1rem; }
+.upd-step .upd-step-status i.bi-circle { color: rgba(255,255,255,.3); }
+.upd-step.active .upd-step-status::before {
+  content: '';
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 2px solid #f4d35e;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: upd-spin 0.7s linear infinite;
+}
+.upd-step.active .upd-step-status i { display: none; }
+.upd-step.done .upd-step-status i.bi-circle { display: none; }
+.upd-step.done .upd-step-status::before { content: '\f26b'; font-family: 'bootstrap-icons'; color: #22c55e; font-size: 1.1rem; }
+.upd-step.error .upd-step-status i.bi-circle { display: none; }
+.upd-step.error .upd-step-status::before { content: '\f33a'; font-family: 'bootstrap-icons'; color: var(--mz-red); font-size: 1.1rem; }
 </style>
 
 <div class="card border-0 shadow-sm">
@@ -856,6 +963,64 @@ $localVersion = upd_localVer();
         <button class="btn btn-primary" onclick="updCheck()"><i class="bi bi-arrow-clockwise"></i> Durum Kontrolü</button>
         <button class="btn btn-warning fw-semibold" onclick="updSync(false)"><i class="bi bi-cloud-download"></i> Akıllı Güncelle</button>
         <button class="btn btn-outline-danger" onclick="updSync(true)" data-mz-confirm="TÜM dosyaları yeniden indirmek istiyor musunuz? Bu işlem yavaştır."><i class="bi bi-arrow-repeat"></i> Tam Yenile (Force)</button>
+      </div>
+
+      <!-- Animasyonlu süreç göstergesi (sync sırasında görünür) -->
+      <div id="updProgress" class="upd-progress" style="display:none">
+        <div class="upd-progress-header">
+          <div class="upd-progress-spinner">
+            <div class="upd-spinner-ring"></div>
+            <div class="upd-spinner-ring"></div>
+            <div class="upd-spinner-ring"></div>
+          </div>
+          <div class="upd-progress-title">
+            <h6 class="mb-1 fw-bold" id="updProgressTitle">Güncelleme başlatılıyor</h6>
+            <small class="text-muted" id="updProgressSub">Lütfen bekleyin, sürecin tamamlanması 30-90 saniye sürebilir.</small>
+          </div>
+          <div class="upd-progress-elapsed" id="updProgressElapsed">0sn</div>
+        </div>
+        <div class="upd-steps">
+          <div class="upd-step" data-step="backup">
+            <div class="upd-step-icon"><i class="bi bi-archive-fill"></i></div>
+            <div class="upd-step-text">
+              <div class="upd-step-name">Yedekleme</div>
+              <div class="upd-step-desc">Mevcut dosyalar ZIP olarak arşivleniyor</div>
+            </div>
+            <div class="upd-step-status"><i class="bi bi-circle"></i></div>
+          </div>
+          <div class="upd-step" data-step="github">
+            <div class="upd-step-icon"><i class="bi bi-github"></i></div>
+            <div class="upd-step-text">
+              <div class="upd-step-name">GitHub Bağlantısı</div>
+              <div class="upd-step-desc">Repo ağacı ve SHA listesi alınıyor</div>
+            </div>
+            <div class="upd-step-status"><i class="bi bi-circle"></i></div>
+          </div>
+          <div class="upd-step" data-step="download">
+            <div class="upd-step-icon"><i class="bi bi-cloud-download-fill"></i></div>
+            <div class="upd-step-text">
+              <div class="upd-step-name">Dosya İndirme</div>
+              <div class="upd-step-desc">Sadece değişen dosyalar çekiliyor</div>
+            </div>
+            <div class="upd-step-status"><i class="bi bi-circle"></i></div>
+          </div>
+          <div class="upd-step" data-step="migrate">
+            <div class="upd-step-icon"><i class="bi bi-database-fill-gear"></i></div>
+            <div class="upd-step-text">
+              <div class="upd-step-name">Veritabanı Migration</div>
+              <div class="upd-step-desc">migration.sql çalıştırılıyor (idempotent)</div>
+            </div>
+            <div class="upd-step-status"><i class="bi bi-circle"></i></div>
+          </div>
+          <div class="upd-step" data-step="finalize">
+            <div class="upd-step-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="upd-step-text">
+              <div class="upd-step-name">Tamamlanıyor</div>
+              <div class="upd-step-desc">Sürüm kayıt, audit log, sayfa yenileniyor</div>
+            </div>
+            <div class="upd-step-status"><i class="bi bi-circle"></i></div>
+          </div>
+        </div>
       </div>
 
       <div class="upd-log" id="ovLog">Hazır. "Durum Kontrolü" butonuyla başlayın.</div>
@@ -1088,10 +1253,60 @@ $localVersion = upd_localVer();
   window.updSync = async function (force) {
     if (!confirm(force ? 'TÜM dosyalar yeniden indirilecek. Devam?' : 'Sadece değişen dosyalar güncellenecek. Devam?')) return;
     const log = document.getElementById('ovLog');
-    log.textContent = (force ? 'Force' : 'Smart') + ' sync başlatılıyor... (büyük güncellemelerde 30-60 sn sürebilir)';
+    const progress = document.getElementById('updProgress');
+    const elapsed = document.getElementById('updProgressElapsed');
+    const title = document.getElementById('updProgressTitle');
+    const sub = document.getElementById('updProgressSub');
+    const steps = document.querySelectorAll('.upd-step');
+
+    // Reset state
+    steps.forEach(s => s.classList.remove('active', 'done', 'error'));
+    progress.style.display = 'block';
+    title.textContent = (force ? 'Tam Yenileme' : 'Akıllı Güncelleme') + ' başlatılıyor';
+    sub.textContent = 'Lütfen bekleyin, sürecin tamamlanması 30-90 saniye sürebilir.';
+    log.textContent = (force ? 'Force' : 'Smart') + ' sync başlatıldı...';
+    progress.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+
+    // Süre sayacı
+    const startTime = Date.now();
+    const elapsedTimer = setInterval(() => {
+      const sec = Math.floor((Date.now() - startTime) / 1000);
+      elapsed.textContent = (sec >= 60 ? Math.floor(sec/60) + 'd ' + (sec%60) : sec) + 'sn';
+    }, 100);
+
+    // Adım simülasyonu (server tek seferde döndüğü için tahminî)
+    const setStep = (idx, status) => {
+      steps.forEach((s, i) => {
+        if (i < idx) s.classList.add('done');
+        if (i === idx) {
+          s.classList.remove('done', 'error');
+          if (status === 'error') s.classList.add('error');
+          else if (status === 'done') s.classList.add('done');
+          else s.classList.add('active');
+        }
+      });
+    };
+
+    // Aşamalı simülasyon timer'ları
+    setStep(0); // Yedekleme
+    title.textContent = 'Yedekleme alınıyor...';
+    const timers = [];
+    timers.push(setTimeout(() => { setStep(1); title.textContent = 'GitHub bağlantısı kuruluyor...'; }, 3000));
+    timers.push(setTimeout(() => { setStep(2); title.textContent = 'Dosyalar indiriliyor...'; sub.textContent = 'GitHub API\'sinden değişen dosyalar tek tek çekiliyor.'; }, 6000));
+    timers.push(setTimeout(() => { setStep(3); title.textContent = 'Migration çalıştırılıyor...'; sub.textContent = 'Veritabanı şeması güncel hâle getiriliyor.'; }, 14000));
+
     try {
       const r = await updFetch((force ? 'force_sync' : 'sync'), new FormData());
+      timers.forEach(t => clearTimeout(t));
+      clearInterval(elapsedTimer);
+
       if (!r.ok && !r.updated) {
+        // Hangi adımda kaldıysa onu error yap
+        const activeIdx = Array.from(steps).findIndex(s => s.classList.contains('active'));
+        setStep(activeIdx >= 0 ? activeIdx : 0, 'error');
+        title.textContent = 'Güncelleme başarısız';
+        sub.textContent = r.error || 'Bilinmeyen hata';
+
         let errHtml = '<span class="err">✗ Sync başarısız</span>\n\n';
         if (r.error) errHtml += 'Sebep: ' + r.error + '\n';
         if (r.errors && r.errors.length) errHtml += '\nHATALAR:\n' + r.errors.map(e => '  ✗ ' + e).join('\n');
@@ -1100,6 +1315,12 @@ $localVersion = upd_localVer();
         log.innerHTML = errHtml;
         return;
       }
+
+      // Başarılı - tüm adımları done yap
+      setStep(4, 'done');
+      title.textContent = 'Güncelleme başarıyla tamamlandı';
+      sub.textContent = 'Sürüm v' + r.version + ' aktif. Sayfa yenileniyor...';
+
       let txt = '';
       if (r.log) txt += r.log.join('\n');
       txt += '\n\n✓ Güncellendi: ' + r.updated + '   |   ✓ Aynı kalan: ' + r.unchanged;
@@ -1108,9 +1329,15 @@ $localVersion = upd_localVer();
       }
       txt += '\n\n>>> Tamamlandı (v' + r.version + ') <<<';
       log.textContent = txt;
-      // Sayfayi 2 saniye sonra yenile (yeni surum gosterimi icin)
+
       if (r.updated > 0 && (!r.errors || r.errors.length === 0)) setTimeout(() => location.reload(), 2500);
     } catch (e) {
+      timers.forEach(t => clearTimeout(t));
+      clearInterval(elapsedTimer);
+      const activeIdx = Array.from(steps).findIndex(s => s.classList.contains('active'));
+      setStep(activeIdx >= 0 ? activeIdx : 0, 'error');
+      title.textContent = 'Bağlantı hatası';
+      sub.textContent = e.message;
       log.innerHTML = '<span class="err">Network hatası: ' + e.message + '</span>';
     }
   };

@@ -53,7 +53,7 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
 <aside class="mz-admin-sidebar" id="adminSidebar">
   <div class="mz-admin-brand">
     <img src="<?= asset('assets/img/logo-light.png') ?>" alt="Mizan Sigorta">
-    <span class="mz-brand-sub">v<?= e(SITE_VERSION) ?></span>
+    <span class="mz-brand-sub">v<?= e(MIZAN_RUNTIME_VERSION) ?></span>
   </div>
 
   <nav class="mz-admin-nav">

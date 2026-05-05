@@ -2861,3 +2861,8 @@ INSERT IGNORE INTO `mz_ayarlar` (`anahtar`,`deger`,`aciklama`,`grup`,`tip`) VALU
 ('operator_email', '',
  'Iletisim formundan gelen mesajlar bu adrese gonderilir (bos ise genel email kullanilir)',
  'smtp', 'email');
+
+-- ============================================================
+-- v1.1.17 - Slider gorselleri + guncelleme animasyonu + version display fix
+-- (Sadece kod degisikligi, SQL migration yok)
+-- ============================================================

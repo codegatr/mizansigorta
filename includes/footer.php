@@ -70,7 +70,7 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
   </div>
   <div class="mz-copy text-center small">
     © <?= date('Y') ?> <?= e(setting('firma_adi', SITE_NAME)) ?> — Tüm hakları saklıdır.
-    &nbsp;|&nbsp; v<?= e(SITE_VERSION) ?> &nbsp;|&nbsp; <span class="text-light-emphasis">Yazılım: <a href="https://codega.com.tr" target="_blank" rel="noopener">CODEGA</a></span>
+    &nbsp;|&nbsp; v<?= e(MIZAN_RUNTIME_VERSION) ?> &nbsp;|&nbsp; <span class="text-light-emphasis">Yazılım: <a href="https://codega.com.tr" target="_blank" rel="noopener">CODEGA</a></span>
   </div>
 </footer>
 

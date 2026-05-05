@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="mz-login-foot">
-      <small>v<?= e(SITE_VERSION) ?> · <a href="https://codega.com.tr" target="_blank" rel="noopener">CODEGA</a></small>
+      <small>v<?= e(MIZAN_RUNTIME_VERSION) ?> · <a href="https://codega.com.tr" target="_blank" rel="noopener">CODEGA</a></small>
     </div>
   </div>
 </div>
