@@ -2,7 +2,11 @@
 if (!defined('MIZAN_BOOT')) { http_response_code(403); exit; }
 
 $slug = $params[0] ?? '';
-$post = db_row('SELECT * FROM ' . t('blog') . ' WHERE slug=? AND aktif=1 AND yayin_tarihi<=NOW() LIMIT 1', [$slug]);
+$post = db_row('SELECT b.*, k.ad_soyad AS yazar_ad
+                FROM ' . t('blog') . ' b
+                LEFT JOIN ' . t('kullanicilar') . ' k ON k.id=b.yazar_id
+                WHERE b.slug=? AND b.aktif=1 AND (b.yayin_tarihi IS NULL OR b.yayin_tarihi<=NOW())
+                LIMIT 1', [$slug]);
 
 if (!$post) {
     http_response_code(404);
@@ -19,9 +23,10 @@ db_exec('UPDATE ' . t('blog') . ' SET goruntulenme=goruntulenme+1 WHERE id=?', [
 $pageTitle = $post['seo_baslik'] ?: ($post['baslik'] . ' - ' . SITE_NAME);
 $pageDesc  = $post['seo_aciklama'] ?: mb_substr($post['ozet'] ?? '', 0, 160);
 
-$benzer = db_all('SELECT slug, baslik, kapak, yayin_tarihi FROM ' . t('blog') . '
-                  WHERE aktif=1 AND id<>? AND (kategori=? OR kategori="")
-                  ORDER BY yayin_tarihi DESC LIMIT 3', [(int)$post['id'], $post['kategori']]);
+$benzer = db_all('SELECT slug, baslik, kapak_gorseli, yayin_tarihi FROM ' . t('blog') . '
+                  WHERE aktif=1 AND id<>? AND (yayin_tarihi IS NULL OR yayin_tarihi<=NOW())
+                    AND (kategori=? OR ?="")
+                  ORDER BY yayin_tarihi DESC LIMIT 3', [(int)$post['id'], (string)$post['kategori'], (string)$post['kategori']]);
 
 require MIZAN_INC . '/header.php';
 ?>
@@ -44,8 +49,8 @@ require MIZAN_INC . '/header.php';
       <div class="d-flex gap-3 text-muted small mb-4">
         <span><i class="bi bi-calendar3"></i> <?= tr_date($post['yayin_tarihi']) ?></span>
         <span><i class="bi bi-eye"></i> <?= number_format((int)$post['goruntulenme'], 0, ',', '.') ?> okunma</span>
-        <?php if (!empty($post['yazar'])): ?>
-          <span><i class="bi bi-person"></i> <?= e($post['yazar']) ?></span>
+        <?php if (!empty($post['yazar_ad'])): ?>
+          <span><i class="bi bi-person"></i> <?= e($post['yazar_ad']) ?></span>
         <?php endif; ?>
       </div>
 
