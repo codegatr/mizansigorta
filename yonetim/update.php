@@ -65,36 +65,107 @@ function upd_token(): string
     return (string)setting('github_token', '');
 }
 
-function upd_curl(string $url, array $headers = [], int $timeout = 30): array
+function upd_curl(string $url, array $headers = [], int $timeout = 30, int $maxRetries = 3): array
 {
     if (!function_exists('curl_init')) {
-        return ['code' => 0, 'body' => '', 'error' => 'PHP cURL eklentisi yüklü değil. Hosting destekten cURL aktivasyonu isteyin.'];
+        return ['code' => 0, 'body' => '', 'error' => 'PHP cURL eklentisi yüklü değil. Hosting destekten cURL aktivasyonu isteyin.', 'attempts' => 0];
     }
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_HTTPHEADER     => $headers,
-        CURLOPT_TIMEOUT        => $timeout,
-        CURLOPT_CONNECTTIMEOUT => 10,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_SSL_VERIFYPEER => true,
-        CURLOPT_SSL_VERIFYHOST => 2,
-    ]);
-    $body = curl_exec($ch);
-    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $err  = curl_error($ch);
 
-    // SSL fail durumunda (paylasimli hosting'lerde CA bundle eksik olabilir) tekrar dene
-    if ($body === false && (stripos($err, 'ssl') !== false || stripos($err, 'certificate') !== false)) {
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        $body = curl_exec($ch);
+    $attempt = 0;
+    $lastBody = '';
+    $lastCode = 0;
+    $lastErr = '';
+    $lastHeaders = [];
+
+    while ($attempt < $maxRetries) {
+        $attempt++;
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => $headers,
+            CURLOPT_TIMEOUT        => $timeout,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HEADER         => true,  // response header'lari da al
+        ]);
+        $raw  = curl_exec($ch);
         $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $hSize = (int)curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         $err  = curl_error($ch);
+
+        // SSL fail (paylasimli hosting'lerde CA bundle eksik) -> retry without verify
+        if ($raw === false && (stripos($err, 'ssl') !== false || stripos($err, 'certificate') !== false)) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            $raw = curl_exec($ch);
+            $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $hSize = (int)curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+            $err = curl_error($ch);
+        }
+
+        $headerStr = $raw !== false ? substr((string)$raw, 0, $hSize) : '';
+        $body = $raw !== false ? substr((string)$raw, $hSize) : '';
+        curl_close($ch);
+
+        // Response header'lari parse et (rate limit, retry-after vs.)
+        $respHeaders = [];
+        foreach (preg_split("/\r\n|\n|\r/", $headerStr) as $hl) {
+            if (str_contains($hl, ':')) {
+                [$k, $v] = explode(':', $hl, 2);
+                $respHeaders[strtolower(trim($k))] = trim($v);
+            }
+        }
+
+        $lastBody = (string)$body;
+        $lastCode = $code;
+        $lastErr  = $err;
+        $lastHeaders = $respHeaders;
+
+        // Basari -> dön
+        if ($code >= 200 && $code < 300) {
+            return ['code' => $code, 'body' => $lastBody, 'error' => '', 'attempts' => $attempt, 'headers' => $respHeaders];
+        }
+
+        // 4xx (rate limit haric) -> retry yapma
+        if ($code >= 400 && $code < 500 && $code !== 429) {
+            break;
+        }
+
+        // 503 / 429 / 502 / 504 / cURL fail -> retry
+        if ($attempt < $maxRetries) {
+            // Retry-After header varsa onu kullan
+            $wait = 0;
+            if (!empty($respHeaders['retry-after'])) {
+                $wait = (int)$respHeaders['retry-after'];
+            }
+            // Yoksa exponential backoff: 1s, 2s, 4s
+            if ($wait <= 0) $wait = (int)pow(2, $attempt - 1);
+            if ($wait > 10) $wait = 10;  // cap
+            sleep($wait);
+        }
     }
 
-    curl_close($ch);
-    return ['code' => $code, 'body' => (string)$body, 'error' => $err];
+    // Tüm denemeler basarisiz
+    $errorMsg = $lastErr;
+    if ($errorMsg === '' && $lastCode > 0) {
+        $errorMsg = "HTTP $lastCode";
+        // Sik karsilasilan kodlar icin aciklama
+        $explanations = [
+            429 => ' (Rate limit aşıldı, GitHub bir süre sonra tekrar deneyin)',
+            502 => ' (Bad Gateway - GitHub veya hosting geçici sorunu)',
+            503 => ' (Service Unavailable - GitHub veya hosting geçici sorunu)',
+            504 => ' (Gateway Timeout - istek zaman aşımı)',
+            401 => ' (Unauthorized - Token geçersiz veya yetki yetersiz)',
+            403 => ' (Forbidden - Token yetkisi yok veya rate limit)',
+            404 => ' (Not Found - Repo/dosya yolu yanlış)',
+        ];
+        if (isset($explanations[$lastCode])) $errorMsg .= $explanations[$lastCode];
+    }
+    if ($errorMsg === '') $errorMsg = 'Bilinmeyen ağ hatası';
+
+    return ['code' => $lastCode, 'body' => $lastBody, 'error' => $errorMsg, 'attempts' => $attempt, 'headers' => $lastHeaders];
 }
 
 function upd_ghHeaders(string $token): array
@@ -107,22 +178,24 @@ function upd_ghHeaders(string $token): array
     return $h;
 }
 
-function upd_ghAPI(string $path, string $token): ?array
+function upd_ghAPI(string $path, string $token, ?array &$debug = null): ?array
 {
     global $repoFull;
     $r = upd_curl("https://api.github.com/repos/$repoFull$path", upd_ghHeaders($token));
+    $debug = ['code' => $r['code'], 'error' => $r['error'], 'attempts' => $r['attempts'] ?? 1];
     if ($r['code'] !== 200) return null;
     $d = json_decode($r['body'], true);
     return is_array($d) ? $d : null;
 }
 
-function upd_ghDownload(string $filePath, string $token): ?string
+function upd_ghDownload(string $filePath, string $token, ?array &$debug = null): ?string
 {
     global $repoFull, $ghBranch;
     $r = upd_curl(
         "https://raw.githubusercontent.com/$repoFull/$ghBranch/" . ltrim($filePath, '/'),
         ['User-Agent: Mizan-Updater/1.0'] + ($token ? ['Authorization: token ' . $token] : [])
     );
+    $debug = ['code' => $r['code'], 'error' => $r['error'], 'attempts' => $r['attempts'] ?? 1];
     return $r['code'] === 200 ? $r['body'] : null;
 }
 
@@ -136,10 +209,10 @@ function upd_isExcluded(string $relPath): bool
     return false;
 }
 
-function upd_repoTree(string $token): array
+function upd_repoTree(string $token, ?array &$debug = null): array
 {
     global $ghBranch;
-    $tree = upd_ghAPI("/git/trees/$ghBranch?recursive=1", $token);
+    $tree = upd_ghAPI("/git/trees/$ghBranch?recursive=1", $token, $debug);
     if (!$tree || empty($tree['tree'])) return [];
     $out = [];
     foreach ($tree['tree'] as $i) {
@@ -372,10 +445,36 @@ if (isset($_GET['ajax'])) {
             // GitHub token
             $tokOk = (bool)$token;
             $checks[] = ['name' => 'GitHub Token', 'ok' => $tokOk, 'detail' => $tokOk ? 'tanımlı (' . substr($token, 0, 8) . '...)' : 'TANIMLI DEĞİL — Ayarlar sekmesi'];
-            // GitHub API erisimi
+            // GitHub API erisimi + rate limit
             if ($tokOk) {
                 $r = upd_ghAPI('/repos/' . $GLOBALS['repoFull'], $token);
                 $checks[] = ['name' => 'GitHub API erişimi', 'ok' => (bool)$r, 'detail' => $r ? 'OK (repo: ' . ($r['full_name'] ?? '?') . ')' : 'API çağrısı başarısız'];
+
+                // Rate limit kontrolu (GitHub'in rate_limit endpoint'i)
+                $rl = upd_curl('https://api.github.com/rate_limit', upd_ghHeaders($token), 10, 1);
+                if ($rl['code'] === 200) {
+                    $rlData = json_decode($rl['body'], true);
+                    $core = $rlData['resources']['core'] ?? [];
+                    $remaining = $core['remaining'] ?? 0;
+                    $limit = $core['limit'] ?? 0;
+                    $resetTs = $core['reset'] ?? 0;
+                    $resetMin = $resetTs > 0 ? max(0, (int)round(($resetTs - time()) / 60)) : 0;
+                    $rlOk = $remaining > 50;
+                    $checks[] = [
+                        'name' => 'GitHub API kotası',
+                        'ok' => $rlOk,
+                        'detail' => "Kalan: $remaining / $limit" . ($remaining < $limit ? " · sıfırlanma: ~{$resetMin} dk" : '') . ($rlOk ? '' : ' (DÜŞÜK — sync sırasında 403 alabilirsiniz)')
+                    ];
+                } else {
+                    $checks[] = ['name' => 'GitHub API kotası', 'ok' => false, 'detail' => 'rate_limit endpoint okunamadı (HTTP ' . $rl['code'] . ')'];
+                }
+
+                // raw.githubusercontent.com ping (dosya indirme adresi - sync burada calisacak)
+                $rawTest = upd_curl('https://raw.githubusercontent.com/' . $GLOBALS['repoFull'] . '/' . $GLOBALS['ghBranch'] . '/manifest.json',
+                    ['User-Agent: Mizan-Updater/1.0', 'Authorization: token ' . $token], 10, 1);
+                $rawOk = $rawTest['code'] === 200;
+                $rawDetail = $rawOk ? 'OK (manifest indirildi)' : "HTTP {$rawTest['code']}" . ($rawTest['error'] ? ' · ' . $rawTest['error'] : '');
+                $checks[] = ['name' => 'raw.githubusercontent.com erişimi', 'ok' => $rawOk, 'detail' => $rawDetail];
             }
             // DB baglantisi
             $dbOk = false;
@@ -392,8 +491,20 @@ if (isset($_GET['ajax'])) {
         // ---- status ----
         if ($aj === 'status') {
             if (!$token) { echo json_encode(['ok' => false, 'error' => 'GitHub token tanımlı değil. Ayarlar sekmesinden ekleyin.']); exit; }
-            $remote = upd_repoTree($token);
-            if (!$remote) { echo json_encode(['ok' => false, 'error' => 'Repo ağacı okunamadı. Token yetkisini kontrol edin.']); exit; }
+            $dbg = null;
+            $remote = upd_repoTree($token, $dbg);
+            if (!$remote) {
+                $msg = 'Repo ağacı okunamadı.';
+                if ($dbg) {
+                    $msg .= ' [HTTP ' . $dbg['code'] . ' · ' . $dbg['attempts'] . ' deneme]';
+                    if (!empty($dbg['error'])) $msg .= ' · ' . $dbg['error'];
+                }
+                if ($dbg && $dbg['code'] === 401) $msg .= "\nÇözüm: Token süresi dolmuş veya yetki yetersiz. Ayarlar → yeni token girin.";
+                if ($dbg && $dbg['code'] === 403) $msg .= "\nÇözüm: Token rate-limit aşmış olabilir veya repo'ya 'repo' yetkisi yok.";
+                if ($dbg && in_array($dbg['code'], [502, 503, 504])) $msg .= "\nGitHub veya hosting geçici sorunu. 1-2 dakika sonra tekrar deneyin.";
+                echo json_encode(['ok' => false, 'error' => $msg, 'debug' => $dbg]);
+                exit;
+            }
             $diff = upd_diff($token);
             echo json_encode([
                 'ok'         => true,
@@ -415,12 +526,24 @@ if (isset($_GET['ajax'])) {
             if (!$token) { echo json_encode(['ok' => false, 'error' => 'Token yok']); exit; }
             $force = ($aj === 'force_sync');
 
+            // Uzun isteklere izin ver (paylasimli hosting'lerde varsayilan 30sn olabilir)
+            @set_time_limit(300);
+            @ini_set('memory_limit', '256M');
+
             // Yedek
             $bk = upd_backup($force ? 'force' : 'sync');
             $log = [];
             $log[] = 'Yedek: ' . ($bk['ok'] ? ($bk['file'] . ' (' . upd_humanSize((int)$bk['size']) . ')') : 'BAŞARISIZ - ' . ($bk['error'] ?? ''));
 
-            $remote = upd_repoTree($token);
+            $treeDbg = null;
+            $remote = upd_repoTree($token, $treeDbg);
+            if (!$remote) {
+                $msg = 'Repo ağacı okunamadı';
+                if ($treeDbg) $msg .= ' [HTTP ' . $treeDbg['code'] . ($treeDbg['error'] ? ' · ' . $treeDbg['error'] : '') . ']';
+                echo json_encode(['ok' => false, 'error' => $msg, 'log' => $log]);
+                exit;
+            }
+
             $updated = 0; $errors = []; $unchanged = 0;
             foreach ($remote as $f) {
                 $abs = MIZAN_ROOT . '/' . $f['path'];
@@ -434,24 +557,41 @@ if (isset($_GET['ajax'])) {
                 }
                 if (!$needs) { $unchanged++; continue; }
 
-                $content = upd_ghDownload($f['path'], $token);
+                $dbg = null;
+                $content = upd_ghDownload($f['path'], $token, $dbg);
                 if ($content === null) {
-                    $errors[] = $f['path'] . ' indirilemedi';
+                    $reason = $dbg && $dbg['code'] ? "HTTP {$dbg['code']}" : ($dbg['error'] ?? 'bilinmeyen');
+                    if ($dbg && $dbg['attempts'] > 1) $reason .= " ({$dbg['attempts']} deneme)";
+                    $errors[] = $f['path'] . ' indirilemedi: ' . $reason;
+                    // 503/429 ust uste alirsak vazgec, hosting/GitHub sorunu var
+                    $recent5xx = 0;
+                    foreach (array_slice($errors, -5) as $e) {
+                        if (strpos($e, 'HTTP 503') !== false || strpos($e, 'HTTP 429') !== false || strpos($e, 'HTTP 502') !== false) $recent5xx++;
+                    }
+                    if ($recent5xx >= 5) {
+                        $errors[] = '⚠ Üst üste 5+ kez 5xx hatası alındı. Senkron durduruldu. Birkaç dakika bekleyip tekrar deneyin.';
+                        break;
+                    }
                     continue;
                 }
                 $dir = dirname($abs);
                 if (!is_dir($dir)) @mkdir($dir, 0755, true);
                 if (@file_put_contents($abs, $content) === false) {
-                    $errors[] = $f['path'] . ' yazılamadı';
+                    $errors[] = $f['path'] . ' yazılamadı (klasör izni?)';
                     continue;
                 }
                 $updated++;
                 $log[] = '✓ ' . $f['path'] . ' (' . upd_humanSize(strlen($content)) . ')';
             }
 
-            // Migration
-            $mig = upd_runMigrations();
-            $log[] = 'Migration: OK=' . $mig['executed'] . ' SKIP=' . $mig['skipped'] . ' ERR=' . $mig['errors'];
+            // Migration (sadece dosya updateleri basarili olduysa calistir, yoksa skip)
+            $mig = ['executed' => 0, 'skipped' => 0, 'errors' => 0, 'error_list' => []];
+            if (count($errors) === 0) {
+                $mig = upd_runMigrations();
+                $log[] = 'Migration: OK=' . $mig['executed'] . ' SKIP=' . $mig['skipped'] . ' ERR=' . $mig['errors'];
+            } else {
+                $log[] = 'Migration: dosya hataları nedeniyle atlandı';
+            }
 
             // Manifest okuyup versiyonu guncelle
             $newVer = upd_localVer();
@@ -824,11 +964,13 @@ $localVersion = upd_localVer();
     <div class="card-body">
       <h6 class="fw-bold mb-2"><i class="bi bi-life-preserver text-warning"></i> Sık Karşılaşılan Sorunlar</h6>
       <ul class="small mb-0">
-        <li><b>"Yedek alınamadı"</b> → <code>backups/</code> klasörü yok veya yazma izni yok. Bu klasör paket çıkarımı sonrası bootstrap tarafından otomatik oluşturulur, ama hosting izinleri sınırlı olabilir. DA File Manager'dan klasör izinlerini <code>755</code> yapın.</li>
-        <li><b>"Token yok / 401"</b> → Ayarlar sekmesinden GitHub Personal Access Token girin (<code>repo</code> yetkisi yeter).</li>
-        <li><b>"Repo ağacı okunamadı"</b> → Token süresi dolmuş veya yetki yetersiz. <a href="https://github.com/settings/tokens" target="_blank">Yeni token üretin</a>.</li>
+        <li><b>"HTTP 503 / 502 / 504" sync sırasında</b> → Geçici GitHub veya hosting sorunu. <strong>Sistem otomatik 3 kez retry yapar</strong> (1s, 2s, 4s aralıklarla). Yine başarısız olursa 1-2 dakika bekleyip tekrar deneyin. Sürekli alıyorsanız hosting destek ekibinden <code>raw.githubusercontent.com</code> ve <code>api.github.com</code> adreslerine giden trafiği kontrol etmelerini isteyin.</li>
+        <li><b>"HTTP 429 Rate limit"</b> → Authenticated 5000 req/saat hakkı doldu (force-sync büyük repolarda mümkün). Tanılama'daki "Kalan kotası" satırını kontrol edin, sıfırlanma süresini bekleyin.</li>
+        <li><b>"HTTP 401 / 403"</b> → Token süresi dolmuş veya yetki yetersiz. Ayarlar → Yeni token girin (sadece <code>repo</code> yetkisi yeter).</li>
+        <li><b>"Yedek alınamadı"</b> → <code>backups/</code> klasörü yok veya yazma izni yok. Bootstrap otomatik oluşturur ama hosting izinleri sınırlı olabilir; DA File Manager'dan klasör izinlerini <code>755</code> yapın.</li>
         <li><b>"cURL eklentisi yok"</b> → Hosting destek ekibinden cURL aktivasyonu isteyin.</li>
         <li><b>Root taşıma sonrası</b> → Eski <code>/v2/backups</code> klasörünü unutmayın, gerekirse manuel oluşturun. <code>config/config.php</code>'de <code>SITE_BASE_URL</code> doğru mu (<code>/v2</code> yok)?</li>
+        <li><b>"Dosya yazılamadı"</b> → Hedef dizin yazılamıyor. PHP user'ı (genelde <code>www-data</code>) için izin: tüm proje klasörü <code>755</code>, dosyalar <code>644</code>.</li>
       </ul>
     </div>
   </div>
@@ -946,23 +1088,28 @@ $localVersion = upd_localVer();
   window.updSync = async function (force) {
     if (!confirm(force ? 'TÜM dosyalar yeniden indirilecek. Devam?' : 'Sadece değişen dosyalar güncellenecek. Devam?')) return;
     const log = document.getElementById('ovLog');
-    log.textContent = (force ? 'Force' : 'Smart') + ' sync başlatılıyor...';
+    log.textContent = (force ? 'Force' : 'Smart') + ' sync başlatılıyor... (büyük güncellemelerde 30-60 sn sürebilir)';
     try {
       const r = await updFetch((force ? 'force_sync' : 'sync'), new FormData());
       if (!r.ok && !r.updated) {
-        log.innerHTML = '<span class="err">Hata: ' + (r.error || (r.errors && r.errors.join('\n')) || '?') + '</span>';
+        let errHtml = '<span class="err">✗ Sync başarısız</span>\n\n';
+        if (r.error) errHtml += 'Sebep: ' + r.error + '\n';
+        if (r.errors && r.errors.length) errHtml += '\nHATALAR:\n' + r.errors.map(e => '  ✗ ' + e).join('\n');
+        if (r.log && r.log.length) errHtml += '\n\nLog:\n' + r.log.join('\n');
+        errHtml += '\n\n💡 Tanılama sekmesinden "Kontrolü Çalıştır" deneyin.';
+        log.innerHTML = errHtml;
         return;
       }
       let txt = '';
       if (r.log) txt += r.log.join('\n');
       txt += '\n\n✓ Güncellendi: ' + r.updated + '   |   ✓ Aynı kalan: ' + r.unchanged;
       if (r.errors && r.errors.length) {
-        txt += '\n\nHATALAR:\n' + r.errors.map(e => '  ✗ ' + e).join('\n');
+        txt += '\n\nUYARILAR:\n' + r.errors.map(e => '  ⚠ ' + e).join('\n');
       }
       txt += '\n\n>>> Tamamlandı (v' + r.version + ') <<<';
       log.textContent = txt;
       // Sayfayi 2 saniye sonra yenile (yeni surum gosterimi icin)
-      if (r.updated > 0) setTimeout(() => location.reload(), 2500);
+      if (r.updated > 0 && (!r.errors || r.errors.length === 0)) setTimeout(() => location.reload(), 2500);
     } catch (e) {
       log.innerHTML = '<span class="err">Network hatası: ' + e.message + '</span>';
     }
@@ -1085,14 +1232,35 @@ $localVersion = upd_localVer();
   };
 
   // ---- Settings tab ----
-  // Tüm AJAX çağrıları için ortak yardımcı (try/catch + JSON parse)
+  // Tüm AJAX çağrıları için ortak yardımcı (try/catch + JSON parse + retry on 5xx)
   async function updFetch(action, formData) {
     const opts = formData ? { method: 'POST', body: formData } : {};
-    const resp = await fetch('?ajax=' + action, opts);
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const text = await resp.text();
-    try { return JSON.parse(text); }
-    catch (e) { throw new Error('Sunucu yanıtı bozuk: ' + text.substring(0, 200)); }
+    const maxAttempts = 3;
+    let lastErr = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const resp = await fetch('?ajax=' + action, opts);
+        if (resp.status >= 500 && resp.status < 600 && attempt < maxAttempts) {
+          // 5xx - server-side hata, retry
+          await new Promise(r => setTimeout(r, attempt * 1500));
+          lastErr = new Error('HTTP ' + resp.status + ' (deneme ' + attempt + '/' + maxAttempts + ')');
+          continue;
+        }
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const text = await resp.text();
+        try { return JSON.parse(text); }
+        catch (e) { throw new Error('Sunucu yanıtı bozuk: ' + text.substring(0, 200)); }
+      } catch (e) {
+        lastErr = e;
+        // Network hatası - retry
+        if (attempt < maxAttempts && (e.message.includes('Failed to fetch') || e.message.includes('Network') || e.message.includes('HTTP 5'))) {
+          await new Promise(r => setTimeout(r, attempt * 1500));
+          continue;
+        }
+        throw e;
+      }
+    }
+    throw lastErr || new Error('Bilinmeyen ağ hatası');
   }
 
   window.updSaveToken = async function () {
