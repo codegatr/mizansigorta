@@ -64,26 +64,41 @@ try { $schemaSubeler = db_all('SELECT * FROM ' . t('subeler') . ' WHERE aktif=1 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
 
-<!-- Schema.org InsuranceAgency JSON-LD -->
+<!-- Schema.org InsuranceAgency JSON-LD - Zengin yapilandirilmis veri -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "InsuranceAgency",
+  "@type": ["InsuranceAgency", "LocalBusiness", "ProfessionalService"],
+  "@id": "<?= e(SITE_BASE_URL) ?>/#organization",
   "name": "<?= e(setting('firma_adi', SITE_NAME)) ?>",
-  "alternateName": ["Mizan Sigorta", "Mizan Sigorta Aracılık Hizmetleri"],
-  "description": "<?= e(setting('site_aciklamasi', 'Mizan Sigorta — sigorta aracılık hizmetleri.')) ?>",
+  "alternateName": ["Mizan Sigorta", "Mizan Sigorta Aracılık Hizmetleri", "Mizan Sigorta Konya", "Mizan Sigorta İstanbul"],
+  "description": "<?= e(setting('site_aciklamasi', 'Mizan Sigorta — 12+ anlaşmalı sigorta şirketi arasından uygun primli kasko, trafik, konut, DASK, sağlık, ferdi kaza ve işyeri sigortası. Konya, İstanbul, Ankara, Aksaray\'da güvenli sigorta hizmetleri.')) ?>",
+  "slogan": "Güven ve Özen İle",
   "url": "<?= e(SITE_BASE_URL) ?>/",
-  "logo": "<?= e(SITE_BASE_URL) ?>/assets/img/logo.png",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "<?= e(SITE_BASE_URL) ?>/assets/img/logo.png",
+    "width": 256,
+    "height": 256
+  },
   "image": "<?= e(SITE_BASE_URL) ?>/assets/img/logo.png",
   "telephone": "<?= e(setting('telefon')) ?>",
   "email": "<?= e(setting('email')) ?>",
-  "priceRange": "$$",
+  "priceRange": "₺",
+  "currenciesAccepted": "TRY",
+  "paymentAccepted": "Cash, Credit Card, Bank Transfer",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "<?= e(setting('adres', 'Konya, Türkiye')) ?>",
     "addressLocality": "Konya",
     "addressRegion": "Konya",
+    "postalCode": "42000",
     "addressCountry": "TR"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "37.8716",
+    "longitude": "32.4845"
   },
 <?php
 // Şubeleri schema'ya dinamik ekle (mz_subeler tablosundan)
@@ -112,9 +127,10 @@ if (!$serviceCitiesArr) $serviceCitiesArr = ['İstanbul', 'Konya', 'Ankara', 'Ak
 ?>
   "areaServed": [
 <?php foreach ($serviceCitiesArr as $i => $c): ?>
-    {"@type": "City", "name": "<?= e($c) ?>"}<?= $i < count($serviceCitiesArr) - 1 ? ',' : '' ?>
+    {"@type": "City", "name": "<?= e($c) ?>"},
 <?php endforeach; ?>
-    ,{"@type": "Country", "name": "Türkiye"}
+    {"@type": "Country", "name": "Türkiye"},
+    {"@type": "AdministrativeArea", "name": "Türkiye Cumhuriyeti"}
   ],
 <?php if ($departments): ?>
   "department": <?= json_encode($departments, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
@@ -140,15 +156,73 @@ if (!$serviceCitiesArr) $serviceCitiesArr = ['İstanbul', 'Konya', 'Ankara', 'Ak
     ?>
   ],
   "knowsLanguage": ["tr-TR", "de-DE", "en-US"],
-  "makesOffer": [
-    {"@type": "Offer", "name": "Kasko Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/kasko"},
-    {"@type": "Offer", "name": "Trafik Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/trafik-zorunlu-sorumluluk"},
-    {"@type": "Offer", "name": "Konut Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/konut-sigortasi"},
-    {"@type": "Offer", "name": "DASK Zorunlu Deprem", "url": "<?= e(SITE_BASE_URL) ?>/urun/dask"},
-    {"@type": "Offer", "name": "Özel Sağlık Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/ozel-saglik-sigortasi"},
-    {"@type": "Offer", "name": "Tamamlayıcı Sağlık Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/tamamlayici-saglik-sigortasi"},
-    {"@type": "Offer", "name": "Ferdi Kaza Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/ferdi-kaza-sigortasi"}
+  "knowsAbout": [
+    "Kasko Sigortası", "Trafik Sigortası", "Konut Sigortası", "DASK Zorunlu Deprem Sigortası",
+    "Özel Sağlık Sigortası", "Tamamlayıcı Sağlık Sigortası", "Ferdi Kaza Sigortası",
+    "İşyeri Sigortası", "Yangın Sigortası", "Nakliyat Sigortası", "Mesuleyet Sigortası",
+    "Hayat Sigortası", "Seyahat Sağlık Sigortası", "Drone Sigortası"
+  ],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Sigorta Ürünleri",
+    "itemListElement": [
+      {"@type": "OfferCatalog", "name": "Araç Sigortaları", "itemListElement": [
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Kasko Sigortası", "description": "Tam Kasko, Genişletilmiş Kasko, Mini Kasko teminatları", "url": "<?= e(SITE_BASE_URL) ?>/urun/kasko"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Trafik Sigortası", "description": "Karayolları Zorunlu Sorumluluk Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/trafik-zorunlu-sorumluluk"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Yeşil Kart Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/yesil-kart"}}
+      ]},
+      {"@type": "OfferCatalog", "name": "Konut Sigortaları", "itemListElement": [
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Konut Sigortası", "description": "Ev sigortası, eşya sigortası, deprem teminatı", "url": "<?= e(SITE_BASE_URL) ?>/urun/konut-sigortasi"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "DASK Zorunlu Deprem Sigortası", "description": "Doğal Afet Sigortaları Kurumu zorunlu deprem", "url": "<?= e(SITE_BASE_URL) ?>/urun/dask"}}
+      ]},
+      {"@type": "OfferCatalog", "name": "Sağlık Sigortaları", "itemListElement": [
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Özel Sağlık Sigortası", "description": "Özel hastane, doktor, ameliyat teminatı", "url": "<?= e(SITE_BASE_URL) ?>/urun/ozel-saglik-sigortasi"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Tamamlayıcı Sağlık Sigortası", "description": "SGK anlaşmalı özel hastane teminatı", "url": "<?= e(SITE_BASE_URL) ?>/urun/tamamlayici-saglik-sigortasi"}}
+      ]},
+      {"@type": "OfferCatalog", "name": "Bireysel Sigortalar", "itemListElement": [
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Ferdi Kaza Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/ferdi-kaza-sigortasi"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Hayat Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/hayat-sigortasi"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Seyahat Sağlık Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/seyahat-saglik"}}
+      ]}
+    ]
+  },
+  "potentialAction": [
+    {
+      "@type": "ReserveAction",
+      "name": "Online Teklif Al",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "<?= e(SITE_BASE_URL) ?>/teklif-al",
+        "actionPlatform": ["http://schema.org/DesktopWebPlatform", "http://schema.org/MobileWebPlatform"]
+      }
+    },
+    {
+      "@type": "Action",
+      "name": "Hasar İhbarı",
+      "target": "<?= e(SITE_BASE_URL) ?>/hasar-ihbari"
+    }
   ]
+}
+</script>
+
+<!-- WebSite Schema (Site arama özelliği) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "<?= e(SITE_BASE_URL) ?>/#website",
+  "url": "<?= e(SITE_BASE_URL) ?>/",
+  "name": "<?= e(setting('site_basligi', 'Mizan Sigorta')) ?>",
+  "publisher": {"@id": "<?= e(SITE_BASE_URL) ?>/#organization"},
+  "inLanguage": "tr-TR",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "<?= e(SITE_BASE_URL) ?>/?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
 }
 </script>
 

@@ -327,50 +327,104 @@ function mail_template(string $title, string $bodyHtml, array $opts = []): strin
     $tel        = e(setting('telefon', ''));
     $email      = e(setting('email', ''));
     $adres      = e(setting('adres', ''));
+    $whatsappRaw = trim((string) setting('whatsapp', ''));
+    $whatsapp   = function_exists('normalize_phone') ? normalize_phone($whatsappRaw) : preg_replace('/[^0-9]/', '', $whatsappRaw);
     $web        = e(rtrim(SITE_BASE_URL, '/'));
     $teklifUrl  = $web . '/teklif-al';
     $hasarUrl   = $web . '/hasar-ihbari';
 
-    $preheader = e((string)($opts['preheader'] ?? 'Mizan Sigorta - Güven ve Özen İle'));
+    $preheader = e((string)($opts['preheader'] ?? 'Mizan Sigorta — 12+ anlaşmalı şirket arasında en uygun teminat'));
     $ctaText   = (string)($opts['cta_text'] ?? '');
     $ctaUrl    = (string)($opts['cta_url'] ?? '');
     $badge     = (string)($opts['badge'] ?? '');
-    $badgeBg   = (string)($opts['badge_color'] ?? '#f4d35e');
+    $badgeBg   = (string)($opts['badge_color'] ?? '#22c55e');
+
+    // Sosyal medya icon'lari (SVG inline - mail-safe)
+    $socialIcons = [
+        'facebook'  => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>',
+        'instagram' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>',
+        'twitter'   => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+        'linkedin'  => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
+        'youtube'   => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>',
+    ];
 
     $socials = [];
-    foreach (['facebook' => 'Facebook', 'instagram' => 'Instagram', 'twitter' => 'Twitter', 'linkedin' => 'LinkedIn', 'youtube' => 'YouTube'] as $key => $label) {
+    foreach (['facebook', 'instagram', 'twitter', 'linkedin', 'youtube'] as $key) {
         if ($u = trim((string) setting($key))) {
-            $socials[] = ['url' => e($u), 'label' => $label];
+            $socials[] = ['url' => e($u), 'icon' => $socialIcons[$key] ?? '', 'label' => ucfirst($key)];
         }
     }
     $socialHtml = '';
     foreach ($socials as $s) {
-        $socialHtml .= '<a href="' . $s['url'] . '" style="color:#9ca3af;text-decoration:none;margin:0 6px;font-size:12px">' . e($s['label']) . '</a>';
+        $socialHtml .= '<a href="' . $s['url'] . '" style="display:inline-block;width:36px;height:36px;line-height:36px;border-radius:50%;background:rgba(255,255,255,.08);color:#9ca3af;text-align:center;text-decoration:none;margin:0 4px;vertical-align:middle" title="' . e($s['label']) . '">' . $s['icon'] . '</a>';
     }
 
+    // CTA buton (varsa)
     $ctaHtml = '';
     if ($ctaText !== '' && $ctaUrl !== '') {
-        $ctaHtml = '<table cellpadding="0" cellspacing="0" style="margin:24px 0"><tr><td>'
-                 . '<a href="' . e($ctaUrl) . '" style="display:inline-block;background:#e30b30;color:#ffffff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;letter-spacing:.3px">'
+        $ctaHtml = '<table cellpadding="0" cellspacing="0" border="0" style="margin:28px 0"><tr><td>'
+                 . '<a href="' . e($ctaUrl) . '" style="display:inline-block;background:linear-gradient(135deg,#e30b30 0%,#a91020 100%);color:#ffffff;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:.3px;box-shadow:0 4px 14px rgba(227,11,48,.35)">'
                  . e($ctaText) . ' &rarr;</a></td></tr></table>';
     }
 
+    // Badge (rozet)
     $badgeHtml = '';
     if ($badge !== '') {
-        $badgeHtml = '<span style="display:inline-block;background:' . e($badgeBg) . ';color:#0d1b2a;padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">' . e($badge) . '</span>';
+        $badgeHtml = '<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:' . e($badgeBg) . ';color:#ffffff;padding:7px 16px;border-radius:100px;font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;box-shadow:0 2px 8px rgba(0,0,0,.18)">&#10004; ' . e($badge) . '</td></tr></table>';
     }
 
-    $contactBlock = '<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:8px">';
+    // Iletisim bloğu (kart sıralı)
+    $iletisimCards = '';
     if ($tel) {
-        $contactBlock .= '<tr><td style="padding:6px 0;font-size:13px;color:#374151"><span style="display:inline-block;width:18px;color:#e30b30">&#9742;</span> <a href="tel:' . preg_replace('/\s+/', '', $tel) . '" style="color:#374151;text-decoration:none">' . $tel . '</a></td></tr>';
+        $telClean = preg_replace('/[^0-9+]/', '', $tel);
+        $iletisimCards .= '<td style="padding:8px;width:33.33%;vertical-align:top">'
+            . '<a href="tel:' . $telClean . '" style="display:block;text-decoration:none;color:inherit">'
+            .   '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center"><tr><td>'
+            .     '<div style="width:40px;height:40px;line-height:40px;border-radius:50%;background:linear-gradient(135deg,#e30b30,#a91020);color:#ffffff;font-size:18px;margin:0 auto 8px">&#9742;</div>'
+            .     '<div style="font-size:10px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-bottom:4px">Telefon</div>'
+            .     '<div style="font-size:13px;color:#0d1b2a;font-weight:700">' . $tel . '</div>'
+            .   '</td></tr></table>'
+            . '</a></td>';
+    }
+    if ($whatsapp && strlen($whatsapp) >= 11) {
+        $iletisimCards .= '<td style="padding:8px;width:33.33%;vertical-align:top">'
+            . '<a href="https://wa.me/' . $whatsapp . '" style="display:block;text-decoration:none;color:inherit">'
+            .   '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center"><tr><td>'
+            .     '<div style="width:40px;height:40px;line-height:40px;border-radius:50%;background:linear-gradient(135deg,#25d366,#128c7e);color:#ffffff;font-size:18px;margin:0 auto 8px;font-weight:700">W</div>'
+            .     '<div style="font-size:10px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-bottom:4px">WhatsApp</div>'
+            .     '<div style="font-size:13px;color:#0d1b2a;font-weight:700">Hemen Yaz</div>'
+            .   '</td></tr></table>'
+            . '</a></td>';
     }
     if ($email) {
-        $contactBlock .= '<tr><td style="padding:6px 0;font-size:13px;color:#374151"><span style="display:inline-block;width:18px;color:#e30b30">&#9993;</span> <a href="mailto:' . $email . '" style="color:#374151;text-decoration:none">' . $email . '</a></td></tr>';
+        $iletisimCards .= '<td style="padding:8px;width:33.33%;vertical-align:top">'
+            . '<a href="mailto:' . $email . '" style="display:block;text-decoration:none;color:inherit">'
+            .   '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center"><tr><td>'
+            .     '<div style="width:40px;height:40px;line-height:40px;border-radius:50%;background:linear-gradient(135deg,#0d6efd,#0a58ca);color:#ffffff;font-size:18px;margin:0 auto 8px">&#9993;</div>'
+            .     '<div style="font-size:10px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-bottom:4px">E-posta</div>'
+            .     '<div style="font-size:12px;color:#0d1b2a;font-weight:700;word-break:break-all">' . $email . '</div>'
+            .   '</td></tr></table>'
+            . '</a></td>';
     }
-    if ($adres) {
-        $contactBlock .= '<tr><td style="padding:6px 0;font-size:13px;color:#374151"><span style="display:inline-block;width:18px;color:#e30b30">&#9678;</span> ' . $adres . '</td></tr>';
-    }
-    $contactBlock .= '</table>';
+
+    // Trust badges (guven simgeleri)
+    $trustHtml = '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px"><tr>'
+        . '<td align="center" style="padding:6px 4px"><div style="font-size:18px;color:#f4d35e;line-height:1">&#9733;</div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-top:2px">12+ Şirket</div></td>'
+        . '<td align="center" style="padding:6px 4px"><div style="font-size:18px;color:#f4d35e;line-height:1">&#10004;</div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-top:2px">KVKK Uyumlu</div></td>'
+        . '<td align="center" style="padding:6px 4px"><div style="font-size:18px;color:#f4d35e;line-height:1">&#128274;</div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-top:2px">Güvenli</div></td>'
+        . '<td align="center" style="padding:6px 4px"><div style="font-size:18px;color:#f4d35e;line-height:1">&#9200;</div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-top:2px">7/24 Destek</div></td>'
+        . '</tr></table>';
+
+    // Sigorta tipleri footer linkleri
+    $urunLinks = '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'
+        . '<td align="center" style="font-size:11px;line-height:1.8;color:#6b7280">'
+        .   '<a href="' . $web . '/urun/kasko" style="color:#6b7280;text-decoration:none;margin:0 6px">Kasko</a> &middot; '
+        .   '<a href="' . $web . '/urun/trafik-zorunlu-sorumluluk" style="color:#6b7280;text-decoration:none;margin:0 6px">Trafik</a> &middot; '
+        .   '<a href="' . $web . '/urun/konut-sigortasi" style="color:#6b7280;text-decoration:none;margin:0 6px">Konut</a> &middot; '
+        .   '<a href="' . $web . '/urun/dask" style="color:#6b7280;text-decoration:none;margin:0 6px">DASK</a> &middot; '
+        .   '<a href="' . $web . '/urun/ozel-saglik-sigortasi" style="color:#6b7280;text-decoration:none;margin:0 6px">Sağlık</a>'
+        . '</td>'
+        . '</tr></table>';
 
     return <<<HTML
 <!DOCTYPE html>
@@ -379,77 +433,119 @@ function mail_template(string $title, string $bodyHtml, array $opts = []): strin
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<meta name="color-scheme" content="light only">
 <title>{$title}</title>
+<!--[if mso]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
+<style>
+@media screen and (max-width:600px){
+  .mz-pad{padding:24px 20px !important}
+  .mz-hero-pad{padding:32px 24px !important}
+  .mz-hero-title{font-size:22px !important}
+  .mz-iletisim-cards td{display:block !important;width:100% !important;padding:6px 0 !important}
+  .mz-cta a{font-size:14px !important;padding:14px 24px !important}
+}
+</style>
 </head>
-<body style="margin:0;padding:0;background:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2937;-webkit-font-smoothing:antialiased">
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2937;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale">
 
   <div style="display:none;font-size:1px;color:#f4f6f9;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden">{$preheader}</div>
 
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:32px 0">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f6f9;padding:32px 0">
     <tr>
       <td align="center">
 
-        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(13,27,42,.08)">
+        <!-- Ana Kart -->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(13,27,42,.12),0 4px 12px rgba(13,27,42,.08)">
 
+          <!-- HEADER: Premium Navy + Hero -->
           <tr>
-            <td style="background:#0d1b2a;background-image:linear-gradient(135deg,#0d1b2a 0%,#1b263b 100%);padding:32px 40px;border-bottom:4px solid #e30b30">
-              <table width="100%" cellpadding="0" cellspacing="0">
+            <td class="mz-hero-pad" style="background:linear-gradient(135deg,#0d1b2a 0%,#1b263b 50%,#1a3a5c 100%);padding:40px 48px;position:relative">
+              <!-- Marka satiri -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td>
-                    <div style="font-family:Georgia,'Times New Roman',serif;color:#e30b30;font-size:14px;font-style:italic;letter-spacing:1px;margin-bottom:6px">Güven ve Özen İle</div>
-                    <div style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:.5px">{$brandShort}</div>
+                    <!-- Logo SVG inline (kalkan + M harfi) -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+                      <td style="vertical-align:middle;padding-right:14px">
+                        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#e30b30 0%,#a91020 100%);text-align:center;line-height:48px;font-family:Georgia,serif;font-size:24px;font-weight:800;color:#ffffff;box-shadow:0 4px 12px rgba(227,11,48,.35)">M</div>
+                      </td>
+                      <td style="vertical-align:middle">
+                        <div style="font-family:Georgia,'Times New Roman',serif;color:#f4d35e;font-size:11px;font-style:italic;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px">Güven ve Özen İle</div>
+                        <div class="mz-hero-title" style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:.5px;line-height:1.2">{$brandShort}</div>
+                      </td>
+                    </tr></table>
                   </td>
-                  <td align="right" valign="top">
+                  <td align="right" valign="top" style="padding-top:6px">
                     {$badgeHtml}
                   </td>
                 </tr>
               </table>
+
+              <!-- Decorative gradient line -->
+              <div style="height:3px;background:linear-gradient(90deg,#e30b30 0%,#f4d35e 50%,#e30b30 100%);margin-top:24px;border-radius:2px;opacity:.85"></div>
             </td>
           </tr>
 
+          <!-- BODY -->
           <tr>
-            <td style="padding:36px 40px;font-size:15px;line-height:1.7;color:#1f2937">
+            <td class="mz-pad" style="padding:40px 48px;font-size:15px;line-height:1.7;color:#1f2937;background:#ffffff">
               {$bodyHtml}
-              {$ctaHtml}
+              <div class="mz-cta">{$ctaHtml}</div>
             </td>
           </tr>
 
+          <!-- Trust Bar -->
           <tr>
-            <td style="background:#f8fafc;padding:18px 40px;border-top:1px solid #e5e7eb">
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td align="center" style="font-size:11px;color:#6b7280;letter-spacing:.8px;text-transform:uppercase;font-weight:600;padding-bottom:10px">Hızlı Erişim</td>
-                </tr>
-                <tr>
-                  <td align="center">
-                    <a href="{$teklifUrl}" style="display:inline-block;color:#0d1b2a;text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;margin:2px">Teklif Al</a>
-                    <a href="{$hasarUrl}" style="display:inline-block;color:#0d1b2a;text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;margin:2px">Hasar İhbarı</a>
-                    <a href="{$web}" style="display:inline-block;color:#0d1b2a;text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;margin:2px">Web Sitesi</a>
-                  </td>
-                </tr>
-              </table>
+            <td style="background:#0d1b2a;padding:18px 48px">
+              {$trustHtml}
             </td>
           </tr>
 
+          <!-- ILETISIM CARD GRID (3 sutun) -->
           <tr>
-            <td style="padding:24px 40px 16px;background:#ffffff">
-              <div style="font-size:11px;color:#9ca3af;letter-spacing:1px;text-transform:uppercase;font-weight:700;margin-bottom:6px">İletişim</div>
-              {$contactBlock}
+            <td style="background:#f8fafc;padding:24px 36px">
+              <div style="text-align:center;font-size:11px;color:#6b7280;letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:14px">Bize Ulaşın</div>
+              <table class="mz-iletisim-cards" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+                {$iletisimCards}
+              </tr></table>
             </td>
           </tr>
 
+          <!-- Hizli erisim - Sigorta tipleri footer linkler -->
           <tr>
-            <td style="background:#0d1b2a;padding:20px 40px;text-align:center">
-              <div style="margin-bottom:8px">{$socialHtml}</div>
-              <div style="font-size:11px;color:#6b7280;line-height:1.5">
-                &copy; {$year} {$brand}<br>
+            <td style="background:#ffffff;padding:20px 36px;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb">
+              <div style="text-align:center;font-size:10px;color:#9ca3af;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;margin-bottom:8px">Sigorta Türlerimiz</div>
+              {$urunLinks}
+            </td>
+          </tr>
+
+          <!-- FOOTER: Sosyal + Telif -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#0d1b2a 0%,#1b263b 100%);padding:28px 36px;text-align:center">
+              <div style="margin-bottom:14px">{$socialHtml}</div>
+              <div style="height:1px;background:rgba(255,255,255,.08);margin:14px 0"></div>
+              <div style="font-size:11px;color:#9ca3af;line-height:1.6">
+                <strong style="color:#ffffff">{$brand}</strong><br>
+                {$adres}<br>
+                <span style="opacity:.6">&copy; {$year} Tüm hakları saklıdır.</span>
+              </div>
+              <div style="font-size:10px;color:#6b7280;margin-top:14px;line-height:1.5">
                 Bu otomatik gönderilen bir e-postadır.<br>
-                Sorularınız için: <a href="mailto:{$email}" style="color:#9ca3af">{$email}</a>
+                Sorularınız için: <a href="mailto:{$email}" style="color:#9ca3af;text-decoration:underline">{$email}</a>
               </div>
             </td>
           </tr>
 
         </table>
+
+        <!-- Anti-spam tagline -->
+        <div style="max-width:600px;margin:18px auto 0;padding:0 20px;text-align:center;font-size:11px;color:#9ca3af;line-height:1.5">
+          {$brandShort} &middot; T.C. Hazine ve Maliye Bakanlığı SBM Lisanslı Sigorta Aracılık Şirketi<br>
+          KVKK kapsamında bilgileriniz koruma altındadır.
+        </div>
+
       </td>
     </tr>
   </table>

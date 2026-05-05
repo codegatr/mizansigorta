@@ -8,11 +8,16 @@ $yorumlar    = db_all('SELECT * FROM ' . t('referanslar') . " WHERE aktif=1 AND 
 $sirketler   = db_all('SELECT * FROM ' . t('sigorta_sirketleri') . ' WHERE aktif=1 ORDER BY sira ASC LIMIT 24');
 $slaytlar    = db_all('SELECT * FROM ' . t('slaytlar') . ' WHERE aktif=1 ORDER BY sira ASC, id ASC');
 
-$pageTitle = setting('site_basligi', SITE_NAME) . ' — Uygun Primli Sigorta, Güvence ve Teminat | Konya, İstanbul, Ankara, Aksaray';
+$pageTitle = 'Mizan Sigorta — Konya, İstanbul, Ankara, Aksaray | Kasko, Trafik, Konut, DASK, Sağlık Sigortası';
 $pageDesc  = setting('site_aciklamasi') ?:
-    'Mizan Sigorta — Lisanslı sigorta aracılık hizmetleri. Kasko, trafik, konut, DASK, özel sağlık, tamamlayıcı sağlık ve ferdi kaza sigortalarında uygun primli, güvenceli teminatlar. 12+ anlaşmalı şirket, 7/24 hasar desteği, online teklif. Konya genel merkez + İstanbul, Ankara, Aksaray şubeleri.';
+    'Mizan Sigorta — T.C. Hazine Bakanlığı SBM lisanslı sigorta aracılık şirketi. Kasko, trafik, konut, DASK, özel sağlık, tamamlayıcı sağlık, ferdi kaza, işyeri ve hayat sigortalarında 12+ anlaşmalı şirket arasında en uygun primi karşılaştırın. Online teklif, 7/24 hasar desteği, KVKK uyumlu güvenli süreç. Konya merkez · İstanbul · Ankara · Aksaray şubeleri ile sigortanızda Güven ve Özen.';
 $pageKeys  = setting('site_anahtar_kelimeler') ?:
-    'mizan sigorta, sigorta aracılık hizmetleri, kasko, trafik sigortası, konut sigortası, DASK, özel sağlık sigortası, tamamlayıcı sağlık sigortası, ferdi kaza, uygun primli sigorta, güvence ve teminat, sigorta al, online sigorta teklifi, Konya sigorta, İstanbul sigorta';
+    'mizan sigorta, mizan sigorta konya, mizan sigorta istanbul, mizan sigorta ankara, mizan sigorta aksaray, sigorta acentesi, sigorta aracılık, kasko, trafik sigortası, konut sigortası, dask, dask sigortası, özel sağlık sigortası, tamamlayıcı sağlık sigortası, tss, ferdi kaza sigortası, işyeri sigortası, hayat sigortası, seyahat sağlık sigortası, online sigorta teklifi, sigorta hesaplama, en uygun kasko, en ucuz trafik sigortası, deprem sigortası, ev sigortası, araç sigortası, hasar ihbarı, sigorta şirketi, türkiye sigorta, hdı sigorta, allianz, axa sigorta, anadolu sigorta, ak sigorta, mapfre sigorta';
+
+// Anasayfaya breadcrumb (SEO icin)
+$pageBreadcrumbs = [
+    ['name' => 'Ana Sayfa', 'url' => SITE_BASE_URL . '/']
+];
 require MIZAN_INC . '/header.php';
 ?>
 
