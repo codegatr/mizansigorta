@@ -12,8 +12,11 @@ if (!$urun) {
 }
 
 $isCategory = $urun['parent_id'] === null;
-$pageTitle = ($urun['seo_baslik'] ?: $urun['baslik']) . ' - ' . setting('firma_adi', SITE_NAME);
-$pageDesc  = $urun['seo_aciklama'] ?: $urun['kisa_aciklama'];
+$baseTitle = $urun['seo_baslik'] ?: $urun['baslik'];
+$pageTitle = $baseTitle . ' | Online Teklif & Uygun Prim - ' . setting('firma_adi', SITE_NAME);
+$pageDesc  = $urun['seo_aciklama'] ?: ($urun['kisa_aciklama']
+    ? $urun['kisa_aciklama'] . ' Mizan Sigorta\'dan online teklif alın, anlaşmalı şirketler arasından en uygun primi karşılaştırın.'
+    : $urun['baslik'] . ' için Mizan Sigorta\'dan uygun primli teklif alın. Lisanslı acente, 12+ anlaşmalı şirket, online başvuru ve 7/24 hasar desteği.');
 
 // Eger kategori ise alt urunleri yukle
 $altUrunler = $isCategory
@@ -27,6 +30,13 @@ if (!$isCategory) {
     $parent = db_row('SELECT id, slug, baslik, icon FROM ' . t('urunler') . ' WHERE id=?', [(int)$urun['parent_id']]);
     $kardesler = db_all('SELECT slug, baslik, icon FROM ' . t('urunler') . ' WHERE aktif=1 AND parent_id=? AND id<>? ORDER BY sira ASC', [(int)$urun['parent_id'], (int)$urun['id']]);
 }
+
+// Breadcrumb schema icin
+$pageBreadcrumbs = [['name' => 'Anasayfa', 'url' => '/']];
+if ($parent) {
+    $pageBreadcrumbs[] = ['name' => $parent['baslik'], 'url' => '/urun/' . $parent['slug']];
+}
+$pageBreadcrumbs[] = ['name' => $urun['baslik'], 'url' => '/urun/' . $urun['slug']];
 
 require MIZAN_INC . '/header.php';
 ?>

@@ -4,10 +4,16 @@ $pageTitle  = $pageTitle  ?? setting('site_basligi', SITE_NAME);
 $pageDesc   = $pageDesc   ?? setting('site_aciklamasi', '');
 $pageKeys   = $pageKeys   ?? setting('site_anahtar_kelimeler', '');
 $canonical  = $canonical  ?? (SITE_BASE_URL . ($_SERVER['REQUEST_URI'] ?? '/'));
+$pageBreadcrumbs = $pageBreadcrumbs ?? null;  // [['name'=>'X','url'=>'/x'], ...] - sayfa kendi setler
+$pageFAQ         = $pageFAQ ?? null;           // [['q'=>'...','a'=>'...'], ...]
 $urunlerNav = db_all('SELECT id, slug, baslik, icon FROM ' . t('urunler') . ' WHERE aktif=1 AND parent_id IS NULL ORDER BY sira ASC LIMIT 12');
 $cmsNav     = db_all('SELECT slug, baslik FROM ' . t('sayfalar') . ' WHERE aktif=1 AND menude_goster=1 ORDER BY menu_sirasi ASC');
 $tel        = setting('telefon');
 $wa         = setting('whatsapp');
+
+// Schema icin subeler (mz_subeler tablosu varsa)
+$schemaSubeler = [];
+try { $schemaSubeler = db_all('SELECT * FROM ' . t('subeler') . ' WHERE aktif=1 ORDER BY merkez_mi DESC, sira ASC'); } catch (Throwable $e) {}
 ?><!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -21,7 +27,12 @@ $wa         = setting('whatsapp');
 <meta name="author" content="<?= e(setting('firma_adi', SITE_NAME)) ?>">
 <meta name="geo.region" content="TR">
 <meta name="geo.placename" content="<?= e(setting('ofis_sehirler', 'Konya, Istanbul, Ankara, Aksaray')) ?>">
+<meta name="format-detection" content="telephone=yes">
 <link rel="canonical" href="<?= e($canonical) ?>">
+
+<!-- Alternate dil yonlendirmeleri (Almanya'daki Türk gurbetciler icin) -->
+<link rel="alternate" hreflang="tr" href="<?= e($canonical) ?>">
+<link rel="alternate" hreflang="x-default" href="<?= e($canonical) ?>">
 
 <!-- Open Graph -->
 <meta property="og:title" content="<?= e($pageTitle) ?>">
@@ -29,6 +40,7 @@ $wa         = setting('whatsapp');
 <meta property="og:type" content="website">
 <meta property="og:url"  content="<?= e($canonical) ?>">
 <meta property="og:locale" content="tr_TR">
+<meta property="og:locale:alternate" content="de_DE">
 <meta property="og:site_name" content="<?= e(setting('site_basligi', SITE_NAME)) ?>">
 <meta property="og:image" content="<?= e(SITE_BASE_URL) ?>/assets/img/logo.png">
 
@@ -58,7 +70,7 @@ $wa         = setting('whatsapp');
   "@context": "https://schema.org",
   "@type": "InsuranceAgency",
   "name": "<?= e(setting('firma_adi', SITE_NAME)) ?>",
-  "alternateName": "Mizan Sigorta",
+  "alternateName": ["Mizan Sigorta", "Mizan Sigorta Aracılık Hizmetleri"],
   "description": "<?= e(setting('site_aciklamasi', 'Mizan Sigorta — sigorta aracılık hizmetleri.')) ?>",
   "url": "<?= e(SITE_BASE_URL) ?>/",
   "logo": "<?= e(SITE_BASE_URL) ?>/assets/img/logo.png",
@@ -73,13 +85,40 @@ $wa         = setting('whatsapp');
     "addressRegion": "Konya",
     "addressCountry": "TR"
   },
+<?php
+// Şubeleri schema'ya dinamik ekle (mz_subeler tablosundan)
+$serviceCities = [];
+$departments = [];
+foreach ($schemaSubeler as $sb) {
+    $sehir = $sb['sehir'] ?? '';
+    if (!$sehir) continue;
+    $serviceCities[$sehir] = true;
+    $departments[] = [
+        '@type' => 'InsuranceAgency',
+        'name'  => $sb['etiket'] . ' - ' . $sehir,
+        'address' => [
+            '@type' => 'PostalAddress',
+            'streetAddress' => $sb['adres'],
+            'addressLocality' => $sehir,
+            'addressRegion' => $sehir,
+            'addressCountry' => 'TR',
+        ],
+        'telephone' => $sb['telefon'] ?? '',
+        'email' => $sb['email'] ?? '',
+    ];
+}
+$serviceCitiesArr = array_keys($serviceCities);
+if (!$serviceCitiesArr) $serviceCitiesArr = ['İstanbul', 'Konya', 'Ankara', 'Aksaray'];
+?>
   "areaServed": [
-    {"@type": "City", "name": "İstanbul"},
-    {"@type": "City", "name": "Konya"},
-    {"@type": "City", "name": "Ankara"},
-    {"@type": "City", "name": "Aksaray"},
-    {"@type": "Country", "name": "Türkiye"}
+<?php foreach ($serviceCitiesArr as $i => $c): ?>
+    {"@type": "City", "name": "<?= e($c) ?>"}<?= $i < count($serviceCitiesArr) - 1 ? ',' : '' ?>
+<?php endforeach; ?>
+    ,{"@type": "Country", "name": "Türkiye"}
   ],
+<?php if ($departments): ?>
+  "department": <?= json_encode($departments, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
+<?php endif; ?>
   "openingHoursSpecification": [{
     "@type": "OpeningHoursSpecification",
     "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
@@ -100,6 +139,7 @@ $wa         = setting('whatsapp');
     echo implode(",\n    ", $socials);
     ?>
   ],
+  "knowsLanguage": ["tr-TR", "de-DE", "en-US"],
   "makesOffer": [
     {"@type": "Offer", "name": "Kasko Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/kasko"},
     {"@type": "Offer", "name": "Trafik Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/trafik-zorunlu-sorumluluk"},
@@ -111,6 +151,48 @@ $wa         = setting('whatsapp');
   ]
 }
 </script>
+
+<!-- BreadcrumbList Schema (sayfa kendi belirler) -->
+<?php if ($pageBreadcrumbs && is_array($pageBreadcrumbs) && count($pageBreadcrumbs) > 1): ?>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+<?php foreach ($pageBreadcrumbs as $i => $b): ?>
+    {
+      "@type": "ListItem",
+      "position": <?= $i + 1 ?>,
+      "name": <?= json_encode($b['name'], JSON_UNESCAPED_UNICODE) ?>,
+      "item": <?= json_encode(SITE_BASE_URL . $b['url'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>
+    }<?= $i < count($pageBreadcrumbs) - 1 ? ',' : '' ?>
+<?php endforeach; ?>
+  ]
+}
+</script>
+<?php endif; ?>
+
+<!-- FAQPage Schema (sayfa kendi belirler - SSS sayfası kullanır) -->
+<?php if ($pageFAQ && is_array($pageFAQ) && count($pageFAQ) > 0): ?>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+<?php foreach ($pageFAQ as $i => $faq): ?>
+    {
+      "@type": "Question",
+      "name": <?= json_encode((string)$faq['q'], JSON_UNESCAPED_UNICODE) ?>,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": <?= json_encode((string)$faq['a'], JSON_UNESCAPED_UNICODE) ?>
+      }
+    }<?= $i < count($pageFAQ) - 1 ? ',' : '' ?>
+<?php endforeach; ?>
+  ]
+}
+</script>
+<?php endif; ?>
 
 <!-- Sitemap referansı -->
 <link rel="sitemap" type="application/xml" href="<?= e(SITE_BASE_URL) ?>/sitemap.xml">

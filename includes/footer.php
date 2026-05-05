@@ -129,6 +129,42 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
 })();
 </script>
 
+<!-- Mobil Alt Tab Bar (sadece mobil/tablette gorunur) -->
+<nav class="mz-mobile-tabbar" aria-label="Mobil hızlı erişim">
+  <a href="<?= u('/') ?>" class="mz-mtab" data-route="/">
+    <i class="bi bi-house-fill"></i>
+    <span>Anasayfa</span>
+  </a>
+  <a href="<?= u('/teklif-al') ?>" class="mz-mtab" data-route="/teklif-al">
+    <i class="bi bi-file-earmark-text-fill"></i>
+    <span>Teklif Al</span>
+  </a>
+  <?php if ($tel = setting('telefon')): ?>
+    <a href="tel:<?= e(preg_replace('/\s+/', '', $tel)) ?>" class="mz-mtab mz-mtab-cta" aria-label="Hemen ara">
+      <span class="mz-mtab-cta-circle"><i class="bi bi-telephone-fill"></i></span>
+    </a>
+  <?php endif; ?>
+  <a href="<?= u('/hasar-ihbari') ?>" class="mz-mtab" data-route="/hasar-ihbari">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>Hasar</span>
+  </a>
+  <a href="<?= u('/iletisim') ?>" class="mz-mtab" data-route="/iletisim">
+    <i class="bi bi-chat-left-text-fill"></i>
+    <span>İletişim</span>
+  </a>
+</nav>
+<script>
+// Aktif tab'i isaretle
+(function(){
+  var path = window.location.pathname.replace(/\/$/, '') || '/';
+  document.querySelectorAll('.mz-mtab[data-route]').forEach(function(t){
+    var route = t.getAttribute('data-route');
+    if (route === '/' && path === '/') t.classList.add('active');
+    else if (route !== '/' && path.indexOf(route) === 0) t.classList.add('active');
+  });
+})();
+</script>
+
 <!-- Scroll to Top -->
 <button type="button" id="mzScrollTop" class="mz-scroll-top" aria-label="Yukarı çık" title="Yukarı çık">
   <i class="bi bi-arrow-up"></i>

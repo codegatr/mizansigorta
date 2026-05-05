@@ -94,7 +94,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $captchaA = random_int(2, 9);
 $captchaB = random_int(2, 9);
 
-$pageTitle = 'Hasar İhbarı - ' . setting('firma_adi', SITE_NAME);
+$pageTitle = 'Hasar İhbarı — Online Form, 7/24 Destek | ' . setting('firma_adi', SITE_NAME);
+$pageDesc  = 'Hasar ihbarınızı online iletin: oto, konut, sağlık veya iş yeri. Eksper takibi, belge süreci ve ödeme — tüm süreci biz yönetiyoruz. 7/24 hasar destek hattı.';
+$pageBreadcrumbs = [
+    ['name' => 'Anasayfa', 'url' => '/'],
+    ['name' => 'Hasar İhbarı', 'url' => '/hasar-ihbari'],
+];
 require MIZAN_INC . '/header.php';
 ?>
 
@@ -265,19 +270,19 @@ require MIZAN_INC . '/header.php';
           <div class="col-md-6">
             <label class="form-label small fw-semibold">Ad Soyad <span class="text-danger">*</span></label>
             <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-              <input type="text" name="ad_soyad" class="form-control" required placeholder="Adınız ve soyadınız">
+              <input type="text" name="ad_soyad" autocomplete="name" class="form-control" required placeholder="Adınız ve soyadınız">
             </div>
           </div>
           <div class="col-md-6">
             <label class="form-label small fw-semibold">Telefon <span class="text-danger">*</span></label>
             <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
-              <input type="tel" name="telefon" class="form-control" required placeholder="0 5xx xxx xx xx">
+              <input type="tel" name="telefon" inputmode="tel" autocomplete="tel" class="form-control" required placeholder="0 5xx xxx xx xx">
             </div>
           </div>
           <div class="col-12">
             <label class="form-label small fw-semibold">E-posta <small class="text-muted fw-normal">(opsiyonel — bilgilendirme için)</small></label>
             <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-              <input type="email" name="email" class="form-control" placeholder="ornek@email.com">
+              <input type="email" name="email" inputmode="email" autocomplete="email" class="form-control" placeholder="ornek@email.com">
             </div>
           </div>
         </div>

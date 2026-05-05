@@ -8,8 +8,11 @@ $yorumlar    = db_all('SELECT * FROM ' . t('referanslar') . " WHERE aktif=1 AND 
 $sirketler   = db_all('SELECT * FROM ' . t('sigorta_sirketleri') . ' WHERE aktif=1 ORDER BY sira ASC LIMIT 24');
 $slaytlar    = db_all('SELECT * FROM ' . t('slaytlar') . ' WHERE aktif=1 ORDER BY sira ASC, id ASC');
 
-$pageTitle = setting('site_basligi', SITE_NAME);
-$pageDesc  = setting('site_aciklamasi', 'Mizan Sigorta — sigorta aracılık hizmetleri. Güven ve özen ile her daim yanınızda.');
+$pageTitle = setting('site_basligi', SITE_NAME) . ' — Uygun Primli Sigorta, Güvence ve Teminat | Konya, İstanbul, Ankara, Aksaray';
+$pageDesc  = setting('site_aciklamasi') ?:
+    'Mizan Sigorta — Lisanslı sigorta aracılık hizmetleri. Kasko, trafik, konut, DASK, özel sağlık, tamamlayıcı sağlık ve ferdi kaza sigortalarında uygun primli, güvenceli teminatlar. 12+ anlaşmalı şirket, 7/24 hasar desteği, online teklif. Konya genel merkez + İstanbul, Ankara, Aksaray şubeleri.';
+$pageKeys  = setting('site_anahtar_kelimeler') ?:
+    'mizan sigorta, sigorta aracılık hizmetleri, kasko, trafik sigortası, konut sigortası, DASK, özel sağlık sigortası, tamamlayıcı sağlık sigortası, ferdi kaza, uygun primli sigorta, güvence ve teminat, sigorta al, online sigorta teklifi, Konya sigorta, İstanbul sigorta';
 require MIZAN_INC . '/header.php';
 ?>
 

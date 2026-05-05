@@ -1,8 +1,8 @@
 <?php
 if (!defined('MIZAN_BOOT')) { http_response_code(403); exit; }
 
-$pageTitle = 'Sıkça Sorulan Sorular - ' . SITE_NAME;
-$pageDesc  = 'Sigorta ürünlerimiz ve süreçlerimizle ilgili sıkça sorulan sorular ve cevapları. Kasko, trafik, DASK, sağlık ve daha fazlası.';
+$pageTitle = 'Sıkça Sorulan Sorular - Sigorta Rehberi | ' . SITE_NAME;
+$pageDesc  = 'Sigorta ürünleri, teklif süreci, hasar ihbarı ve poliçe yenileme hakkında sıkça sorulan sorular. Kasko, trafik, DASK, sağlık sigortası rehberi.';
 
 $kategoriFilter = $_GET['k'] ?? '';
 $qFilter = trim($_GET['q'] ?? '');
@@ -17,6 +17,28 @@ if ($kategoriFilter !== '') {
 // Tum sorulari yukle (JS ile filtreleyecegiz; sayisi az 35 civari)
 $sorular     = db_all('SELECT id, kategori, soru, cevap, sira FROM ' . t('sss') . " WHERE aktif=1 ORDER BY kategori, sira ASC, id ASC");
 $kategoriler = db_all('SELECT DISTINCT kategori FROM ' . t('sss') . ' WHERE aktif=1 AND kategori<>"" ORDER BY kategori');
+
+// FAQ schema icin (Google rich-result) - sadece kategori filtresi yoksa tum sorulari kullan
+if (!$kategoriFilter && !$qFilter) {
+    $pageFAQ = [];
+    foreach ($sorular as $s) {
+        // Cevap HTML icerebilir, schema'ya plain text gerekir
+        $cevap = trim((string) $s['cevap']);
+        $cevapPlain = trim(strip_tags(str_replace(['<br>', '<br/>', '<br />', "\n"], ' ', $cevap)));
+        $cevapPlain = preg_replace('/\s+/', ' ', $cevapPlain);
+        if (mb_strlen($cevapPlain) > 30) {  // cok kisa cevaplari atla
+            $pageFAQ[] = ['q' => $s['soru'], 'a' => $cevapPlain];
+        }
+    }
+    // Cok fazla soru varsa Google schema 30-50 ile sinirla
+    $pageFAQ = array_slice($pageFAQ, 0, 50);
+}
+
+// Breadcrumb
+$pageBreadcrumbs = [
+    ['name' => 'Anasayfa', 'url' => '/'],
+    ['name' => 'Sıkça Sorulan Sorular', 'url' => '/sss'],
+];
 
 // Kategoriye gore grupla (server-side render kategorili gosterim icin)
 $gruplu = [];

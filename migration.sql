@@ -2950,3 +2950,7 @@ INSERT IGNORE INTO `mz_subeler` (`id`,`sehir`,`ilce`,`etiket`,`adres`,`telefon`,
 (2, 'Konya',    'Karatay', 'Sube Ofis', 'Adres bilgisi yonetim panelden duzenlenebilir.', NULL, 0, 1, 20),
 (3, 'Ankara',   NULL,      'Sube Ofis', 'Adres bilgisi yonetim panelden duzenlenebilir.', NULL, 0, 1, 30),
 (4, 'Aksaray',  NULL,      'Sube Ofis', 'Adres bilgisi yonetim panelden duzenlenebilir.', NULL, 0, 1, 40);
+
+-- ============================================================
+-- v1.1.20 - SEO + Mobil iyilestirmeler (sadece kod, SQL yok)
+-- ============================================================

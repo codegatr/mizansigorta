@@ -1,8 +1,12 @@
 <?php
 if (!defined('MIZAN_BOOT')) { http_response_code(403); exit; }
 
-$pageTitle = 'İletişim - ' . SITE_NAME;
-$pageDesc  = 'Mizan Sigorta İstanbul Genel Merkez ve şubeleri. Adres, telefon, e-posta, harita ve mesaj formu.';
+$pageTitle = 'İletişim — Konya, İstanbul, Ankara, Aksaray Şubeleri | ' . SITE_NAME;
+$pageDesc  = 'Mizan Sigorta İletişim. Konya genel merkez ve şubelerimizin telefon, e-posta, adres ve çalışma saatleri. Online mesaj formu ile bize ulaşın, en kısa sürede dönüş yapalım.';
+$pageBreadcrumbs = [
+    ['name' => 'Anasayfa', 'url' => '/'],
+    ['name' => 'İletişim', 'url' => '/iletisim'],
+];
 
 $errors = [];
 $ok = false;
@@ -378,19 +382,19 @@ $_haritaSrc = function(array $s): string {
                 <div class="col-md-6">
                   <label class="form-label small fw-semibold">Ad Soyad <span class="text-danger">*</span></label>
                   <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                    <input type="text" name="ad_soyad" class="form-control" required value="<?= e($_POST['ad_soyad'] ?? '') ?>" placeholder="Adınız ve soyadınız">
+                    <input type="text" name="ad_soyad" autocomplete="name" class="form-control" required value="<?= e($_POST['ad_soyad'] ?? '') ?>" placeholder="Adınız ve soyadınız">
                   </div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label small fw-semibold">Telefon <span class="text-danger">*</span></label>
                   <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
-                    <input type="tel" name="telefon" class="form-control" required value="<?= e($_POST['telefon'] ?? '') ?>" placeholder="0 5xx xxx xx xx">
+                    <input type="tel" name="telefon" inputmode="tel" autocomplete="tel" class="form-control" required value="<?= e($_POST['telefon'] ?? '') ?>" placeholder="0 5xx xxx xx xx">
                   </div>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label small fw-semibold">E-posta <span class="text-danger">*</span></label>
                   <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                    <input type="email" name="email" class="form-control" required value="<?= e($_POST['email'] ?? '') ?>" placeholder="ornek@email.com">
+                    <input type="email" name="email" inputmode="email" autocomplete="email" class="form-control" required value="<?= e($_POST['email'] ?? '') ?>" placeholder="ornek@email.com">
                   </div>
                 </div>
                 <div class="col-md-6">

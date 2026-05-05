@@ -126,7 +126,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $captchaA = random_int(2, 9);
 $captchaB = random_int(2, 9);
 
-$pageTitle = 'Teklif Talebi - ' . setting('firma_adi', SITE_NAME);
+$pageTitle = 'Online Sigorta Teklifi Al — Uygun Primli, Anlaşmalı 12+ Şirket | ' . setting('firma_adi', SITE_NAME);
+$pageDesc  = 'Online sigorta teklifi alın. Kasko, trafik, konut, DASK, sağlık, ferdi kaza — anlaşmalı 12+ sigorta şirketi arasından en uygun primi karşılaştırın. Ücretsiz teklif, hızlı dönüş.';
+$pageBreadcrumbs = [
+    ['name' => 'Anasayfa', 'url' => '/'],
+    ['name' => 'Teklif Al', 'url' => '/teklif-al'],
+];
 require MIZAN_INC . '/header.php';
 ?>
 
@@ -222,7 +227,7 @@ require MIZAN_INC . '/header.php';
             <div class="col-md-6">
               <label class="form-label small fw-semibold">Ad Soyad <span class="text-danger">*</span></label>
               <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                <input type="text" name="ad_soyad" class="form-control" value="<?= e($_POST['ad_soyad'] ?? '') ?>" required placeholder="Adınız ve soyadınız">
+                <input type="text" name="ad_soyad" autocomplete="name" class="form-control" value="<?= e($_POST['ad_soyad'] ?? '') ?>" required placeholder="Adınız ve soyadınız">
               </div>
             </div>
             <div class="col-md-6 mz-firma-field" style="display:none">
@@ -234,13 +239,13 @@ require MIZAN_INC . '/header.php';
             <div class="col-md-6">
               <label class="form-label small fw-semibold">Telefon <span class="text-danger">*</span></label>
               <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
-                <input type="tel" name="telefon" class="form-control" value="<?= e($onTel ?: ($_POST['telefon'] ?? '')) ?>" placeholder="0 5xx xxx xx xx" required>
+                <input type="tel" name="telefon" inputmode="tel" autocomplete="tel" class="form-control" value="<?= e($onTel ?: ($_POST['telefon'] ?? '')) ?>" placeholder="0 5xx xxx xx xx" required>
               </div>
             </div>
             <div class="col-md-6">
               <label class="form-label small fw-semibold">E-posta <small class="text-muted fw-normal">(opsiyonel)</small></label>
               <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                <input type="email" name="email" class="form-control" value="<?= e($_POST['email'] ?? '') ?>" placeholder="ornek@email.com">
+                <input type="email" name="email" inputmode="email" autocomplete="email" class="form-control" value="<?= e($_POST['email'] ?? '') ?>" placeholder="ornek@email.com">
               </div>
             </div>
             <div class="col-md-6">
