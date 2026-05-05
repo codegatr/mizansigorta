@@ -505,14 +505,85 @@ main { flex: 1; }
 @media (max-width: 767.98px) {
   .mz-slide-bg { display: none; }
   .mz-slide-bg.mz-slide-bg-full { display: block !important; }
-  .mz-slide.has-full-bg .mz-slide-inner { bottom: 30px; }
-  .mz-slide.has-full-bg .mz-slide-cta {
-    flex-direction: column;
-    gap: 8px;
-    width: calc(100% - 40px);
-    margin: 0 20px;
+
+  /* Custom_url slaytlarda mobile - resim + butonlar dikey istif */
+  .mz-slider.mz-slider-full-bg {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    background: var(--mz-navy);
   }
-  .mz-slide.has-full-bg .mz-slide-cta .btn { width: 100%; }
+  .mz-slider.mz-slider-full-bg .mz-slider-track {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  .mz-slide.has-full-bg {
+    position: relative !important;
+    inset: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding-bottom: 20px;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .mz-slide.has-full-bg.active {
+    display: flex !important;
+  }
+  .mz-slide.has-full-bg:not(.active) {
+    display: none !important;
+  }
+  .mz-slide.has-full-bg .mz-slide-bg.mz-slide-bg-full {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+  }
+  .mz-slide.has-full-bg .mz-slide-bg.mz-slide-bg-full img {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    display: block;
+    position: static !important;
+  }
+  .mz-slide.has-full-bg .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .mz-slide.has-full-bg .mz-slide-inner {
+    position: relative !important;
+    bottom: auto !important;
+    margin-top: 14px !important;
+    padding: 0 16px !important;
+    width: 100% !important;
+  }
+  .mz-slide.has-full-bg .mz-slide-cta {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+  }
+  .mz-slide.has-full-bg .mz-slide-cta .btn {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Mobile'da slider oklari gizli (dots yeterli) */
+  .mz-slider.mz-slider-full-bg .mz-slider-arrows {
+    display: none !important;
+  }
+  .mz-slider.mz-slider-full-bg .mz-slider-dots {
+    position: relative !important;
+    bottom: auto !important;
+    margin: 14px 0 6px !important;
+    padding: 0 !important;
+  }
 }
 
 /* ============================================================

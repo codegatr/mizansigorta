@@ -22,8 +22,21 @@ require MIZAN_INC . '/header.php';
 ?>
 
 
+<?php
+// Tum aktif slaytlar custom_url tipinde mi? (mobile reorganize icin)
+$wrapperHasFullBg = false;
+if ($slaytlar) {
+    $wrapperHasFullBg = true;
+    foreach ($slaytlar as $sl) {
+        if (($sl['gorsel_tip'] ?? '') !== 'custom_url' || empty($sl['gorsel_url'])) {
+            $wrapperHasFullBg = false;
+            break;
+        }
+    }
+}
+?>
 <!-- Slider Hero (yonetim panelden duzenlenebilir) -->
-<section class="mz-slider">
+<section class="mz-slider<?= $wrapperHasFullBg ? ' mz-slider-full-bg' : '' ?>">
   <div class="mz-slider-track">
     <?php
     // Eger DB'de hic aktif slayt yoksa, varsayilan 4 slayt seti kullan (kurulum oncesi guvenlik)
