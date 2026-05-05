@@ -165,13 +165,13 @@ body.mz-admin { background: var(--mz-bg); font-family: 'Inter', system-ui, -appl
     align-items: center;
     gap: 6px;
     padding: .42rem .7rem;
-    color: rgba(255,255,255,.85);
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.12);
+    color: rgba(255,255,255,.92);
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.16);
     border-radius: 8px;
     text-decoration: none;
     font-size: .85rem;
-    font-weight: 500;
+    font-weight: 600;
     transition: all .15s ease;
     line-height: 1;
     white-space: nowrap;
@@ -183,43 +183,49 @@ body.mz-admin { background: var(--mz-bg); font-family: 'Inter', system-ui, -appl
 }
 
 .mz-quick-btn:hover {
-    background: rgba(255,255,255,.14);
+    background: rgba(255,255,255,.18);
     color: #ffffff;
-    border-color: rgba(255,255,255,.22);
+    border-color: rgba(255,255,255,.3);
     transform: translateY(-1px);
 }
 
 .mz-quick-btn.active {
     background: linear-gradient(135deg, #e30b30, #a91020);
-    color: #ffffff;
+    color: #ffffff !important;
     border-color: rgba(255,255,255,.25);
     box-shadow: 0 4px 12px rgba(227, 11, 48, .35);
 }
 
-/* Akilli Guncelleme - sari vurgu */
+/* Akilli Guncelleme - solid sari + koyu navy text (okunur) */
 .mz-quick-btn-warning {
-    background: linear-gradient(135deg, rgba(244, 211, 94, .18), rgba(212, 175, 55, .14));
-    border-color: rgba(244, 211, 94, .35);
-    color: #f4d35e;
+    background: linear-gradient(135deg, #f4d35e, #d4af37);
+    border-color: #d4af37;
+    color: #0d1b2a !important;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(244, 211, 94, .25);
 }
 .mz-quick-btn-warning:hover {
-    background: linear-gradient(135deg, #f4d35e, #d4af37);
-    color: #0d1b2a;
-    border-color: #f4d35e;
-    box-shadow: 0 6px 18px rgba(244, 211, 94, .35);
+    background: linear-gradient(135deg, #ffd966, #e6bf3f);
+    color: #0d1b2a !important;
+    border-color: #ffd966;
+    box-shadow: 0 6px 18px rgba(244, 211, 94, .45);
+    transform: translateY(-1px);
 }
 
-/* Cikis - kirmizi vurgu */
+/* Cikis - solid kirmizi + beyaz text (okunur) */
 .mz-quick-btn-danger {
-    background: rgba(227, 11, 48, .12);
-    border-color: rgba(227, 11, 48, .3);
-    color: #ff6b80;
+    background: linear-gradient(135deg, #e30b30, #a91020);
+    border-color: #a91020;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(227, 11, 48, .25);
 }
 .mz-quick-btn-danger:hover {
-    background: linear-gradient(135deg, #e30b30, #a91020);
-    color: #ffffff;
-    border-color: rgba(255,255,255,.2);
-    box-shadow: 0 6px 18px rgba(227, 11, 48, .4);
+    background: linear-gradient(135deg, #ff1f44, #c91328);
+    color: #ffffff !important;
+    border-color: #ff1f44;
+    box-shadow: 0 6px 18px rgba(227, 11, 48, .5);
+    transform: translateY(-1px);
 }
 
 .mz-quick-divider {
