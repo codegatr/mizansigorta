@@ -67,12 +67,12 @@ require MIZAN_INC . '/header.php';
             $b2text = (string)($sl['buton2_metin'] ?? '');
         }
     ?>
-      <div class="mz-slide<?= $isActive ? ' active' : '' ?>" data-slide="<?= $idx ?>">
+      <div class="mz-slide<?= $isActive ? ' active' : '' ?><?= ($tip === 'custom_url' && $customUrl !== '') ? ' has-full-bg' : '' ?>" data-slide="<?= $idx ?>">
         <div class="mz-slide-decor d1"></div>
         <div class="mz-slide-decor d2"></div>
         <?php if ($tip === 'custom_url' && $customUrl !== ''): ?>
-          <div class="mz-slide-bg" aria-hidden="true">
-            <img src="<?= e($customUrl) ?>" alt="" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 32px rgba(0,0,0,.3))" loading="lazy">
+          <div class="mz-slide-bg mz-slide-bg-full" aria-hidden="true">
+            <img src="<?= e($customUrl) ?>" alt="" loading="lazy">
           </div>
         <?php elseif ($tip !== 'yok'): ?>
           <div class="mz-slide-bg" aria-hidden="true">

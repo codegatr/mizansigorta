@@ -419,7 +419,7 @@ main { flex: 1; }
 .mz-teminat-item i { font-size: 1.75rem; color: var(--mz-red); display: block; margin-bottom: .35rem; }
 .mz-teminat-item .label { font-size: .85rem; font-weight: 600; color: var(--mz-navy); }
 
-/* Slider arka plan dekoratif illustration */
+/* Slider arka plan dekoratif illustration (jenerik SVG'ler icin) */
 .mz-slide-bg {
   position: absolute;
   right: -3%;
@@ -438,6 +438,53 @@ main { flex: 1; }
   filter: drop-shadow(0 8px 32px rgba(0,0,0,.3));
 }
 
+/* Custom URL gorseli (Mizan'in tam-frame slaytlari) - tam ekran cover */
+.mz-slide-bg.mz-slide-bg-full {
+  inset: 0 !important;
+  position: absolute !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+  top: 0 !important;
+  right: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  transform: none !important;
+  opacity: 1 !important;
+  z-index: 0 !important;
+}
+.mz-slide-bg.mz-slide-bg-full img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  filter: none !important;
+}
+/* Custom URL slaytlarinda metin alanini gizle, butonlari alta hizala */
+.mz-slide.has-full-bg .mz-slide-decor { display: none !important; }
+.mz-slide.has-full-bg .mz-slide-script,
+.mz-slide.has-full-bg .mz-slide-inner h1,
+.mz-slide.has-full-bg .mz-slide-inner p { display: none !important; }
+.mz-slide.has-full-bg .mz-slide-inner {
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: none;
+  text-align: center;
+  z-index: 3;
+}
+.mz-slide.has-full-bg .mz-slide-cta {
+  justify-content: center;
+  display: inline-flex;
+  gap: 14px;
+  background: rgba(13, 27, 42, 0.55);
+  padding: 12px 18px;
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+}
+
 /* Soft floating decorative shapes - mizan kirmizi/sari gradient */
 .mz-slide-decor {
   position: absolute;
@@ -451,11 +498,21 @@ main { flex: 1; }
 
 @media (max-width: 991.98px) {
   .mz-slide-bg { width: 70%; opacity: .15; right: -15%; }
+  .mz-slide-bg.mz-slide-bg-full { width: 100% !important; opacity: 1 !important; right: 0 !important; }
   .mz-slide-decor.d1 { width: 200px; height: 200px; }
   .mz-slide-decor.d2 { width: 180px; height: 180px; }
 }
 @media (max-width: 767.98px) {
   .mz-slide-bg { display: none; }
+  .mz-slide-bg.mz-slide-bg-full { display: block !important; }
+  .mz-slide.has-full-bg .mz-slide-inner { bottom: 30px; }
+  .mz-slide.has-full-bg .mz-slide-cta {
+    flex-direction: column;
+    gap: 8px;
+    width: calc(100% - 40px);
+    margin: 0 20px;
+  }
+  .mz-slide.has-full-bg .mz-slide-cta .btn { width: 100%; }
 }
 
 /* ============================================================
