@@ -47,15 +47,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                        . ($levha ? '<p><b>Levha No:</b> ' . e($levha) . '</p>' : '')
                        . ($aciklama ? '<p><b>Açıklama:</b><br>' . nl2br(e($aciklama)) . '</p>' : '')
                        . '<hr><p>Yönetim panelinden başvuruyu inceleyebilirsiniz.</p>';
-                @send_mail($adminMail, 'Mizan Sigorta', 'Yeni Temsilci Başvurusu — ' . $ad, mail_template('Temsilci Başvurusu', $govde));
+                $extra = talep_bildirim_alicilari();
+                @send_mail(
+                    $adminMail,
+                    'Yeni Temsilci Başvurusu — ' . $ad,
+                    mail_template('Temsilci Başvurusu', $govde, [
+                        'badge'       => 'TEMSİLCİ BAŞVURUSU',
+                        'badge_color' => '#0d6efd',
+                        'preheader'   => 'Yeni temsilci basvurusu: ' . $ad,
+                    ]),
+                    '',
+                    ['bcc' => $extra['bcc'], 'reply_to' => $email ?: null]
+                );
             }
 
-            @send_mail($email, $ad, 'Başvurunuz alındı — Mizan Sigorta',
+            @send_mail(
+                $email,
+                'Başvurunuz alındı — Mizan Sigorta',
                 mail_template('Başvurunuz alındı',
                     '<p>Sayın <b>' . e($ad) . '</b>,</p>'
                   . '<p>Mizan Sigorta temsilciliği başvurunuzu aldık. Yetkili ekibimiz başvurunuzu değerlendirecek ve en kısa sürede sizinle iletişime geçecektir.</p>'
-                  . '<p>İlginiz için teşekkür ederiz.</p>'
-                  . '<p style="font-style:italic">Saygılarımızla,<br><b>Mizan Sigorta</b></p>'));
+                  . '<p>İlginiz için teşekkür ederiz.</p>',
+                    [
+                        'badge'       => 'BAŞVURUNUZ ALINDI',
+                        'badge_color' => '#22c55e',
+                        'preheader'   => 'Mizan Sigorta temsilcilik basvurunuz alindi.',
+                    ]
+                )
+            );
 
             $ok = true;
         }

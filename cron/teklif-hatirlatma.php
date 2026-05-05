@@ -99,8 +99,14 @@ function sendReminder(array $kural, array $vars, ?int $teklifId = null, ?int $po
         }
         $konu  = tpl_replace((string)$kural['email_konu'], $vars);
         $govde = tpl_replace((string)$kural['email_govde'], $vars);
-        $html  = mail_template($konu, '<div style="white-space:pre-wrap">' . nl2br(e($govde)) . '</div>');
-        $ok = send_mail($to, $vars['ad_soyad'] ?: 'Sayın müşterimiz', $konu, $html);
+        $html  = mail_template($konu, '<div style="white-space:pre-wrap">' . nl2br(e($govde)) . '</div>', [
+            'badge' => 'HATIRLATMA',
+            'badge_color' => '#f4d35e',
+            'preheader' => $konu,
+        ]);
+        // Tum maillerin kopyasi BCC'ye (talep_bildirim_bcc setting)
+        $extra = talep_bildirim_alicilari();
+        $ok = send_mail($to, $konu, $html, '', ['bcc' => $extra['bcc']]);
         return ['ok' => $ok, 'mesaj' => $ok ? 'Gönderildi' : 'SMTP hatası', 'konu' => $konu, 'alici' => $to];
     }
 

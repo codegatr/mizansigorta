@@ -314,8 +314,8 @@ function mail_template(string $title, string $bodyHtml, array $opts = []): strin
               <div style="margin-bottom:8px">{$socialHtml}</div>
               <div style="font-size:11px;color:#6b7280;line-height:1.5">
                 &copy; {$year} {$brand}<br>
-                Bu otomatik gonderilen bir e-postadir.<br>
-                Sorulariniz icin: <a href="mailto:{$email}" style="color:#9ca3af">{$email}</a>
+                Bu otomatik gönderilen bir e-postadır.<br>
+                Sorularınız için: <a href="mailto:{$email}" style="color:#9ca3af">{$email}</a>
               </div>
             </td>
           </tr>

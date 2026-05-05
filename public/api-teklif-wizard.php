@@ -119,18 +119,35 @@ try {
               . ($il ? '<p><b>Şehir:</b> ' . e($il . ($ilce ? ' / ' . $ilce : '')) . '</p>' : '')
               . ($mesaj ? '<p><b>Mesaj:</b><br>' . nl2br(e($mesaj)) . '</p>' : '')
               . '<hr><p>Yönetim panelinden teklifi inceleyebilirsiniz.</p>';
-        @send_mail($opMail, 'Mizan Sigorta', "Yeni Teklif Talebi — $teklifNo", mail_template('Yeni Teklif Talebi', $body));
+        $extra = talep_bildirim_alicilari();
+        @send_mail(
+            $opMail,
+            'Yeni Teklif Talebi — ' . $teklifNo,
+            mail_template('Yeni Teklif Talebi', $body, [
+                'badge' => 'YENİ TEKLİF',
+                'badge_color' => '#f4d35e',
+                'preheader' => 'Yeni teklif talebi: ' . $ad . ' - ' . $teklifNo,
+            ]),
+            '',
+            ['bcc' => $extra['bcc'], 'reply_to' => $email ?: null]
+        );
     }
 
     // Müşteriye teyit
     if ($email !== '') {
-        @send_mail($email, $ad, 'Teklifiniz alındı — Mizan Sigorta',
+        @send_mail(
+            $email,
+            'Teklifiniz alındı — Mizan Sigorta',
             mail_template('Teklifiniz alındı',
                 '<p>Sayın <b>' . e($ad) . '</b>,</p>'
               . '<p><b>' . e($urun['baslik']) . '</b> için teklif talebinizi aldık.</p>'
               . '<p><b>Teklif No:</b> ' . e($teklifNo) . '</p>'
-              . '<p>Yetkili ekibimiz <b>' . e($tel) . '</b> üzerinden en kısa sürede sizinle iletişime geçecek.</p>'
-              . '<p style="font-style:italic;margin-top:2rem">Güven ve Özen İle<br><b>Mizan Sigorta</b></p>'
+              . '<p>Yetkili ekibimiz <b>' . e($tel) . '</b> üzerinden en kısa sürede sizinle iletişime geçecek.</p>',
+                [
+                    'badge' => 'TALEBİNİZ ALINDI',
+                    'badge_color' => '#22c55e',
+                    'preheader' => 'Teklifiniz alindi - ' . $teklifNo,
+                ]
             )
         );
     }

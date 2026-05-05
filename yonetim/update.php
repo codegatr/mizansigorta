@@ -596,7 +596,16 @@ if (isset($_GET['ajax'])) {
             // Manifest okuyup versiyonu guncelle
             $newVer = upd_localVer();
             audit_log('akilli_guncelleme', 'sistem', null, "Mode=" . ($force ? 'force' : 'sync') . " updated=$updated errors=" . count($errors));
-            db_exec('INSERT INTO ' . t('guncellemeler') . ' (surum, kaynak, aciklama, migration_calisti, durum, kullanici_id, olusturma_tarihi) VALUES (?,?,?,?,?,?,NOW())',
+            // Ayni surum birden fazla kez yuklenirse (ornek: force resync) UNIQUE key cakismasi yerine
+            // mevcut log kaydini son durumla guncelle. Boylece 'Duplicate entry uk_surum' hatasi olmaz.
+            db_exec('INSERT INTO ' . t('guncellemeler') . ' (surum, kaynak, aciklama, migration_calisti, durum, kullanici_id, olusturma_tarihi) VALUES (?,?,?,?,?,?,NOW())
+                ON DUPLICATE KEY UPDATE
+                    kaynak            = VALUES(kaynak),
+                    aciklama          = VALUES(aciklama),
+                    migration_calisti = VALUES(migration_calisti),
+                    durum             = VALUES(durum),
+                    kullanici_id      = VALUES(kullanici_id),
+                    olusturma_tarihi  = NOW()',
                 [$newVer, ($force ? 'force_sync' : 'smart_sync'), implode("\n", $log), $mig['errors'] === 0 ? 1 : 0, count($errors) === 0 ? 'basarili' : 'hatali', user_id()]);
 
             echo json_encode([

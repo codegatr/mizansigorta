@@ -3026,3 +3026,22 @@ WHERE `kullanici_adi` IS NULL OR `kullanici_adi` = '';
 -- v1.1.25 - Kullanici adi: Turkce + buyuk harf izni (sadece kod)
 -- DB collation utf8mb4_unicode_ci zaten case-insensitive
 -- ============================================================
+
+-- ============================================================
+-- v1.1.27 - send_mail imza fix + BCC eksiklikleri + bcc default guncelle
+-- ============================================================
+
+-- Talep bildirim BCC default 'teklifmerkezi@...' -> 'teklifbirimi@...'
+-- Yunus 'teklifbirimi@mizansigorta.com.tr' istiyor (onceki default 'teklifmerkezi'di).
+-- Sadece henuz manuel degistirmemis olanlar icin guncelle (idempotent).
+UPDATE `mz_ayarlar`
+   SET `deger` = 'teklifbirimi@mizansigorta.com.tr'
+ WHERE `anahtar` = 'talep_bildirim_bcc'
+   AND (`deger` IS NULL OR `deger` = '' OR `deger` = 'teklifmerkezi@mizansigorta.com.tr');
+
+-- Eger anahtar tabloda hic yoksa ekle (yeni kurulumlar icin)
+INSERT INTO `mz_ayarlar` (`anahtar`,`deger`,`aciklama`,`grup`,`tip`)
+SELECT 'talep_bildirim_bcc', 'teklifbirimi@mizansigorta.com.tr',
+       'Teklif/hasar/iletisim/temsilci formlari ve hatirlatma mailleri bu adrese de BCC ile kopyalanir. Birden fazla adres virgulle ayrilabilir.',
+       'mail', 'text'
+WHERE NOT EXISTS (SELECT 1 FROM `mz_ayarlar` WHERE `anahtar` = 'talep_bildirim_bcc');
