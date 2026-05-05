@@ -56,6 +56,8 @@ function asset(string $path): string
 function sirket_logo_url(?string $logo): ?string
 {
     if (!$logo) return null;
+    // Tam URL ise direkt don (admin panelden URL kopyalanabilir)
+    if (preg_match('~^https?://~i', $logo)) return $logo;
     if (str_contains($logo, '/')) return u(ltrim($logo, '/'));
     return u('uploads/sirket/' . rawurlencode($logo));
 }

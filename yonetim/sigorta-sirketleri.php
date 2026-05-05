@@ -22,7 +22,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             $up = admin_handle_upload('logo', 'sirket', ['jpg','jpeg','png','webp','svg']);
-            if ($up) $d['logo'] = $up;
+            if ($up) {
+                $d['logo'] = $up;
+            } else {
+                // Dosya yuklenmedi - logo_url alani var mi kontrol et
+                $logoUrl = trim((string)($_POST['logo_url'] ?? ''));
+                if ($logoUrl !== '') {
+                    if (!filter_var($logoUrl, FILTER_VALIDATE_URL) || !preg_match('~^https?://~i', $logoUrl)) {
+                        admin_redirect('sigorta-sirketleri.php', 'danger', "Logo URL'si geçerli bir http(s) adresi olmalı.");
+                    }
+                    $d['logo'] = $logoUrl;
+                }
+            }
         } catch (Throwable $e) { admin_redirect('sigorta-sirketleri.php', 'danger', $e->getMessage()); }
 
         if ($id) {
@@ -64,10 +75,18 @@ $edit = $editId ? db_row('SELECT * FROM ' . t('sigorta_sirketleri') . ' WHERE id
 <div class="alert alert-info d-flex gap-3 align-items-start mb-3">
   <i class="bi bi-info-circle-fill fs-4"></i>
   <div class="flex-grow-1 small">
-    <strong class="d-block mb-1">Şirket logoları hakkında</strong>
-    Anasayfada ve hakkımızda sayfasında, logo yüklü olan şirketler için logo, yüklü olmayanlar için şirket adı metin olarak görünür.
-    Resmi logoları acente sözleşmenizle veya şirketin <a href="https://www.tsb.org.tr/tr/uye-sirketler" target="_blank" rel="noopener">TSB üye listesi <i class="bi bi-box-arrow-up-right small"></i></a> üzerinden temin ettiğiniz kurumsal kit sayfasından edinebilirsiniz.
-    Önerilen format: <strong>PNG/SVG, şeffaf zemin, 240×90 px civarı, ~50 KB altı.</strong>
+    <strong class="d-block mb-2">Şirket logoları nasıl eklenir? <span class="badge bg-warning text-dark ms-1">2 yöntem</span></strong>
+    <div class="row g-2">
+      <div class="col-md-6">
+        <strong><i class="bi bi-upload"></i> Yöntem 1 — Dosya yükle</strong>
+        <div class="small text-muted">PNG/SVG şeffaf zemin, 240×90 px civarı, ~50 KB altı. Acente sözleşmesi veya <a href="https://www.tsb.org.tr/tr/uye-sirketler" target="_blank" rel="noopener">TSB üye listesi <i class="bi bi-box-arrow-up-right small"></i></a> üzerinden temin edilir.</div>
+      </div>
+      <div class="col-md-6">
+        <strong><i class="bi bi-link-45deg"></i> Yöntem 2 — Logo URL'si yapıştır</strong>
+        <div class="small text-muted">Şirketin resmi sitesindeki logoya sağ tık → "Resim adresini kopyala" → yapıştırın. Logo şirketin sunucusundan yüklenir, sizin alanınıza dosya gerekmez.</div>
+      </div>
+    </div>
+    <div class="small text-muted mt-2">Logo eklenmediği takdirde anasayfada şirket adı metin olarak görünür (sorun değil ama logolu görsellik daha iyi).</div>
   </div>
 </div>
 
@@ -132,9 +151,14 @@ $edit = $editId ? db_row('SELECT * FROM ' . t('sigorta_sirketleri') . ' WHERE id
                 <div class="small text-muted mt-1"><i class="bi bi-image"></i> Mevcut: <code><?= e($edit['logo']) ?></code></div>
               <?php endif; ?>
               <div class="form-text small">
-                Önerilen: <strong>PNG/SVG, şeffaf zemin, 240×90 px civarı.</strong>
-                Şirketin resmi web sitesinden veya acente portalından temin ettiğiniz logoyu yükleyin.
-                Logo yüklenmediği takdirde anasayfada şirket adı metin olarak görünür.
+                <strong>Yöntem 1:</strong> Şeffaf zemin PNG/SVG dosyası yükleyin (önerilen: 240×90 px civarı, ~50 KB altı).
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label small">veya Logo URL'si <small class="text-muted fw-normal">(opsiyonel — dosya yüklemediyseniz)</small></label>
+              <input type="url" name="logo_url" class="form-control form-control-sm" placeholder="https://www.sirket.com.tr/logo.png" value="<?= e(($edit && filter_var($edit['logo'] ?? '', FILTER_VALIDATE_URL)) ? $edit['logo'] : '') ?>">
+              <div class="form-text small">
+                <strong>Yöntem 2:</strong> Şirketin resmi web sitesindeki logoya sağ tıklayıp "Resim adresini kopyala" diyerek URL'yi yapıştırabilirsiniz. Bu yöntemde logo şirketin sunucusundan yüklenir, sizin sunucunuza dosya gerekmez.
               </div>
             </div>
             <div class="col-md-7"><label class="form-label small">Web Sitesi</label><input type="url" name="web_sitesi" class="form-control form-control-sm" value="<?= e($edit['web_sitesi'] ?? '') ?>"></div>

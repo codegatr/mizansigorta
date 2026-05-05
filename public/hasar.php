@@ -132,6 +132,66 @@ require MIZAN_INC . '/header.php';
 </style>
 <?php endif; ?>
 
+<!-- Hasar Rehberi: hepiyi.com.tr/hasar-islemleri tarzi yonlendirmeler -->
+<section class="container py-5">
+  <div class="text-center mb-4">
+    <span class="mz-trust-badge mb-2"><i class="bi bi-compass"></i> Hasar Rehberi</span>
+    <h2 class="fw-bold" style="color:var(--mz-navy)">Hasar anında ne yapmalısınız?</h2>
+    <p class="text-muted">Adım adım rehberler, gerekli belgeler ve doğrudan hasar hatları</p>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6 col-lg-4">
+      <a href="<?= u('/sayfa/hasar-anlik-rehber') ?>" class="mz-hasar-rehber-card">
+        <div class="mz-hasar-rehber-icon"><i class="bi bi-exclamation-circle-fill"></i></div>
+        <h6 class="fw-bold" style="color:var(--mz-navy)">Hasar anında ne yapmalısınız?</h6>
+        <p class="small text-muted mb-2">Trafik kazası, yangın, sel — anlık adımlar ve hayati öneriler.</p>
+        <span class="small fw-semibold" style="color:var(--mz-red)">Rehberi oku <i class="bi bi-arrow-right"></i></span>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <a href="<?= u('/sayfa/kaza-tespit-tutanagi') ?>" class="mz-hasar-rehber-card">
+        <div class="mz-hasar-rehber-icon" style="background:linear-gradient(135deg,#0d1b2a,#1b263b)"><i class="bi bi-clipboard-data-fill"></i></div>
+        <h6 class="fw-bold" style="color:var(--mz-navy)">Kaza tespit tutanağı</h6>
+        <p class="small text-muted mb-2">Anlaşmalı tutanak nedir, nasıl doldurulur, dikkat edilmesi gerekenler.</p>
+        <span class="small fw-semibold" style="color:var(--mz-red)">Detaylar <i class="bi bi-arrow-right"></i></span>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <a href="https://www.sbm.org.tr/tr/mobil-kaza-tutanagi-mkt" target="_blank" rel="noopener" class="mz-hasar-rehber-card">
+        <div class="mz-hasar-rehber-icon" style="background:linear-gradient(135deg,#198754,#157347)"><i class="bi bi-phone-fill"></i></div>
+        <h6 class="fw-bold" style="color:var(--mz-navy)">Mobil kaza uygulaması <i class="bi bi-box-arrow-up-right small"></i></h6>
+        <p class="small text-muted mb-2">SBM Mobil Kaza Tutanağı (MKT) uygulaması — telefonla anlaşmalı tutanak.</p>
+        <span class="small fw-semibold" style="color:var(--mz-red)">SBM sayfasına git <i class="bi bi-arrow-right"></i></span>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <a href="<?= u('/sayfa/deger-kaybi-basvurusu') ?>" class="mz-hasar-rehber-card">
+        <div class="mz-hasar-rehber-icon" style="background:linear-gradient(135deg,#ffc107,#fd7e14)"><i class="bi bi-cash-coin"></i></div>
+        <h6 class="fw-bold" style="color:var(--mz-navy)">Değer kaybı başvurusu</h6>
+        <p class="small text-muted mb-2">Kazaya karışan aracınızın değer kaybı için gerekli evraklar ve süreç.</p>
+        <span class="small fw-semibold" style="color:var(--mz-red)">Belgeleri gör <i class="bi bi-arrow-right"></i></span>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <a href="<?= u('/sayfa/anlasmali-saglik-kurumlari') ?>" class="mz-hasar-rehber-card">
+        <div class="mz-hasar-rehber-icon" style="background:linear-gradient(135deg,#0d6efd,#0b5ed7)"><i class="bi bi-hospital-fill"></i></div>
+        <h6 class="fw-bold" style="color:var(--mz-navy)">Anlaşmalı sağlık kurumları</h6>
+        <p class="small text-muted mb-2">Sağlık tazminat sürecinde geçerli özel hastaneler ve klinikler.</p>
+        <span class="small fw-semibold" style="color:var(--mz-red)">Listeyi görüntüle <i class="bi bi-arrow-right"></i></span>
+      </a>
+    </div>
+    <div class="col-md-6 col-lg-4">
+      <a href="<?= u('/iletisim') ?>" class="mz-hasar-rehber-card">
+        <div class="mz-hasar-rehber-icon" style="background:linear-gradient(135deg,#6610f2,#6f42c1)"><i class="bi bi-headset"></i></div>
+        <h6 class="fw-bold" style="color:var(--mz-navy)">Hasar iletişim</h6>
+        <p class="small text-muted mb-2">Doğrudan hasar uzmanlarımızla iletişim — telefon, e-posta, WhatsApp.</p>
+        <span class="small fw-semibold" style="color:var(--mz-red)">İletişim kanalları <i class="bi bi-arrow-right"></i></span>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- 4 adim sureci -->
 <section class="container py-5">
   <div class="text-center mb-4">

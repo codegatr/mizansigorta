@@ -12,65 +12,125 @@ $pageDesc  = setting('site_aciklamasi', 'Mizan Sigorta — sigorta aracılık hi
 require MIZAN_INC . '/header.php';
 ?>
 
-<section class="mz-hero">
-  <div class="container position-relative py-5">
-    <div class="row align-items-center g-5 py-4">
-      <div class="col-lg-6 text-white">
-        <span class="mz-script mz-script-lg mz-script-red d-inline-block mb-3"><?= e(setting('site_slogan', 'Güven ve Özen İle')) ?></span>
-        <h1 class="display-4 fw-bold lh-1 mb-3">Hayatınıza, aracınıza ve işinize <span class="text-warning">tam koruma</span></h1>
-        <p class="lead mb-4">Anlaşmalı sigorta şirketleri arasından sizin için en uygun teminatları karşılaştırır, uzman temsilcilerimiz aracılığıyla en avantajlı çözümü sunarız. Talebinizi iletin, müsait temsilcimiz en kısa sürede sizinle iletişime geçsin.</p>
-        <div class="d-flex flex-wrap gap-2 mb-4">
-          <a href="<?= u('/teklif-al') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-headset"></i> Teklif Talebi Oluştur</a>
-          <a href="<?= u('/iletisim') ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-telephone"></i> Bize Ulaşın</a>
-        </div>
-        <div class="d-flex flex-wrap gap-2 mb-4">
-          <span class="mz-trust-badge"><i class="bi bi-patch-check"></i> Lisanslı Acente</span>
-          <span class="mz-trust-badge"><i class="bi bi-shield-check"></i> KVKK Uyumlu</span>
-          <span class="mz-trust-badge"><i class="bi bi-people"></i> Uzman Temsilci Kadrosu</span>
-          <span class="mz-trust-badge"><i class="bi bi-clock-history"></i> 7/24 Hasar Desteği</span>
-        </div>
-        <ul class="mz-hero-stats list-unstyled d-flex flex-wrap gap-4 mt-4 mb-0">
-          <li><strong class="text-warning fs-3 d-block">7/24</strong><span>Hasar Desteği</span></li>
-          <li><strong class="text-warning fs-3 d-block">12+</strong><span>Sigorta Şirketi</span></li>
-          <li><strong class="text-warning fs-3 d-block">4</strong><span>Şube · İST · KON · ANK · AKS</span></li>
-        </ul>
-      </div>
-      <div class="col-lg-6">
-        <div class="mz-hero-quote">
-          <div class="mz-hero-quote-head">
-            <span class="mz-hero-quote-icon"><i class="bi bi-headset"></i></span>
-            <div>
-              <div class="mz-hero-quote-title">Teklif Talebi Oluşturun</div>
-              <div class="mz-hero-quote-sub">Bilgilerinizi alalım, müsait temsilcimiz sizinle iletişime geçsin</div>
-            </div>
+<!-- Slider Hero -->
+<section class="mz-slider">
+  <div class="mz-slider-track">
+
+    <!-- Slide 1 - Hayatınız, Aracınız, İşiniz -->
+    <div class="mz-slide active" data-slide="0">
+      <div class="container">
+        <div class="mz-slide-inner">
+          <span class="mz-slide-script"><?= e(setting('site_slogan', 'Güven ve Özen İle')) ?></span>
+          <h1>Hayatınıza, aracınıza ve işinize <span class="accent">tam koruma</span></h1>
+          <p>12+ anlaşmalı sigorta şirketi arasından, ihtiyacınıza özel en avantajlı teminatları biz buluruz. Talebinizi iletin, müsait temsilcimiz en kısa sürede sizinle iletişime geçsin.</p>
+          <div class="mz-slide-cta">
+            <a href="<?= u('/teklif-al') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-headset"></i> Teklif Talebi Oluştur</a>
+            <a href="<?= u('/iletisim') ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-telephone"></i> Bize Ulaşın</a>
           </div>
-          <form action="<?= u('/teklif-al') ?>" method="get" class="row g-3">
-            <div class="col-12">
-              <label class="form-label small fw-semibold text-secondary mb-1">Sigorta türü</label>
-              <select name="urun" class="form-select" required>
-                <option value="">Sigorta türü seçin</option>
-                <?php foreach ($kategoriler as $k): ?>
-                  <option value="<?= e($k['slug']) ?>"><?= e($k['baslik']) ?></option>
-                <?php endforeach; ?>
-              </select>
-              <div class="form-text small">Detaylı ürün seçimini temsilcimiz sizinle birlikte belirleyecektir.</div>
-            </div>
-            <div class="col-12">
-              <label class="form-label small fw-semibold text-secondary mb-1">Cep telefonu</label>
-              <input type="tel" name="tel" class="form-control" placeholder="0XXX XXX XX XX" pattern="[0-9 +]+" required>
-            </div>
-            <div class="col-12 d-grid mt-2">
-              <button class="btn btn-warning fw-semibold">Talep Oluştur <i class="bi bi-arrow-right"></i></button>
-            </div>
-            <div class="col-12 small text-muted text-center mb-0 mt-1">
-              <i class="bi bi-shield-check"></i> KVKK kapsamında bilgileriniz yalnızca teklif sürecinde kullanılır.
-            </div>
-          </form>
         </div>
       </div>
     </div>
+
+    <!-- Slide 2 - Kasko / Trafik -->
+    <div class="mz-slide" data-slide="1">
+      <div class="container">
+        <div class="mz-slide-inner">
+          <span class="mz-slide-script">Aracınız İçin</span>
+          <h1>Kasko ve Trafik Sigortası — <span class="accent">en uygun fiyat</span></h1>
+          <p>Anadolu, Allianz, Türkiye Sigorta, AXA, HDI ve daha fazlası — tek bir talepte tüm şirketlerin teklifini karşılaştırın. Yenileme zamanı yaklaştığında size hatırlatma yapıyoruz.</p>
+          <div class="mz-slide-cta">
+            <a href="<?= u('/urun/oto-sigortalari') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-car-front-fill"></i> Oto Sigortalarını İncele</a>
+            <a href="<?= u('/teklif-al?urun=oto-sigortalari') ?>" class="btn btn-outline-light btn-lg">Teklif Al</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3 - Sağlık / DASK -->
+    <div class="mz-slide" data-slide="2">
+      <div class="container">
+        <div class="mz-slide-inner">
+          <span class="mz-slide-script">Aileniz İçin</span>
+          <h1>Sağlık ve DASK — <span class="accent">geleceğinizi güvenceye alın</span></h1>
+          <p>Tamamlayıcı sağlık, özel sağlık ve DASK zorunlu deprem sigortası. Aile bireylerinize özel paketler, anlaşmalı özel hastanelerde fark ücretsiz tedavi ve deprem sonrası nakit destek.</p>
+          <div class="mz-slide-cta">
+            <a href="<?= u('/urun/saglik-sigortalari') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-heart-pulse-fill"></i> Sağlık Sigortaları</a>
+            <a href="<?= u('/urun/yangin-policeleri') ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-houses-fill"></i> DASK · Konut</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4 - 7/24 Hasar -->
+    <div class="mz-slide" data-slide="3">
+      <div class="container">
+        <div class="mz-slide-inner">
+          <span class="mz-slide-script">Hasar Anında</span>
+          <h1>7/24 hasar desteğimiz — <span class="accent">yalnız değilsiniz</span></h1>
+          <p>Hasar durumunda online ihbar formu, eksper takibi, belge süreci ve ödeme — hepsini biz yönetiyoruz. Aramamız yeterli, sürecin gerisini bize bırakın.</p>
+          <div class="mz-slide-cta">
+            <a href="<?= u('/hasar-ihbari') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-exclamation-triangle-fill"></i> Hasar İhbarı Yap</a>
+            <?php if ($tel = setting('telefon')): ?>
+              <a href="tel:<?= e(preg_replace('/\s+/', '', $tel)) ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-telephone-fill"></i> <?= e($tel) ?></a>
+            <?php endif; ?>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="mz-slider-arrows">
+    <button class="mz-slider-arrow" data-slide-prev aria-label="Önceki"><i class="bi bi-chevron-left"></i></button>
+    <button class="mz-slider-arrow" data-slide-next aria-label="Sonraki"><i class="bi bi-chevron-right"></i></button>
+  </div>
+
+  <div class="mz-slider-dots">
+    <button class="mz-slider-dot active" data-slide-to="0" aria-label="Slide 1"></button>
+    <button class="mz-slider-dot" data-slide-to="1" aria-label="Slide 2"></button>
+    <button class="mz-slider-dot" data-slide-to="2" aria-label="Slide 3"></button>
+    <button class="mz-slider-dot" data-slide-to="3" aria-label="Slide 4"></button>
   </div>
 </section>
+
+<script>
+(function(){
+  'use strict';
+  const track = document.querySelector('.mz-slider-track');
+  if (!track) return;
+  const slides = track.querySelectorAll('.mz-slide');
+  const dots = document.querySelectorAll('.mz-slider-dot');
+  let current = 0;
+  let timer = null;
+
+  function show(idx) {
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    current = idx;
+  }
+  function next() { show((current + 1) % slides.length); }
+  function prev() { show((current - 1 + slides.length) % slides.length); }
+  function start() { stop(); timer = setInterval(next, 6000); }
+  function stop()  { if (timer) { clearInterval(timer); timer = null; } }
+
+  document.querySelector('[data-slide-next]')?.addEventListener('click', () => { next(); start(); });
+  document.querySelector('[data-slide-prev]')?.addEventListener('click', () => { prev(); start(); });
+  dots.forEach(d => d.addEventListener('click', e => { show(parseInt(e.target.dataset.slideTo, 10)); start(); }));
+
+  // Hover'da durdur
+  document.querySelector('.mz-slider')?.addEventListener('mouseenter', stop);
+  document.querySelector('.mz-slider')?.addEventListener('mouseleave', start);
+
+  // Klavye gezinme
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === 'ArrowRight') { next(); start(); }
+    if (e.key === 'ArrowLeft') { prev(); start(); }
+  });
+
+  start();
+})();
+</script>
 
 <!-- 9 Kategori Kartlari -->
 <section class="mz-band">
@@ -91,30 +151,6 @@ require MIZAN_INC . '/header.php';
           </a>
         </div>
       <?php endforeach; ?>
-    </div>
-  </div>
-</section>
-
-<!-- Neden Mizan -->
-<section class="mz-band bg-light">
-  <div class="container">
-    <div class="row g-4 align-items-center">
-      <div class="col-lg-5">
-        <span class="mz-script mz-script-md mz-script-red d-inline-block mb-2">Neden Mizan?</span>
-        <h2 class="fw-bold mb-3">Önem verdiklerinizi <span class="text-warning">güvence altına</span> alıyoruz.</h2>
-        <p class="text-muted">Mizan Sigorta Aracılık Hizmetleri olarak, sizi ve değer verdiğiniz her şeyi korumak için yıllardır çalışıyoruz. İşyerinizden konutunuza, sağlığınızdan aracınıza kadar her ihtiyacınıza özel çözümler sunarız.</p>
-        <a href="<?= u('/teklif-al') ?>" class="btn btn-warning fw-semibold mt-2"><i class="bi bi-headset"></i> Teklif Talebi Oluştur</a>
-      </div>
-      <div class="col-lg-7">
-        <div class="row g-3">
-          <div class="col-md-6"><div class="mz-feat"><i class="bi bi-shield-check"></i><div><h6>Lisanslı Acentelik</h6><p>SBM ve Hazine Müsteşarlığı kayıtlı, levhalı sigorta acentesi.</p></div></div></div>
-          <div class="col-md-6"><div class="mz-feat"><i class="bi bi-graph-up-arrow"></i><div><h6>En Uygun Teklif</h6><p>12+ anlaşmalı şirket arasından otomatik karşılaştırma.</p></div></div></div>
-          <div class="col-md-6"><div class="mz-feat"><i class="bi bi-headset"></i><div><h6>7/24 Hasar Desteği</h6><p>Hasar bildiriminizi gece-gündüz takip ediyoruz.</p></div></div></div>
-          <div class="col-md-6"><div class="mz-feat"><i class="bi bi-people"></i><div><h6>Uzman Kadro</h6><p>Yıllarca tecrübeyle hizmet veren uzman ekip.</p></div></div></div>
-          <div class="col-md-6"><div class="mz-feat"><i class="bi bi-geo-alt-fill"></i><div><h6>4 Şehirde Şube</h6><p>İstanbul, Konya, Ankara, Aksaray fiziki ofislerimiz.</p></div></div></div>
-          <div class="col-md-6"><div class="mz-feat"><i class="bi bi-shield-lock"></i><div><h6>KVKK Uyumlu</h6><p>Verileriniz yalnızca teklif sürecinde kullanılır.</p></div></div></div>
-        </div>
-      </div>
     </div>
   </div>
 </section>

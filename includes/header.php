@@ -16,11 +16,33 @@ $wa         = setting('whatsapp');
 <title><?= e($pageTitle) ?></title>
 <meta name="description" content="<?= e($pageDesc) ?>">
 <meta name="keywords"    content="<?= e($pageKeys) ?>">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="googlebot" content="index, follow">
+<meta name="author" content="<?= e(setting('firma_adi', SITE_NAME)) ?>">
+<meta name="geo.region" content="TR">
+<meta name="geo.placename" content="<?= e(setting('ofis_sehirler', 'Konya, Istanbul, Ankara, Aksaray')) ?>">
 <link rel="canonical" href="<?= e($canonical) ?>">
+
+<!-- Open Graph -->
 <meta property="og:title" content="<?= e($pageTitle) ?>">
 <meta property="og:description" content="<?= e($pageDesc) ?>">
 <meta property="og:type" content="website">
 <meta property="og:url"  content="<?= e($canonical) ?>">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:site_name" content="<?= e(setting('site_basligi', SITE_NAME)) ?>">
+<meta property="og:image" content="<?= e(SITE_BASE_URL) ?>/assets/img/logo.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<?= e($pageTitle) ?>">
+<meta name="twitter:description" content="<?= e($pageDesc) ?>">
+<meta name="twitter:image" content="<?= e(SITE_BASE_URL) ?>/assets/img/logo.png">
+
+<!-- Google Search Console verification (admin->ayarlar->sistem'den eklenebilir) -->
+<?php if ($gsc = setting('gsc_verification')): ?>
+<meta name="google-site-verification" content="<?= e($gsc) ?>">
+<?php endif; ?>
+
 <meta name="theme-color" content="#0f1e37">
 <link rel="icon" href="<?= asset('assets/img/favicon.svg') ?>" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,6 +51,69 @@ $wa         = setting('whatsapp');
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
+
+<!-- Schema.org InsuranceAgency JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "InsuranceAgency",
+  "name": "<?= e(setting('firma_adi', SITE_NAME)) ?>",
+  "alternateName": "Mizan Sigorta",
+  "description": "<?= e(setting('site_aciklamasi', 'Mizan Sigorta — sigorta aracılık hizmetleri.')) ?>",
+  "url": "<?= e(SITE_BASE_URL) ?>/",
+  "logo": "<?= e(SITE_BASE_URL) ?>/assets/img/logo.png",
+  "image": "<?= e(SITE_BASE_URL) ?>/assets/img/logo.png",
+  "telephone": "<?= e(setting('telefon')) ?>",
+  "email": "<?= e(setting('email')) ?>",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "<?= e(setting('adres', 'Konya, Türkiye')) ?>",
+    "addressLocality": "Konya",
+    "addressRegion": "Konya",
+    "addressCountry": "TR"
+  },
+  "areaServed": [
+    {"@type": "City", "name": "İstanbul"},
+    {"@type": "City", "name": "Konya"},
+    {"@type": "City", "name": "Ankara"},
+    {"@type": "City", "name": "Aksaray"},
+    {"@type": "Country", "name": "Türkiye"}
+  ],
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "opens": "09:00",
+    "closes": "18:00"
+  }, {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": "Saturday",
+    "opens": "10:00",
+    "closes": "14:00"
+  }],
+  "sameAs": [
+    <?php
+    $socials = [];
+    foreach (['facebook','instagram','twitter','linkedin','youtube'] as $sn) {
+      if ($u = setting($sn)) $socials[] = '"' . e($u) . '"';
+    }
+    echo implode(",\n    ", $socials);
+    ?>
+  ],
+  "makesOffer": [
+    {"@type": "Offer", "name": "Kasko Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/kasko"},
+    {"@type": "Offer", "name": "Trafik Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/trafik-zorunlu-sorumluluk"},
+    {"@type": "Offer", "name": "Konut Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/konut-sigortasi"},
+    {"@type": "Offer", "name": "DASK Zorunlu Deprem", "url": "<?= e(SITE_BASE_URL) ?>/urun/dask"},
+    {"@type": "Offer", "name": "Özel Sağlık Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/ozel-saglik-sigortasi"},
+    {"@type": "Offer", "name": "Tamamlayıcı Sağlık Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/tamamlayici-saglik-sigortasi"},
+    {"@type": "Offer", "name": "Ferdi Kaza Sigortası", "url": "<?= e(SITE_BASE_URL) ?>/urun/ferdi-kaza-sigortasi"}
+  ]
+}
+</script>
+
+<!-- Sitemap referansı -->
+<link rel="sitemap" type="application/xml" href="<?= e(SITE_BASE_URL) ?>/sitemap.xml">
 </head>
 <body class="mz-public">
 

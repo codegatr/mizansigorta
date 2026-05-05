@@ -99,6 +99,7 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
     <div class="mz-admin-section">Sistem</div>
     <a href="kullanicilar.php"         class="<?= $current === 'kullanicilar.php' ? 'active' : '' ?>"><i class="bi bi-person-gear"></i> Kullanıcılar</a>
     <a href="ayarlar.php"              class="<?= $current === 'ayarlar.php' ? 'active' : '' ?>"><i class="bi bi-gear"></i> Ayarlar</a>
+    <a href="sitemap-yenile.php"       class="<?= $current === 'sitemap-yenile.php' ? 'active' : '' ?>"><i class="bi bi-diagram-3"></i> Sitemap Yenile</a>
     <a href="audit-log.php"            class="<?= $current === 'audit-log.php' ? 'active' : '' ?>"><i class="bi bi-clipboard-data"></i> İşlem Kaydı</a>
     <?php if (is_superadmin()): ?>
     <a href="update.php"               class="<?= $current === 'update.php' ? 'active' : '' ?>"><i class="bi bi-cpu"></i> Akıllı Güncelleme</a>
