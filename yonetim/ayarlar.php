@@ -84,6 +84,72 @@ $tabs = [
     'sistem'   => ['Sistem & Güncelleme', 'bi-gear'],
 ];
 
+// Insan dostu etiket + yardim metni mapping (anahtar -> [Label, Help])
+$ayarLabels = [
+    // GENEL
+    'site_basligi'           => ['Site Başlığı', 'Tarayıcı sekmesinde ve Google sonuç başlığında gözükür'],
+    'site_aciklamasi'        => ['Site Açıklaması', 'Anasayfa meta description (Google sonuçlarında alt yazı). 160 karakteri geçmesin.'],
+    'site_anahtar_kelimeler' => ['SEO Anahtar Kelimeler', 'Virgülle ayırın: kasko, trafik sigortası, dask...'],
+    'firma_adi'              => ['Resmi Firma Ünvanı', 'Yasal yazışma ve sözleşmelerde kullanılır'],
+    'site_url'               => ['Site URL', 'https:// ile başlamalı'],
+    'logo'                   => ['Logo Dosya Adı', 'uploads/sirket/ klasöründeki dosya adı'],
+    'favicon'                => ['Favicon', 'Tarayıcı sekmesindeki küçük ikon'],
+    'gsc_verification'       => ['Google Search Console Doğrulama', 'GSC\'den aldığınız meta-tag content değeri'],
+    'sehir'                  => ['Genel Merkez Şehri', 'İstanbul, Konya, Ankara vb.'],
+    'ofis_sehirler'          => ['Hizmet Verilen Şehirler', 'SEO için: Konya, İstanbul, Ankara, Aksaray'],
+
+    // ILETISIM
+    'telefon'                => ['Ana Telefon', 'Sitede ve maillerde gözükür, tıklanabilir tel: linki olur'],
+    'telefon_2'              => ['Yedek Telefon', 'Opsiyonel ikinci numara'],
+    'gsm'                    => ['GSM / Cep Telefonu', 'Acil çağrı için cep numarası'],
+    'whatsapp'               => ['WhatsApp Numarası', '0552 694 32 32 veya 5526943232 yazsanız da otomatik 905526943232 formatına çevrilir.'],
+    'email'                  => ['Ana E-posta', 'Müşteri yanıtları ve form bildirimleri buraya gelir'],
+    'destek_email'           => ['Destek E-posta', 'Müşteri destek hattı için ayrı adres (opsiyonel)'],
+    'adres'                  => ['Genel Merkez Adresi', 'İletişim sayfasında ve mail footer\'da görünür'],
+    'kvkk_aydinlatma_sorumlu'=> ['KVKK Veri Sorumlusu', 'Aydınlatma metninde gösterilir'],
+    'kvkk_iletisim'          => ['KVKK İletişim', 'Veri talepleri için iletişim bilgisi'],
+    'calisma_saatleri'       => ['Çalışma Saatleri', 'Örn: Pzt-Cum 09:00-18:00'],
+    'harita_embed'           => ['Google Maps Embed Kodu', '<iframe src="..."> kodu (opsiyonel)'],
+    'talep_bildirim_bcc'     => ['Talep Bildirim BCC ⭐', 'ÖNEMLİ: Sisteme gelen tüm form mailleri (teklif/hasar/iletişim/temsilci) ve hatırlatmalar bu adrese BCC ile kopyalanır. Birden fazla için virgül.'],
+
+    // SOSYAL
+    'facebook'               => ['Facebook Sayfası', 'https://facebook.com/...'],
+    'instagram'              => ['Instagram Hesabı', 'https://instagram.com/...'],
+    'twitter'                => ['Twitter / X', 'https://x.com/...'],
+    'linkedin'               => ['LinkedIn Sayfası', 'https://linkedin.com/company/...'],
+    'youtube'                => ['YouTube Kanalı', 'https://youtube.com/@...'],
+    'tiktok'                 => ['TikTok', 'https://tiktok.com/@...'],
+
+    // SMTP
+    'smtp_host'              => ['SMTP Sunucu', 'Örn: mail.mizansigorta.com.tr'],
+    'smtp_port'              => ['SMTP Port', 'Genelde 465 (SSL) veya 587 (TLS)'],
+    'smtp_user'              => ['SMTP Kullanıcı Adı', 'Genellikle e-posta adresi (örn: bilgi@...)'],
+    'smtp_pass'              => ['SMTP Şifre', 'E-posta hesabının şifresi'],
+    'smtp_secure'            => ['Şifreleme Tipi', 'tls (587), ssl (465) veya yok'],
+    'smtp_from'              => ['Gönderen E-posta', 'Maillerin "kimden" alanında görünen adres'],
+    'smtp_from_name'         => ['Gönderen Adı', 'Maillerin başında görünen ad (örn: Mizan Sigorta)'],
+
+    // TEKLIF
+    'teklif_bildirim_email'  => ['Teklif Bildirim E-postası', 'Yeni teklif talebi geldiğinde bildirim alır'],
+    'hasar_bildirim_email'   => ['Hasar Bildirim E-postası', 'Yeni hasar ihbarı bildirimi gelir'],
+    'iletisim_bildirim_email'=> ['İletişim Mesaj Bildirim', 'Web sitesi iletişim formu mesajları'],
+    'teklif_otomatik_no'     => ['Teklif No Formatı', 'TKL-{tarih}-{rastgele} gibi'],
+
+    // SISTEM
+    'cron_anahtar'           => ['Cron Güvenlik Anahtarı', 'Hatırlatma cron\'unu URL\'den tetiklemek için. Aşağıdan yenileyebilirsiniz.'],
+    'site_durum'             => ['Site Durumu', 'aktif / bakim'],
+    'bakim_mesaji'           => ['Bakım Modu Mesajı', 'Site bakımdayken ziyaretçiye gösterilen metin'],
+    'gtag_id'                => ['Google Analytics ID', 'G-XXXXXXXXXX formatında'],
+    'meta_pixel_id'          => ['Meta (Facebook) Pixel ID', 'Sadece rakam, örn: 123456789'],
+];
+
+$labelOf = function(array $r) use ($ayarLabels): array {
+    if (isset($ayarLabels[$r['anahtar']])) return $ayarLabels[$r['anahtar']];
+    // Mapping yoksa: aciklama varsa onu label, anahtar'i help olarak goster
+    $label = $r['aciklama'] ?: ucwords(str_replace('_', ' ', $r['anahtar']));
+    return [$label, ''];
+};
+
 $activeTab = (string)($_GET['tab'] ?? 'genel');
 if (!isset($tabs[$activeTab])) $activeTab = 'genel';
 
@@ -122,56 +188,115 @@ $renderField = function(array $r) {
 };
 ?>
 
-<ul class="nav nav-pills mb-3 flex-wrap">
+<style>
+.mz-ayar-card {border:1px solid #e5e7eb; border-radius:10px; padding:18px 20px; margin-bottom:14px; background:#fff; transition:all .2s ease; position:relative}
+.mz-ayar-card:hover {border-color:#cbd5e1; box-shadow:0 2px 8px rgba(13,27,42,.05)}
+.mz-ayar-label {font-size:14px; font-weight:700; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:6px}
+.mz-ayar-help {font-size:12.5px; color:#64748b; margin-bottom:10px; line-height:1.55}
+.mz-ayar-key {position:absolute; top:14px; right:18px; font-size:10px; color:#cbd5e1; font-family:'Monaco',monospace; user-select:all}
+.mz-ayar-key:hover {color:#94a3b8; cursor:copy}
+.mz-ayar-card input.form-control, .mz-ayar-card textarea, .mz-ayar-card select {border:1px solid #d1d5db; border-radius:8px; padding:10px 12px; font-size:14px; transition:border .15s; font-size:14px !important}
+.mz-ayar-card input.form-control:focus, .mz-ayar-card textarea:focus, .mz-ayar-card select:focus {border-color:#0d6efd; box-shadow:0 0 0 3px rgba(13,110,253,.12)}
+.mz-ayar-section-header {display:flex; align-items:center; gap:12px; margin:6px 0 18px; padding-bottom:14px; border-bottom:2px solid #f1f5f9}
+.mz-ayar-section-header .mz-icon-bg {width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg,#0d1b2a,#1b263b); color:#f4d35e; display:flex; align-items:center; justify-content:center; font-size:18px}
+.mz-ayar-section-header h5 {margin:0; font-weight:700; color:#0f172a; font-size:18px}
+.mz-ayar-section-header p {margin:2px 0 0; font-size:12.5px; color:#64748b}
+.mz-ayar-sticky-bar {position:sticky; bottom:0; background:#fff; border-top:1px solid #e5e7eb; padding:14px 20px; margin:18px -20px -20px; border-radius:0 0 8px 8px; box-shadow:0 -4px 12px rgba(0,0,0,.04); z-index:10}
+.mz-dirty-indicator {display:none; color:#f59e0b; font-size:13px; font-weight:600; margin-right:14px}
+.mz-dirty-indicator.show {display:inline-flex; align-items:center; gap:6px}
+.mz-dirty-indicator i {animation:mz-pulse 1.5s infinite}
+@keyframes mz-pulse {0%,100% {opacity:1} 50% {opacity:.5}}
+.mz-ayar-tab .nav-link {padding:10px 16px; border-radius:10px; font-weight:600; color:#475569; transition:all .2s}
+.mz-ayar-tab .nav-link:hover {background:#f1f5f9; color:#0f172a}
+.mz-ayar-tab .nav-link.active {background:linear-gradient(135deg,#0d1b2a,#1b263b); color:#fff; box-shadow:0 4px 12px rgba(13,27,42,.15)}
+.mz-ayar-tab .nav-link i {margin-right:6px}
+</style>
+
+<ul class="nav nav-pills mb-4 flex-wrap mz-ayar-tab">
   <?php foreach ($tabs as $key => $info): ?>
-    <li class="nav-item"><a class="nav-link <?= $activeTab===$key?'active':'' ?>" href="?tab=<?= e($key) ?>"><i class="bi <?= $info[1] ?>"></i> <?= e($info[0]) ?></a></li>
+    <li class="nav-item me-2 mb-2"><a class="nav-link <?= $activeTab===$key?'active':'' ?>" href="?tab=<?= e($key) ?>"><i class="bi <?= $info[1] ?>"></i> <?= e($info[0]) ?></a></li>
   <?php endforeach; ?>
 </ul>
 
 <div class="card border-0 shadow-sm">
-  <div class="card-body">
-    <h5 class="fw-bold mb-3"><i class="bi <?= $tabs[$activeTab][1] ?> text-warning"></i> <?= e($tabs[$activeTab][0]) ?></h5>
-    <form method="post">
+  <div class="card-body p-4">
+    <div class="mz-ayar-section-header">
+      <div class="mz-icon-bg"><i class="bi <?= $tabs[$activeTab][1] ?>"></i></div>
+      <div>
+        <h5><?= e($tabs[$activeTab][0]) ?></h5>
+        <p>Bu sekmede <?= count($groups[$activeTab] ?? []) ?> ayar bulunuyor. Değişiklikleri kaydetmeyi unutmayın.</p>
+      </div>
+    </div>
+
+    <form method="post" id="ayarForm">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="kaydet">
       <div class="row g-3">
         <?php
         $items = $groups[$activeTab] ?? [];
         foreach ($items as $r):
+            [$label, $help] = $labelOf($r);
             $col = ($r['tip'] === 'textarea') ? 12 : 6;
         ?>
           <div class="col-md-<?= $col ?>">
-            <label class="form-label small fw-semibold"><?= e($r['aciklama'] ?: $r['anahtar']) ?></label>
-            <?= $renderField($r) ?>
-            <div class="form-text small text-muted">Anahtar: <code><?= e($r['anahtar']) ?></code></div>
+            <div class="mz-ayar-card">
+              <span class="mz-ayar-key" title="Sistemdeki teknik anahtar (kopyalamak için tıklayın)" onclick="navigator.clipboard.writeText('<?= e($r['anahtar']) ?>')">&lt;<?= e($r['anahtar']) ?>&gt;</span>
+              <div class="mz-ayar-label"><?= e($label) ?></div>
+              <?php if ($help): ?>
+                <div class="mz-ayar-help"><?= e($help) ?></div>
+              <?php endif; ?>
+              <?= $renderField($r) ?>
+            </div>
           </div>
         <?php endforeach; ?>
         <?php if (!$items): ?>
-          <div class="col-12"><div class="alert alert-info">Bu sekmede henüz ayar yok.</div></div>
+          <div class="col-12"><div class="alert alert-info"><i class="bi bi-info-circle"></i> Bu sekmede henüz ayar yok.</div></div>
         <?php endif; ?>
       </div>
-      <hr>
-      <div class="d-flex justify-content-between">
-        <button class="btn btn-primary btn-sm fw-semibold"><i class="bi bi-save"></i> Ayarları Kaydet</button>
+
+      <?php if ($items): ?>
+      <div class="mz-ayar-sticky-bar d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span class="mz-dirty-indicator" id="mzDirty">
+          <i class="bi bi-exclamation-circle-fill"></i> Kaydedilmemiş değişiklikler var
+        </span>
+        <div class="ms-auto d-flex gap-2">
+          <a href="?tab=<?= e($activeTab) ?>" class="btn btn-light btn-sm" id="mzResetBtn" style="display:none">
+            <i class="bi bi-x"></i> Vazgeç
+          </a>
+          <button class="btn btn-primary fw-semibold" type="submit"><i class="bi bi-save"></i> Ayarları Kaydet</button>
+        </div>
       </div>
+      <?php endif; ?>
     </form>
 
     <?php if ($activeTab === 'sistem'): ?>
-      <hr>
-      <h6 class="fw-bold mb-3"><i class="bi bi-key text-warning"></i> Cron Anahtarı</h6>
-      <p class="small text-muted">Hatırlatma cron'unu çalıştırmak için aşağıdaki komutu cPanel/DirectAdmin → Cron Jobs ekranına ekleyin (her gün saat 09:00):</p>
-      <div class="bg-dark text-white p-3 rounded font-monospace small mb-2"><?= e('wget -q -O- "' . SITE_BASE_URL . '/cron/teklif-hatirlatma.php?key=' . (setting('cron_anahtar') ?: 'ANAHTAR_BELIRLENMEDI') . '" > /dev/null 2>&1') ?></div>
-      <form method="post" class="d-inline" onsubmit="return confirm('Cron anahtarı yenilensin mi? Mevcut cron komutunuzu güncellemeniz gerekecek.');">
+      <hr class="my-4">
+      <div class="mz-ayar-section-header">
+        <div class="mz-icon-bg" style="background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff"><i class="bi bi-key"></i></div>
+        <div>
+          <h5>Cron Anahtarı</h5>
+          <p>Hatırlatma cron'unu otomatik çalıştırmak için</p>
+        </div>
+      </div>
+      <p class="small text-muted">Aşağıdaki komutu cPanel/DirectAdmin → Cron Jobs ekranına ekleyin (her gün saat 09:00):</p>
+      <div class="bg-dark text-white p-3 rounded font-monospace small mb-3" style="word-break:break-all"><?= e('wget -q -O- "' . SITE_BASE_URL . '/cron/teklif-hatirlatma.php?key=' . (setting('cron_anahtar') ?: 'ANAHTAR_BELIRLENMEDI') . '" > /dev/null 2>&1') ?></div>
+      <form method="post" class="d-inline" onsubmit="return confirm('Cron anahtarı yenilensin mi?\n\nMevcut cron komutunuzu güncellemeniz gerekecek.');">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="cron_yenile">
-        <button class="btn btn-warning btn-sm"><i class="bi bi-arrow-repeat"></i> Cron Anahtarını Yenile</button>
+        <button class="btn btn-warning btn-sm fw-semibold"><i class="bi bi-arrow-repeat"></i> Cron Anahtarını Yenile</button>
       </form>
     <?php endif; ?>
 
     <?php if ($activeTab === 'smtp'): ?>
-      <hr>
-      <h6 class="fw-bold mb-3"><i class="bi bi-send text-warning"></i> SMTP Test</h6>
-      <form method="post" class="row g-2">
+      <hr class="my-4">
+      <div class="mz-ayar-section-header">
+        <div class="mz-icon-bg" style="background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff"><i class="bi bi-send"></i></div>
+        <div>
+          <h5>SMTP Test</h5>
+          <p>Mail ayarlarının doğru çalışıp çalışmadığını test edin</p>
+        </div>
+      </div>
+      <form method="post" class="row g-2 align-items-end">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="smtp_test">
         <div class="col-md-6"><input type="email" name="test_email" required class="form-control form-control-sm" placeholder="test@example.com"></div>
@@ -181,5 +306,44 @@ $renderField = function(array $r) {
     <?php endif; ?>
   </div>
 </div>
+
+<script>
+// Form dirty state - degisiklik var ise sticky bar'a uyari + sayfa terkinde onay
+(function(){
+  var form = document.getElementById('ayarForm');
+  if (!form) return;
+  var dirtyEl = document.getElementById('mzDirty');
+  var resetEl = document.getElementById('mzResetBtn');
+  var initial = new FormData(form);
+  var initialJson = {};
+  for (var pair of initial.entries()) initialJson[pair[0]] = pair[1];
+  var isDirty = false;
+
+  function checkDirty() {
+    var current = new FormData(form);
+    var changed = false;
+    var seen = {};
+    for (var pair of current.entries()) {
+      seen[pair[0]] = true;
+      if ((initialJson[pair[0]] || '') !== pair[1]) { changed = true; break; }
+    }
+    if (!changed) for (var k in initialJson) if (!(k in seen) && initialJson[k]) { changed = true; break; }
+    isDirty = changed;
+    dirtyEl.classList.toggle('show', changed);
+    resetEl.style.display = changed ? 'inline-block' : 'none';
+  }
+
+  form.addEventListener('input', checkDirty);
+  form.addEventListener('change', checkDirty);
+
+  // Form submit edilince dirty yok
+  form.addEventListener('submit', function(){ isDirty = false; });
+
+  // Sayfayi terk etmeden once uyar
+  window.addEventListener('beforeunload', function(e){
+    if (isDirty) { e.preventDefault(); e.returnValue = ''; return ''; }
+  });
+})();
+</script>
 
 <?php require __DIR__ . '/_footer.php';

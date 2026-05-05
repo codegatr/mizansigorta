@@ -90,14 +90,34 @@ foreach ($subelerDb as $s) {
     else { $digerler[] = $s; }
 }
 
+// Merkez kaydi var ama adres bos ise -> setting('adres')'i fallback olarak kullan
+// (Yunus 'Ayarlar > Iletisim > adres' gridine yazip iletisim sayfasinda gormesini bekliyor)
+if ($merkez && empty(trim((string)$merkez['adres'])) && ($genelAdres = trim((string)setting('adres')))) {
+    $merkez['adres'] = $genelAdres;
+}
+if ($merkez && empty(trim((string)$merkez['telefon'])) && ($genelTel = trim((string)setting('telefon')))) {
+    $merkez['telefon'] = $genelTel;
+}
+if ($merkez && empty(trim((string)$merkez['email'])) && ($genelEmail = trim((string)setting('email')))) {
+    $merkez['email'] = $genelEmail;
+}
+
 // Legacy fallback: tablo bos ise eski setting'lerden minimum bilgi
 if (!$merkez && !$digerler) {
     $istanbul = setting('istanbul_adres');
     $konya    = setting('konya_adres');
     $ankara   = setting('ankara_adres');
     $aksaray  = setting('aksaray_adres');
+    $genelAdres = trim((string)setting('adres'));
+
+    // Genel merkez: once istanbul_adres, sonra genel adres setting'i, sonra placeholder
     if ($istanbul) {
         $merkez = ['sehir' => 'İstanbul', 'ilce' => null, 'etiket' => 'Genel Merkez', 'adres' => $istanbul,
+                   'telefon' => setting('telefon'), 'telefon_2' => null, 'email' => setting('email'),
+                   'harita_url' => null, 'calisma_saatleri' => setting('calisma_saatleri', 'Pzt-Cum 09:00-18:00'), 'merkez_mi' => 1, 'aktif' => 1];
+    } elseif ($genelAdres) {
+        // istanbul_adres yok ama genel 'adres' setting var -> onu kullan
+        $merkez = ['sehir' => setting('sehir', 'Türkiye'), 'ilce' => null, 'etiket' => 'Genel Merkez', 'adres' => $genelAdres,
                    'telefon' => setting('telefon'), 'telefon_2' => null, 'email' => setting('email'),
                    'harita_url' => null, 'calisma_saatleri' => setting('calisma_saatleri', 'Pzt-Cum 09:00-18:00'), 'merkez_mi' => 1, 'aktif' => 1];
     }
