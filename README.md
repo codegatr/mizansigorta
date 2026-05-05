@@ -115,7 +115,7 @@ Repository'deki `.htaccess` dosyasının kopyalandığını ve Apache'nin `mod_r
 
 **Varsayılan giriş:**
 ```
-E-posta: admin@mizansigorta.com
+E-posta: destek@mizansigorta.com.tr
 Şifre:   Mizan2026!
 ```
 

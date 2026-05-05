@@ -18,8 +18,8 @@ const DB_PASS    = 'DEGISTIRIN_password';
 const DB_CHARSET = 'utf8mb4';
 const DB_PREFIX  = 'mz_';
 
-const SITE_VERSION   = '1.1.7';
-const SITE_BASE_URL  = 'https://mizansigorta.com';
+const SITE_VERSION   = '1.1.8';
+const SITE_BASE_URL  = 'https://mizansigorta.com.tr';
 const SITE_NAME      = 'Mizan Sigorta';
 const SITE_TIMEZONE  = 'Europe/Istanbul';
 const SITE_LOCALE    = 'tr_TR';
