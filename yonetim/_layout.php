@@ -14,6 +14,16 @@
 
 if (!defined('MZ_ADMIN')) { http_response_code(403); exit; }
 
+// CRITICAL: Admin sayfalari pattern'inde HTML cikti _layout.php icinde basliyor,
+// fakat POST handler _layout.php require'undan SONRA calisiyor. Bu yuzden
+// admin_redirect() icindeki header('Location:') 'headers already sent' hatasi alir
+// ve redirect calismaz - Yunus formu kaydedince sayfa yenilenmedigini goruyor.
+//
+// Cozum: butun admin sayfa cikti'sini output buffer'a yaz. POST handler redirect
+// gerekirse admin_redirect() icinde ob_end_clean() ile buffer temizlenip header
+// gonderilir; aksi halde sayfa sonu otomatik flush olur.
+if (!ob_get_level()) ob_start();
+
 if (!defined('MIZAN_BOOT')) define('MIZAN_BOOT', true);
 require __DIR__ . '/../includes/bootstrap.php';
 

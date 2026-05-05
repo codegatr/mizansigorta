@@ -19,3 +19,10 @@ $current = basename($_SERVER['SCRIPT_NAME']);
 <script src="<?= asset('assets/js/admin.js') ?>"></script>
 </body>
 </html>
+<?php
+// Output buffer flush - _layout.php basinda ob_start() ile baslattigimiz buffer'i
+// scriptin normal akisinda ekrana yaz. Eger redirect olduysa zaten admin_redirect()
+// icinde ob_end_clean() ile temizlenmis olurdu.
+while (ob_get_level() > 0) {
+    @ob_end_flush();
+}

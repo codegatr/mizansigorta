@@ -6,8 +6,7 @@ require __DIR__ . '/_helpers.php';
 
 // Zaten giris yapilmissa panele yonlendir
 if (user_id()) {
-    header('Location: index.php');
-    exit;
+    admin_redirect('index.php');
 }
 
 $err = '';
@@ -17,9 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pass  = (string)($_POST['password'] ?? '');
     $r = user_login($email, $pass);
     if ($r['ok']) {
-        flash_set('success', 'Hoş geldiniz, ' . ($r['user']['ad_soyad'] ?? ''));
-        header('Location: index.php');
-        exit;
+        admin_redirect('index.php', 'success', 'Hoş geldiniz, ' . ($r['user']['ad_soyad'] ?? ''));
     }
     $err = $r['error'] ?? 'Giriş başarısız.';
 }

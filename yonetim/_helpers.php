@@ -65,6 +65,23 @@ if (!function_exists('admin_redirect')) {
     function admin_redirect(string $page, string $type = 'success', string $msg = ''): void
     {
         if ($msg) flash_set($type, $msg);
+
+        // Onceki cikti varsa (HTML head/sidebar zaten yazildi olabilir) buffer'i temizle
+        // ki header('Location:') 'headers already sent' hatasi vermesin.
+        while (ob_get_level() > 0) {
+            @ob_end_clean();
+        }
+
+        // Eger header gonderilemezse (cok nadir hosting durumlari) JS+meta refresh fallback
+        if (headers_sent($file, $line)) {
+            // Failsafe: javascript ve meta refresh ile yonlendir
+            echo '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+               . '<meta http-equiv="refresh" content="0;url=' . htmlspecialchars($page, ENT_QUOTES) . '">'
+               . '<script>window.location.replace(' . json_encode($page) . ');</script>'
+               . '</head><body>Yönlendiriliyor... <a href="' . htmlspecialchars($page, ENT_QUOTES) . '">Devam et</a></body></html>';
+            exit;
+        }
+
         header('Location: ' . $page);
         exit;
     }
