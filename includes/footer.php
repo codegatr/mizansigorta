@@ -167,6 +167,7 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
 
 <!-- Mizan Kampanya Pop-up (mz_kampanyalar tablosundan, tarih araliginda olan) -->
 <?php @require __DIR__ . '/kampanya_popup.php'; ?>
+<?php @require __DIR__ . '/whatsapp_widget.php'; ?>
 
 <!-- Scroll to Top -->
 <button type="button" id="mzScrollTop" class="mz-scroll-top" aria-label="Yukarı çık" title="Yukarı çık">

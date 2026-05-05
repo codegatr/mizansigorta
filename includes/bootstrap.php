@@ -34,6 +34,7 @@ require __DIR__ . '/functions.php';
 require __DIR__ . '/csrf.php';
 require __DIR__ . '/auth.php';
 require __DIR__ . '/mail.php';
+require __DIR__ . '/upload.php';
 require __DIR__ . '/svg_illustrations.php';
 
 // Kritik calisma klasorleri yoksa olustur (root tasima sonrasi vs.)

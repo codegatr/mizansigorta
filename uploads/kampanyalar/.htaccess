@@ -1,0 +1,7 @@
+# Mizan Sigorta - kampanyalar uploads guvenlik
+# Sadece resim erisimine izin ver, PHP/script calistirmayi engelle
+
+<FilesMatch "\.(php|phtml|phar|pl|py|cgi|sh|asp|aspx|jsp)$">
+    Require all denied
+</FilesMatch>
+Options -ExecCGI

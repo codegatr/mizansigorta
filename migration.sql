@@ -3079,3 +3079,8 @@ CREATE TABLE IF NOT EXISTS `mz_mail_log` (
   KEY `idx_ilgili` (`ilgili_tip`, `ilgili_id`),
   KEY `idx_alici` (`alici`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- v1.1.31 - Kampanya gorsel upload + WhatsApp floating widget
+-- (sadece kod + dosya sistemi, SQL yok)
+-- ============================================================
