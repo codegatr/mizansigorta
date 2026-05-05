@@ -3102,3 +3102,8 @@ UPDATE `mz_ayarlar`
 UPDATE `mz_ayarlar`
    SET `aciklama` = 'WhatsApp numarası. 0552 694 32 32 veya 5526943232 yazsanız da kayıt sırasında otomatik 905526943232 formatına çevrilir.'
  WHERE `anahtar` = 'whatsapp';
+
+-- ============================================================
+-- v1.1.33 - Musteri teyit mailleri BCC + detay modal hep goster
+-- (sadece kod, SQL yok)
+-- ============================================================

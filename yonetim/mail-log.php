@@ -13,15 +13,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'tekra
     if (!$log) {
         admin_redirect('mail-log.php', 'danger', 'Log kaydı bulunamadı.');
     }
-    $bccArr = $log['bcc_listesi'] ? array_filter(array_map('trim', explode(',', (string)$log['bcc_listesi']))) : [];
-    $opts = ['ilgili_tip' => $log['ilgili_tip'] ?? 'tekrar_gonder', 'ilgili_id' => $log['ilgili_id'] ?? null];
+
+    // Log'daki BCC ile mevcut talep_bildirim_alicilari() BCC'sini birlestir
+    // Boylece eski (BCC'siz) bir maili tekrar gonderirken otomatik kopya gider
+    $bccLog = $log['bcc_listesi'] ? array_filter(array_map('trim', explode(',', (string)$log['bcc_listesi']))) : [];
+    $bccAktif = talep_bildirim_alicilari()['bcc'] ?? [];
+    $bccArr = array_values(array_unique(array_merge($bccLog, $bccAktif)));
+
+    $opts = [
+        'ilgili_tip' => $log['ilgili_tip'] ?? 'tekrar_gonder',
+        'ilgili_id'  => $log['ilgili_id'] ?? null,
+    ];
     if ($bccArr) $opts['bcc'] = $bccArr;
     if (!empty($log['reply_to'])) $opts['reply_to'] = $log['reply_to'];
 
     $r = send_mail($log['alici'], (string)$log['konu'], (string)$log['govde_html'], '', $opts);
-    audit_log('mail_tekrar_gonder', 'mail_log', $id, json_encode(['ok' => !empty($r['ok']), 'msg' => $r['msg'] ?? ''], JSON_UNESCAPED_UNICODE));
+    audit_log('mail_tekrar_gonder', 'mail_log', $id, json_encode(['ok' => !empty($r['ok']), 'msg' => $r['msg'] ?? '', 'bcc' => $bccArr], JSON_UNESCAPED_UNICODE));
     if (!empty($r['ok'])) {
-        admin_redirect('mail-log.php', 'success', 'Mail tekrar gönderildi.');
+        $msg = 'Mail tekrar gönderildi.';
+        if ($bccArr) $msg .= ' BCC: ' . implode(', ', $bccArr);
+        admin_redirect('mail-log.php', 'success', $msg);
     } else {
         admin_redirect('mail-log.php', 'danger', 'Mail gönderilemedi: ' . ($r['msg'] ?? 'Bilinmeyen hata'));
     }
@@ -267,9 +278,9 @@ $tipler = [
           <div class="col-md-4"><b>Durum:</b> <span id="d_durum"></span></div>
           <div class="col-md-4"><b>Tip:</b> <span id="d_tip"></span></div>
           <div class="col-md-12"><b>Alıcı (To):</b> <span id="d_alici"></span></div>
-          <div class="col-md-12" id="d_cc_row" style="display:none"><b>CC:</b> <span id="d_cc"></span></div>
-          <div class="col-md-12" id="d_bcc_row" style="display:none"><b>BCC:</b> <span id="d_bcc"></span></div>
-          <div class="col-md-12" id="d_reply_row" style="display:none"><b>Reply-To:</b> <span id="d_reply"></span></div>
+          <div class="col-md-12"><b>BCC (gizli kopya):</b> <span id="d_bcc"></span></div>
+          <div class="col-md-12"><b>CC:</b> <span id="d_cc"></span></div>
+          <div class="col-md-12"><b>Reply-To:</b> <span id="d_reply"></span></div>
           <div class="col-md-12"><b>Konu:</b> <span id="d_konu"></span></div>
           <div class="col-md-12" id="d_hata_row" style="display:none">
             <div class="alert alert-danger small mb-1 mt-2"><b><i class="bi bi-exclamation-triangle"></i> Hata:</b> <span id="d_hata"></span></div>
@@ -318,9 +329,11 @@ function showDetail(d) {
   document.getElementById('d_alici').textContent = d.alici;
   document.getElementById('d_konu').textContent = d.konu;
 
-  toggleRow('d_cc_row', 'd_cc', d.cc);
-  toggleRow('d_bcc_row', 'd_bcc', d.bcc);
-  toggleRow('d_reply_row', 'd_reply', d.reply_to);
+  // BCC/CC/Reply-To her zaman goster - bossa kirmizi vurgulu '— gonderilmedi' uyarisi
+  setFieldValue('d_bcc',   d.bcc,      'BCC adresi yok — bu mail kopya gönderilmemiş');
+  setFieldValue('d_cc',    d.cc,       '—');
+  setFieldValue('d_reply', d.reply_to, '—');
+
   toggleRow('d_hata_row', 'd_hata', d.hata);
   toggleRow('d_smtp_row', 'd_smtp', d.smtp);
 
@@ -329,12 +342,24 @@ function showDetail(d) {
   iframe.srcdoc = d.govde || '<p style="padding:1rem;color:#999">Boş içerik</p>';
   document.getElementById('d_source').textContent = d.govde || '';
 
-  // Tekrar gonder butonu sadece basarili veya hatali fark etmez, ama hata ise daha mantikli
   var btn = document.getElementById('resendBtn');
   btn.style.display = d.alici ? 'inline-block' : 'none';
 
   toggleView('html');
   new bootstrap.Modal(document.getElementById('detayModal')).show();
+}
+
+function setFieldValue(id, value, emptyText) {
+  var el = document.getElementById(id);
+  if (value && value.trim() !== '') {
+    el.textContent = value;
+    el.style.color = '';
+    el.style.fontStyle = '';
+  } else {
+    el.textContent = emptyText || '—';
+    el.style.color = (emptyText && emptyText.indexOf('gönderilmemiş') !== -1) ? '#dc3545' : '#9ca3af';
+    el.style.fontStyle = 'italic';
+  }
 }
 
 function toggleRow(rowId, valId, val) {

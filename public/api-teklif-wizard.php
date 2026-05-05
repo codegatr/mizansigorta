@@ -140,6 +140,7 @@ try {
 
     // Müşteriye teyit
     if ($email !== '') {
+        $extraMusteri = talep_bildirim_alicilari();
         @send_mail(
             $email,
             'Teklifiniz alındı — Mizan Sigorta',
@@ -156,6 +157,7 @@ try {
             ),
             '',
             [
+                'bcc'        => $extraMusteri['bcc'],
                 'ilgili_tip' => 'teklif',
                 'ilgili_id'  => isset($teklifId) ? (int)$teklifId : null,
             ]

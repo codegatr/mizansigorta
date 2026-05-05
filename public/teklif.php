@@ -120,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'preheader'   => 'Teklif talebiniz alindi - Teklif No: ' . $no,
             ]);
             send_mail($email, 'Teklif talebiniz alındı - ' . $no, $html, '', [
+                'bcc'        => $extra['bcc'],
                 'ilgili_tip' => 'teklif',
                 'ilgili_id'  => (int)$teklifId,
             ]);

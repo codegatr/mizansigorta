@@ -35,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
 
             $adminMail = setting('email');
+            $extra     = talep_bildirim_alicilari();
             if ($adminMail) {
                 $govde = '<h3>Yeni Temsilci Başvurusu</h3>'
                        . '<p><b>Ad Soyad:</b> ' . e($ad) . '</p>'
@@ -47,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                        . ($levha ? '<p><b>Levha No:</b> ' . e($levha) . '</p>' : '')
                        . ($aciklama ? '<p><b>Açıklama:</b><br>' . nl2br(e($aciklama)) . '</p>' : '')
                        . '<hr><p>Yönetim panelinden başvuruyu inceleyebilirsiniz.</p>';
-                $extra = talep_bildirim_alicilari();
                 @send_mail(
                     $adminMail,
                     'Yeni Temsilci Başvurusu — ' . $ad,
@@ -79,7 +79,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ]
                 ),
                 '',
-                ['ilgili_tip' => 'temsilci']
+                [
+                    'bcc'        => $extra['bcc'],
+                    'ilgili_tip' => 'temsilci',
+                ]
             );
 
             $ok = true;
