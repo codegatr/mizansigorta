@@ -6,227 +6,115 @@ $tumUrunler  = db_all('SELECT id, slug, baslik FROM ' . t('urunler') . ' WHERE a
 $blogList    = db_all('SELECT slug, baslik, ozet, kapak_gorseli, yayin_tarihi FROM ' . t('blog') . ' WHERE aktif=1 AND (yayin_tarihi IS NULL OR yayin_tarihi <= NOW()) ORDER BY yayin_tarihi DESC, id DESC LIMIT 3');
 $yorumlar    = db_all('SELECT * FROM ' . t('referanslar') . " WHERE aktif=1 AND tip='yorum' ORDER BY sira ASC, id DESC LIMIT 6");
 $sirketler   = db_all('SELECT * FROM ' . t('sigorta_sirketleri') . ' WHERE aktif=1 ORDER BY sira ASC LIMIT 24');
+$slaytlar    = db_all('SELECT * FROM ' . t('slaytlar') . ' WHERE aktif=1 ORDER BY sira ASC, id ASC');
 
 $pageTitle = setting('site_basligi', SITE_NAME);
 $pageDesc  = setting('site_aciklamasi', 'Mizan Sigorta — sigorta aracılık hizmetleri. Güven ve özen ile her daim yanınızda.');
 require MIZAN_INC . '/header.php';
 ?>
 
-<!-- Slider Hero -->
+
+<!-- Slider Hero (yonetim panelden duzenlenebilir) -->
 <section class="mz-slider">
   <div class="mz-slider-track">
+    <?php
+    // Eger DB'de hic aktif slayt yoksa, varsayilan 4 slayt seti kullan (kurulum oncesi guvenlik)
+    $slaytKaynak = $slaytlar;
+    if (!$slaytKaynak) {
+        $slaytKaynak = [
+            ['baslik' => 'Hayatınıza, aracınıza ve işinize tam koruma', 'accent_kelime' => 'tam koruma', 'ust_metin' => setting('site_slogan', 'Güven ve Özen İle'),
+             'aciklama' => '12+ anlaşmalı sigorta şirketi arasından, ihtiyacınıza özel en avantajlı teminatları biz buluruz. Talebinizi iletin, müsait temsilcimiz en kısa sürede sizinle iletişime geçsin.',
+             'buton1_metin' => 'Teklif Talebi Oluştur', 'buton1_link' => '/teklif-al', 'buton1_ikon' => 'bi-headset',
+             'buton2_metin' => 'Bize Ulaşın', 'buton2_link' => '/iletisim', 'buton2_ikon' => 'bi-telephone',
+             'gorsel_tip' => 'svg_kalkan', 'gorsel_url' => null],
+        ];
+    }
+    $slaytTotal = count($slaytKaynak);
+    ?>
 
-    <!-- Slide 1 - Hayatınız, Aracınız, İşiniz -->
-    <div class="mz-slide active" data-slide="0">
-      <div class="mz-slide-decor d1"></div>
-      <div class="mz-slide-decor d2"></div>
-      <div class="mz-slide-bg" aria-hidden="true">
-        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-          <!-- Kalkan + aile silueti: koruma metaforu -->
-          <defs>
-            <linearGradient id="sh1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#f4d35e" stop-opacity=".9"/>
-              <stop offset="100%" stop-color="#e30b30" stop-opacity=".7"/>
-            </linearGradient>
-          </defs>
-          <!-- Kalkan -->
-          <path d="M200 60 L320 100 V210 Q320 290 200 350 Q80 290 80 210 V100 Z" fill="url(#sh1)" stroke="#fff" stroke-width="3" stroke-opacity=".4"/>
-          <!-- Içeride büyük check -->
-          <path d="M140 200 L185 245 L265 165" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <!-- Yıldız parıltıları -->
-          <circle cx="80" cy="80" r="4" fill="#f4d35e" opacity=".8"/>
-          <circle cx="340" cy="120" r="5" fill="#fff" opacity=".7"/>
-          <circle cx="60" cy="280" r="3" fill="#f4d35e" opacity=".6"/>
-          <circle cx="350" cy="320" r="4" fill="#fff" opacity=".5"/>
-        </svg>
-      </div>
-      <div class="container">
-        <div class="mz-slide-inner">
-          <span class="mz-slide-script"><?= e(setting('site_slogan', 'Güven ve Özen İle')) ?></span>
-          <h1>Hayatınıza, aracınıza ve işinize <span class="accent">tam koruma</span></h1>
-          <p>12+ anlaşmalı sigorta şirketi arasından, ihtiyacınıza özel en avantajlı teminatları biz buluruz. Talebinizi iletin, müsait temsilcimiz en kısa sürede sizinle iletişime geçsin.</p>
-          <div class="mz-slide-cta">
-            <a href="<?= u('/teklif-al') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-headset"></i> Teklif Talebi Oluştur</a>
-            <a href="<?= u('/iletisim') ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-telephone"></i> Bize Ulaşın</a>
+    <?php foreach ($slaytKaynak as $idx => $sl):
+        $isActive   = ($idx === 0);
+        $accent     = trim((string)($sl['accent_kelime'] ?? ''));
+        $baslik     = (string)($sl['baslik'] ?? '');
+        // accent kelimeyi h1 icinde sari renkli span ile vurgula (ilk eslesme)
+        $baslikRender = e($baslik);
+        if ($accent !== '' && stripos($baslik, $accent) !== false) {
+            // Case-preserving replace (ilk eslesme)
+            $pos = stripos($baslik, $accent);
+            $baslikRender = e(substr($baslik, 0, $pos))
+                          . '<span class="accent">' . e(substr($baslik, $pos, strlen($accent))) . '</span>'
+                          . e(substr($baslik, $pos + strlen($accent)));
+        }
+
+        $tip      = (string)($sl['gorsel_tip'] ?? 'yok');
+        $customUrl = trim((string)($sl['gorsel_url'] ?? ''));
+
+        // Buton2 link telefon ise setting'den oku
+        $b2link = (string)($sl['buton2_link'] ?? '');
+        if ($b2link === 'tel:' || $b2link === 'tel') {
+            $tel = (string) setting('telefon', '');
+            $b2link = $tel ? 'tel:' . preg_replace('/\s+/', '', $tel) : '';
+            $b2text = $tel ?: (string)($sl['buton2_metin'] ?? '');
+        } else {
+            $b2text = (string)($sl['buton2_metin'] ?? '');
+        }
+    ?>
+      <div class="mz-slide<?= $isActive ? ' active' : '' ?>" data-slide="<?= $idx ?>">
+        <div class="mz-slide-decor d1"></div>
+        <div class="mz-slide-decor d2"></div>
+        <?php if ($tip === 'custom_url' && $customUrl !== ''): ?>
+          <div class="mz-slide-bg" aria-hidden="true">
+            <img src="<?= e($customUrl) ?>" alt="" style="width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 32px rgba(0,0,0,.3))" loading="lazy">
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Slide 2 - Kasko / Trafik -->
-    <div class="mz-slide" data-slide="1">
-      <div class="mz-slide-decor d1"></div>
-      <div class="mz-slide-decor d2"></div>
-      <div class="mz-slide-bg" aria-hidden="true">
-        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-          <!-- Yol + araba silueti -->
-          <defs>
-            <linearGradient id="car1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#e30b30" stop-opacity=".9"/>
-              <stop offset="100%" stop-color="#a91020" stop-opacity=".8"/>
-            </linearGradient>
-          </defs>
-          <!-- Zemin yol -->
-          <ellipse cx="200" cy="320" rx="180" ry="25" fill="#fff" opacity=".15"/>
-          <!-- Kesikli yol cizgileri -->
-          <line x1="40" y1="320" x2="80" y2="320" stroke="#f4d35e" stroke-width="4" stroke-linecap="round" opacity=".7"/>
-          <line x1="120" y1="320" x2="160" y2="320" stroke="#f4d35e" stroke-width="4" stroke-linecap="round" opacity=".7"/>
-          <line x1="240" y1="320" x2="280" y2="320" stroke="#f4d35e" stroke-width="4" stroke-linecap="round" opacity=".7"/>
-          <line x1="320" y1="320" x2="360" y2="320" stroke="#f4d35e" stroke-width="4" stroke-linecap="round" opacity=".7"/>
-          <!-- Araba -->
-          <path d="M90 280 L120 230 Q130 215 150 215 H260 Q275 215 285 235 L310 280 H300 V300 Q300 305 295 305 H285 Q280 305 280 300 V295 H125 V300 Q125 305 120 305 H110 Q105 305 105 300 V280 Z" fill="url(#car1)" stroke="#fff" stroke-width="2" stroke-opacity=".4"/>
-          <!-- Camlar -->
-          <path d="M135 280 L150 240 Q155 232 165 232 H240 Q252 232 257 245 L270 280 Z" fill="#fff" opacity=".25"/>
-          <line x1="200" y1="232" x2="200" y2="280" stroke="#fff" stroke-width="2" opacity=".4"/>
-          <!-- Tekerlekler -->
-          <circle cx="135" cy="305" r="22" fill="#0d1b2a" stroke="#fff" stroke-width="3" stroke-opacity=".5"/>
-          <circle cx="135" cy="305" r="9" fill="#fff" opacity=".7"/>
-          <circle cx="270" cy="305" r="22" fill="#0d1b2a" stroke="#fff" stroke-width="3" stroke-opacity=".5"/>
-          <circle cx="270" cy="305" r="9" fill="#fff" opacity=".7"/>
-          <!-- Far -->
-          <circle cx="305" cy="265" r="5" fill="#f4d35e" opacity=".9"/>
-          <!-- Hız çizgileri -->
-          <line x1="20" y1="250" x2="60" y2="250" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".5"/>
-          <line x1="10" y1="270" x2="55" y2="270" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".4"/>
-          <line x1="25" y1="290" x2="60" y2="290" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".3"/>
-        </svg>
-      </div>
-      <div class="container">
-        <div class="mz-slide-inner">
-          <span class="mz-slide-script">Aracınız İçin</span>
-          <h1>Kasko ve Trafik Sigortası — <span class="accent">en uygun fiyat</span></h1>
-          <p>Anadolu, Allianz, Türkiye Sigorta, AXA, HDI ve daha fazlası — tek bir talepte tüm şirketlerin teklifini karşılaştırın. Yenileme zamanı yaklaştığında size hatırlatma yapıyoruz.</p>
-          <div class="mz-slide-cta">
-            <a href="<?= u('/urun/oto-sigortalari') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-car-front-fill"></i> Oto Sigortalarını İncele</a>
-            <a href="<?= u('/teklif-al?urun=oto-sigortalari') ?>" class="btn btn-outline-light btn-lg">Teklif Al</a>
+        <?php elseif ($tip !== 'yok'): ?>
+          <div class="mz-slide-bg" aria-hidden="true">
+            <?= mz_svg_illustration($tip) ?>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Slide 3 - Sağlık / DASK -->
-    <div class="mz-slide" data-slide="2">
-      <div class="mz-slide-decor d1"></div>
-      <div class="mz-slide-decor d2"></div>
-      <div class="mz-slide-bg" aria-hidden="true">
-        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-          <!-- Ev + kalp metaforu: aile sağlık + konut güvencesi -->
-          <defs>
-            <linearGradient id="hg1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#22c55e" stop-opacity=".8"/>
-              <stop offset="100%" stop-color="#0d6efd" stop-opacity=".7"/>
-            </linearGradient>
-            <linearGradient id="hg2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#e30b30" stop-opacity=".9"/>
-              <stop offset="100%" stop-color="#f4d35e" stop-opacity=".8"/>
-            </linearGradient>
-          </defs>
-          <!-- Ev silueti -->
-          <path d="M120 200 L200 130 L280 200 V310 H120 Z" fill="url(#hg1)" stroke="#fff" stroke-width="3" stroke-opacity=".4"/>
-          <!-- Cati -->
-          <path d="M105 210 L200 120 L295 210" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none" opacity=".8"/>
-          <!-- Kapi -->
-          <rect x="180" y="245" width="40" height="65" rx="3" fill="#fff" opacity=".25"/>
-          <circle cx="212" cy="277" r="2" fill="#f4d35e"/>
-          <!-- Pencereler -->
-          <rect x="140" y="220" width="25" height="25" rx="2" fill="#fff" opacity=".3"/>
-          <rect x="235" y="220" width="25" height="25" rx="2" fill="#fff" opacity=".3"/>
-          <!-- Pencere haçları -->
-          <line x1="152" y1="220" x2="152" y2="245" stroke="#0d1b2a" stroke-width="1" opacity=".5"/>
-          <line x1="140" y1="232" x2="165" y2="232" stroke="#0d1b2a" stroke-width="1" opacity=".5"/>
-          <line x1="247" y1="220" x2="247" y2="245" stroke="#0d1b2a" stroke-width="1" opacity=".5"/>
-          <line x1="235" y1="232" x2="260" y2="232" stroke="#0d1b2a" stroke-width="1" opacity=".5"/>
-          <!-- Kalp (sağlık metaforu) - üst sağ köşe -->
-          <path d="M310 80 Q310 60 330 60 Q345 60 350 75 Q355 60 370 60 Q390 60 390 80 Q390 105 350 135 Q310 105 310 80 Z" fill="url(#hg2)" stroke="#fff" stroke-width="2" stroke-opacity=".4"/>
-          <!-- Atış çizgisi (EKG) -->
-          <path d="M312 90 L325 90 L330 80 L335 100 L342 75 L347 90 L388 90" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".9"/>
-          <!-- Yıldız parıltıları -->
-          <circle cx="60" cy="100" r="3" fill="#f4d35e" opacity=".7"/>
-          <circle cx="80" cy="60" r="4" fill="#fff" opacity=".6"/>
-          <circle cx="40" cy="280" r="3" fill="#f4d35e" opacity=".5"/>
-        </svg>
-      </div>
-      <div class="container">
-        <div class="mz-slide-inner">
-          <span class="mz-slide-script">Aileniz İçin</span>
-          <h1>Sağlık ve DASK — <span class="accent">geleceğinizi güvenceye alın</span></h1>
-          <p>Tamamlayıcı sağlık, özel sağlık ve DASK zorunlu deprem sigortası. Aile bireylerinize özel paketler, anlaşmalı özel hastanelerde fark ücretsiz tedavi ve deprem sonrası nakit destek.</p>
-          <div class="mz-slide-cta">
-            <a href="<?= u('/urun/saglik-sigortalari') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-heart-pulse-fill"></i> Sağlık Sigortaları</a>
-            <a href="<?= u('/urun/yangin-policeleri') ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-houses-fill"></i> DASK · Konut</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Slide 4 - 7/24 Hasar -->
-    <div class="mz-slide" data-slide="3">
-      <div class="mz-slide-decor d1"></div>
-      <div class="mz-slide-decor d2"></div>
-      <div class="mz-slide-bg" aria-hidden="true">
-        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-          <!-- 7/24 destek operatorü kulaklık + saat -->
-          <defs>
-            <linearGradient id="op1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#f4d35e" stop-opacity=".9"/>
-              <stop offset="100%" stop-color="#e30b30" stop-opacity=".8"/>
-            </linearGradient>
-            <linearGradient id="op2" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#0d6efd" stop-opacity=".9"/>
-              <stop offset="100%" stop-color="#22c55e" stop-opacity=".7"/>
-            </linearGradient>
-          </defs>
-          <!-- Kulaklık üst kemeri -->
-          <path d="M100 220 Q100 110 200 110 Q300 110 300 220" fill="none" stroke="url(#op1)" stroke-width="14" stroke-linecap="round"/>
-          <!-- Sol kulaklık (mikrofonlu) -->
-          <rect x="80" y="200" width="50" height="80" rx="20" fill="url(#op1)" stroke="#fff" stroke-width="2" stroke-opacity=".4"/>
-          <!-- Mikrofon kolu -->
-          <path d="M105 280 Q105 320 145 325 Q175 328 185 320" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".9"/>
-          <ellipse cx="190" cy="318" rx="10" ry="6" fill="#e30b30" opacity=".95"/>
-          <!-- Sağ kulaklık -->
-          <rect x="270" y="200" width="50" height="80" rx="20" fill="url(#op1)" stroke="#fff" stroke-width="2" stroke-opacity=".4"/>
-          <!-- Saat ikonu (24/7) - sağ üst -->
-          <circle cx="320" cy="80" r="42" fill="url(#op2)" stroke="#fff" stroke-width="3" stroke-opacity=".5"/>
-          <line x1="320" y1="50" x2="320" y2="80" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-          <line x1="320" y1="80" x2="345" y2="80" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="320" cy="80" r="3" fill="#fff"/>
-          <!-- 24 yazısı altında -->
-          <text x="320" y="145" font-family="Arial,sans-serif" font-weight="bold" font-size="24" fill="#fff" text-anchor="middle" opacity=".95">7/24</text>
-          <!-- Ses dalgaları -->
-          <path d="M50 230 Q40 240 50 250" stroke="#fff" stroke-width="2" fill="none" opacity=".6" stroke-linecap="round"/>
-          <path d="M40 220 Q25 240 40 260" stroke="#fff" stroke-width="2" fill="none" opacity=".4" stroke-linecap="round"/>
-          <path d="M30 210 Q10 240 30 270" stroke="#fff" stroke-width="2" fill="none" opacity=".25" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="container">
-        <div class="mz-slide-inner">
-          <span class="mz-slide-script">Hasar Anında</span>
-          <h1>7/24 hasar desteğimiz — <span class="accent">yalnız değilsiniz</span></h1>
-          <p>Hasar durumunda online ihbar formu, eksper takibi, belge süreci ve ödeme — hepsini biz yönetiyoruz. Aramamız yeterli, sürecin gerisini bize bırakın.</p>
-          <div class="mz-slide-cta">
-            <a href="<?= u('/hasar-ihbari') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-exclamation-triangle-fill"></i> Hasar İhbarı Yap</a>
-            <?php if ($tel = setting('telefon')): ?>
-              <a href="tel:<?= e(preg_replace('/\s+/', '', $tel)) ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-telephone-fill"></i> <?= e($tel) ?></a>
+        <?php endif; ?>
+        <div class="container">
+          <div class="mz-slide-inner">
+            <?php if (!empty($sl['ust_metin'])): ?>
+              <span class="mz-slide-script"><?= e($sl['ust_metin']) ?></span>
             <?php endif; ?>
+            <h1><?= $baslikRender /* HTML icerir, escape edilmis */ ?></h1>
+            <?php if (!empty($sl['aciklama'])): ?>
+              <p><?= e($sl['aciklama']) ?></p>
+            <?php endif; ?>
+            <div class="mz-slide-cta">
+              <?php if (!empty($sl['buton1_link']) && !empty($sl['buton1_metin'])): ?>
+                <a href="<?= e(u($sl['buton1_link'])) ?>" class="btn btn-warning btn-lg fw-semibold">
+                  <?php if (!empty($sl['buton1_ikon'])): ?><i class="bi <?= e($sl['buton1_ikon']) ?>"></i> <?php endif; ?>
+                  <?= e($sl['buton1_metin']) ?>
+                </a>
+              <?php endif; ?>
+              <?php if ($b2link !== '' && $b2text !== ''): ?>
+                <a href="<?= e(strpos($b2link, 'tel:') === 0 ? $b2link : u($b2link)) ?>" class="btn btn-outline-light btn-lg">
+                  <?php if (!empty($sl['buton2_ikon'])): ?><i class="bi <?= e($sl['buton2_ikon']) ?>"></i> <?php endif; ?>
+                  <?= e($b2text) ?>
+                </a>
+              <?php endif; ?>
+            </div>
           </div>
         </div>
       </div>
+    <?php endforeach; ?>
+
+  </div>
+
+  <?php if ($slaytTotal > 1): ?>
+    <div class="mz-slider-arrows">
+      <button class="mz-slider-arrow" data-slide-prev aria-label="Önceki"><i class="bi bi-chevron-left"></i></button>
+      <button class="mz-slider-arrow" data-slide-next aria-label="Sonraki"><i class="bi bi-chevron-right"></i></button>
     </div>
 
-  </div>
-
-  <div class="mz-slider-arrows">
-    <button class="mz-slider-arrow" data-slide-prev aria-label="Önceki"><i class="bi bi-chevron-left"></i></button>
-    <button class="mz-slider-arrow" data-slide-next aria-label="Sonraki"><i class="bi bi-chevron-right"></i></button>
-  </div>
-
-  <div class="mz-slider-dots">
-    <button class="mz-slider-dot active" data-slide-to="0" aria-label="Slide 1"></button>
-    <button class="mz-slider-dot" data-slide-to="1" aria-label="Slide 2"></button>
-    <button class="mz-slider-dot" data-slide-to="2" aria-label="Slide 3"></button>
-    <button class="mz-slider-dot" data-slide-to="3" aria-label="Slide 4"></button>
-  </div>
+    <div class="mz-slider-dots">
+      <?php for ($i = 0; $i < $slaytTotal; $i++): ?>
+        <button class="mz-slider-dot<?= $i === 0 ? ' active' : '' ?>" data-slide-to="<?= $i ?>" aria-label="Slide <?= $i + 1 ?>"></button>
+      <?php endfor; ?>
+    </div>
+  <?php endif; ?>
 </section>
+
 
 <script>
 (function(){

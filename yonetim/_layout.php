@@ -77,6 +77,7 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
     <a href="hatirlatma-log.php"       class="<?= $current === 'hatirlatma-log.php' ? 'active' : '' ?>"><i class="bi bi-list-check"></i> Gönderim Logu</a>
 
     <div class="mz-admin-section">İçerik</div>
+    <a href="slaytlar.php"             class="<?= $current === 'slaytlar.php' ? 'active' : '' ?>"><i class="bi bi-images"></i> Anasayfa Slider</a>
     <a href="urun-yonetimi.php"        class="<?= $current === 'urun-yonetimi.php' ? 'active' : '' ?>"><i class="bi bi-box"></i> Sigorta Ürünleri</a>
     <a href="sayfa-yonetimi.php"       class="<?= $current === 'sayfa-yonetimi.php' ? 'active' : '' ?>"><i class="bi bi-file-text"></i> CMS Sayfalar</a>
     <a href="blog.php"                 class="<?= $current === 'blog.php' ? 'active' : '' ?>"><i class="bi bi-journal-text"></i> Blog</a>

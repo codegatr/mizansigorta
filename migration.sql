@@ -2866,3 +2866,53 @@ INSERT IGNORE INTO `mz_ayarlar` (`anahtar`,`deger`,`aciklama`,`grup`,`tip`) VALU
 -- v1.1.17 - Slider gorselleri + guncelleme animasyonu + version display fix
 -- (Sadece kod degisikligi, SQL migration yok)
 -- ============================================================
+
+-- ============================================================
+-- v1.1.18 - Slider Yonetim Tablosu
+-- Yunus istegi: Slider yonetim panelinden duzenlenebilir olsun
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `mz_slaytlar` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `baslik` varchar(255) NOT NULL,
+  `accent_kelime` varchar(100) DEFAULT NULL COMMENT 'Sari renkli vurgulu kelime baslik icinde',
+  `ust_metin` varchar(150) DEFAULT NULL COMMENT 'Italik kirmizi script (ornek: Aileniz Icin)',
+  `aciklama` text DEFAULT NULL,
+  `buton1_metin` varchar(80) DEFAULT NULL,
+  `buton1_link` varchar(255) DEFAULT NULL,
+  `buton1_ikon` varchar(50) DEFAULT 'bi-headset' COMMENT 'Bootstrap Icons class adi',
+  `buton2_metin` varchar(80) DEFAULT NULL,
+  `buton2_link` varchar(255) DEFAULT NULL,
+  `buton2_ikon` varchar(50) DEFAULT 'bi-telephone' COMMENT 'Bootstrap Icons class adi',
+  `gorsel_tip` enum('svg_kalkan','svg_araba','svg_ev_kalp','svg_kulaklik','custom_url','yok') NOT NULL DEFAULT 'svg_kalkan' COMMENT 'Slide arka plan illustration tipi',
+  `gorsel_url` varchar(500) DEFAULT NULL COMMENT 'gorsel_tip=custom_url icin gercek resim URL',
+  `aktif` tinyint(1) NOT NULL DEFAULT 1,
+  `sira` int(11) NOT NULL DEFAULT 0,
+  `olusturma_tarihi` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `guncelleme_tarihi` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_aktif_sira` (`aktif`,`sira`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4 varsayilan slayt seed (sadece tablo bossa eklenir - INSERT IGNORE pattern)
+INSERT IGNORE INTO `mz_slaytlar` (`id`,`baslik`,`accent_kelime`,`ust_metin`,`aciklama`,`buton1_metin`,`buton1_link`,`buton1_ikon`,`buton2_metin`,`buton2_link`,`buton2_ikon`,`gorsel_tip`,`aktif`,`sira`) VALUES
+(1, 'Hayatınıza, aracınıza ve işinize tam koruma', 'tam koruma', 'Güven ve Özen İle',
+ '12+ anlaşmalı sigorta şirketi arasından, ihtiyacınıza özel en avantajlı teminatları biz buluruz. Talebinizi iletin, müsait temsilcimiz en kısa sürede sizinle iletişime geçsin.',
+ 'Teklif Talebi Oluştur', '/teklif-al', 'bi-headset',
+ 'Bize Ulaşın', '/iletisim', 'bi-telephone',
+ 'svg_kalkan', 1, 10),
+(2, 'Kasko ve Trafik Sigortası en uygun fiyat', 'en uygun fiyat', 'Aracınız İçin',
+ 'Anadolu, Allianz, Türkiye Sigorta, AXA, HDI ve daha fazlası — tek bir talepte tüm şirketlerin teklifini karşılaştırın. Yenileme zamanı yaklaştığında size hatırlatma yapıyoruz.',
+ 'Oto Sigortalarını İncele', '/urun/oto-sigortalari', 'bi-car-front-fill',
+ 'Teklif Al', '/teklif-al?urun=oto-sigortalari', 'bi-arrow-right',
+ 'svg_araba', 1, 20),
+(3, 'Sağlık ve DASK geleceğinizi güvenceye alın', 'geleceğinizi güvenceye alın', 'Aileniz İçin',
+ 'Tamamlayıcı sağlık, özel sağlık ve DASK zorunlu deprem sigortası. Aile bireylerinize özel paketler, anlaşmalı özel hastanelerde fark ücretsiz tedavi ve deprem sonrası nakit destek.',
+ 'Sağlık Sigortaları', '/urun/saglik-sigortalari', 'bi-heart-pulse-fill',
+ 'DASK · Konut', '/urun/yangin-policeleri', 'bi-houses-fill',
+ 'svg_ev_kalp', 1, 30),
+(4, 'Hasar anında 7/24 yanınızdayız', 'yalnız değilsiniz', 'Hasar Anında',
+ 'Hasar durumunda online ihbar formu, eksper takibi, belge süreci ve ödeme — hepsini biz yönetiyoruz. Aramamız yeterli, sürecin gerisini bize bırakın.',
+ 'Hasar İhbarı Yap', '/hasar-ihbari', 'bi-exclamation-triangle-fill',
+ 'Bizi Arayın', 'tel:', 'bi-telephone-fill',
+ 'svg_kulaklik', 1, 40);
