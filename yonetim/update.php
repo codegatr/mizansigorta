@@ -44,10 +44,13 @@ $repoFull = $manifest['repo'] ?? 'codegatr/mizansigorta';
 $ghBranch = setting('github_branch', 'main') ?: 'main';
 
 // Guncelleme harici dosyalar/klasorler (asla degistirilmez)
+// NOT: uploads/ buraya eklenmedi cunku ZIP icindeki yeni dosyalar
+// (orn. slayt gorselleri) eksik kalir. Onun yerine upd_isUploadProtected()
+// fonksiyonu var: uploads/ icindeki dosyalar SADECE diskte zaten varsa skip
+// edilir (kullanici yuklemeleri korunur, yeni dosyalar kopyalanir).
 $UPD_EXCLUDES = [
     'config/config.php',
     'config/',
-    'uploads/',
     'backups/',
     '.git/',
     '.github/',
@@ -205,6 +208,13 @@ function upd_isExcluded(string $relPath): bool
     foreach ($UPD_EXCLUDES as $ex) {
         if ($relPath === $ex) return true;
         if (str_ends_with($ex, '/') && str_starts_with($relPath, $ex)) return true;
+    }
+    // uploads/ icindeki dosyalar: SADECE diskte zaten varsa skip
+    // (kullanici yuklemeleri korunur, yeni dosyalar -orn. yeni slayt gorseli- kopyalanir)
+    if (str_starts_with($relPath, 'uploads/')) {
+        $absPath = MIZAN_ROOT . '/' . $relPath;
+        if (file_exists($absPath)) return true; // mevcut kullanici dosyasi - atla
+        // Yeni dosya - kopyalanir (return false)
     }
     return false;
 }
