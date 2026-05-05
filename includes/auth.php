@@ -26,12 +26,35 @@ function start_session(): void
     session_start();
 }
 
-function user_login(string $email, string $password): array
+function user_login(string $identifier, string $password): array
 {
-    $email = strtolower(trim($email));
-    $u = db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE email = ? LIMIT 1', [$email]);
+    // $identifier email veya kullanici_adi olabilir.
+    // Iceren '@' ise email olarak, aksi halde kullanici_adi olarak ara.
+    $identifier = strtolower(trim($identifier));
+    if ($identifier === '') {
+        return ['ok' => false, 'msg' => 'E-posta veya kullanici adi giriniz.'];
+    }
+
+    if (strpos($identifier, '@') !== false) {
+        // Email gibi gorunuyor - email kolonundan ara
+        $u = db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE email = ? LIMIT 1', [$identifier]);
+    } else {
+        // Kullanici adi - kullanici_adi kolonundan ara (yoksa fallback olarak emailin @ oncesi)
+        $u = null;
+        try {
+            $u = db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE kullanici_adi = ? LIMIT 1', [$identifier]);
+        } catch (Throwable $e) {
+            // kullanici_adi kolonu yoksa (migration calismamissa) graceful fallback
+            $u = null;
+        }
+        // Bulunamazsa: emailin @ oncesi karsilastirmasi (kolon yokken cakismayi onler)
+        if (!$u) {
+            $u = db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE LOWER(SUBSTRING_INDEX(email, "@", 1)) = ? LIMIT 1', [$identifier]);
+        }
+    }
+
     if (!$u) {
-        return ['ok' => false, 'msg' => 'E-posta veya sifre hatali.'];
+        return ['ok' => false, 'msg' => 'Kullanici adi/e-posta veya sifre hatali.'];
     }
     if ((int) $u['aktif'] !== 1) {
         return ['ok' => false, 'msg' => 'Hesabiniz devre disi.'];
@@ -47,7 +70,7 @@ function user_login(string $email, string $password): array
             : null;
         db_exec('UPDATE ' . t('kullanicilar') . ' SET hatali_giris=?, kilit_bitis=? WHERE id=?',
             [$hatali, $kilit, $u['id']]);
-        return ['ok' => false, 'msg' => 'E-posta veya sifre hatali.'];
+        return ['ok' => false, 'msg' => 'Kullanici adi/e-posta veya sifre hatali.'];
     }
     db_exec('UPDATE ' . t('kullanicilar') .
         ' SET hatali_giris=0, kilit_bitis=NULL, son_giris=NOW(), son_giris_ip=? WHERE id=?',

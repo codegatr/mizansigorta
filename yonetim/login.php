@@ -12,13 +12,13 @@ if (user_id()) {
 $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_assert_post();
-    $email = trim((string)($_POST['email'] ?? ''));
+    $identifier = trim((string)($_POST['identifier'] ?? $_POST['email'] ?? ''));  // geriye donuk uyumlu
     $pass  = (string)($_POST['password'] ?? '');
-    $r = user_login($email, $pass);
+    $r = user_login($identifier, $pass);
     if ($r['ok']) {
         admin_redirect('index.php', 'success', 'Hoş geldiniz, ' . ($r['user']['ad_soyad'] ?? ''));
     }
-    $err = $r['error'] ?? 'Giriş başarısız.';
+    $err = $r['error'] ?? $r['msg'] ?? 'Giriş başarısız.';
 }
 ?>
 
@@ -37,10 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <form method="post" novalidate autocomplete="off">
         <?= csrf_field() ?>
         <div class="mb-3">
-          <label class="form-label small fw-semibold">E-posta</label>
+          <label class="form-label small fw-semibold">E-posta veya Kullanıcı Adı</label>
           <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-            <input type="email" name="email" class="form-control" required autofocus value="<?= e($_POST['email'] ?? '') ?>">
+            <span class="input-group-text"><i class="bi bi-person"></i></span>
+            <input type="text" name="identifier" class="form-control" required autofocus
+                   autocomplete="username"
+                   value="<?= e($_POST['identifier'] ?? $_POST['email'] ?? '') ?>"
+                   placeholder="ornek@firma.com veya yunus">
           </div>
         </div>
         <div class="mb-4">

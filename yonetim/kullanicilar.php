@@ -10,13 +10,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $act = (string)($_POST['action'] ?? '');
 
     if ($act === 'save') {
-        $id       = (int)($_POST['id'] ?? 0);
-        $ad_soyad = trim((string)($_POST['ad_soyad'] ?? ''));
-        $email    = strtolower(trim((string)($_POST['email'] ?? '')));
-        $rol      = (string)($_POST['rol'] ?? 'operator');
-        $telefon  = normalize_phone((string)($_POST['telefon'] ?? ''));
-        $aktif    = isset($_POST['aktif']) ? 1 : 0;
-        $sifre    = (string)($_POST['sifre'] ?? '');
+        $id            = (int)($_POST['id'] ?? 0);
+        $ad_soyad      = trim((string)($_POST['ad_soyad'] ?? ''));
+        $email         = strtolower(trim((string)($_POST['email'] ?? '')));
+        $kullanici_adi = strtolower(trim((string)($_POST['kullanici_adi'] ?? '')));
+        $rol           = (string)($_POST['rol'] ?? 'operator');
+        $telefon       = normalize_phone((string)($_POST['telefon'] ?? ''));
+        $aktif         = isset($_POST['aktif']) ? 1 : 0;
+        $sifre         = (string)($_POST['sifre'] ?? '');
 
         // Sadece superadmin baskasini superadmin yapabilir
         if ($rol === 'superadmin' && !is_superadmin()) $rol = 'admin';
@@ -24,13 +25,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($ad_soyad === '' || $email === '') admin_redirect('kullanicilar.php', 'danger', 'Ad soyad ve e-posta zorunlu.');
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) admin_redirect('kullanicilar.php', 'danger', 'Geçerli bir e-posta giriniz.');
 
+        // Kullanici adi opsiyonel, ama girildiyse formati dogrula
+        if ($kullanici_adi !== '') {
+            if (!preg_match('/^[a-z0-9_.-]{3,50}$/', $kullanici_adi)) {
+                admin_redirect('kullanicilar.php', 'danger', 'Kullanıcı adı 3-50 karakter, sadece a-z 0-9 . _ - karakterleri içerebilir (Türkçe karakter kullanmayın).');
+            }
+            if (strpos($kullanici_adi, '@') !== false) {
+                admin_redirect('kullanicilar.php', 'danger', 'Kullanıcı adı "@" içeremez (e-posta gibi görünür, çakışmayı önler).');
+            }
+        }
+
         // Email tekrar kontrol
         $existing = db_value('SELECT id FROM ' . t('kullanicilar') . ' WHERE email=? AND id<>?', [$email, $id]);
         if ($existing) admin_redirect('kullanicilar.php', 'danger', 'Bu e-posta başka bir kullanıcıya ait.');
 
+        // Kullanici adi tekrar kontrol (girildiyse)
+        if ($kullanici_adi !== '') {
+            $existingKa = db_value('SELECT id FROM ' . t('kullanicilar') . ' WHERE kullanici_adi=? AND id<>?', [$kullanici_adi, $id]);
+            if ($existingKa) admin_redirect('kullanicilar.php', 'danger', 'Bu kullanıcı adı başka bir hesaba ait.');
+        }
+
+        $kaForDb = $kullanici_adi !== '' ? $kullanici_adi : null;
+
         if ($id) {
-            $params = [$ad_soyad, $email, $telefon, $rol, $aktif];
-            $sql = 'UPDATE ' . t('kullanicilar') . ' SET ad_soyad=?, email=?, telefon=?, rol=?, aktif=?';
+            $params = [$ad_soyad, $email, $kaForDb, $telefon, $rol, $aktif];
+            $sql = 'UPDATE ' . t('kullanicilar') . ' SET ad_soyad=?, email=?, kullanici_adi=?, telefon=?, rol=?, aktif=?';
             if ($sifre !== '') {
                 if (strlen($sifre) < 8) admin_redirect('kullanicilar.php', 'danger', 'Şifre en az 8 karakter olmalı.');
                 $sql .= ', sifre_hash=?';
@@ -44,10 +63,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             if (strlen($sifre) < 8) admin_redirect('kullanicilar.php', 'danger', 'Yeni kullanıcı için şifre (en az 8 karakter) zorunlu.');
             $hash = password_hash($sifre, PASSWORD_BCRYPT);
-            db_exec('INSERT INTO ' . t('kullanicilar') . ' (ad_soyad,email,telefon,sifre_hash,rol,aktif,olusturma_tarihi) VALUES (?,?,?,?,?,?,NOW())',
-                [$ad_soyad, $email, $telefon, $hash, $rol, $aktif]);
+            // kullanici_adi bos ise email'in @ oncesinden otomatik uret
+            if ($kaForDb === null) {
+                $auto = strtolower(substr($email, 0, strpos($email, '@')));
+                $auto = preg_replace('/[^a-z0-9_.-]/', '', $auto);
+                if ($auto && strlen($auto) >= 3) {
+                    // Cakismayi kontrol et, varsa sayi ekle
+                    $try = $auto; $i = 1;
+                    while (db_value('SELECT id FROM ' . t('kullanicilar') . ' WHERE kullanici_adi=?', [$try])) {
+                        $try = $auto . $i; $i++;
+                        if ($i > 99) { $try = null; break; }
+                    }
+                    $kaForDb = $try;
+                }
+            }
+            db_exec('INSERT INTO ' . t('kullanicilar') . ' (ad_soyad,email,kullanici_adi,telefon,sifre_hash,rol,aktif,olusturma_tarihi) VALUES (?,?,?,?,?,?,?,NOW())',
+                [$ad_soyad, $email, $kaForDb, $telefon, $hash, $rol, $aktif]);
             audit_log('kullanici_ekle', 'kullanici', db_last_id());
-            admin_redirect('kullanicilar.php', 'success', 'Yeni kullanıcı eklendi.');
+            admin_redirect('kullanicilar.php', 'success', 'Yeni kullanıcı eklendi.' . ($kaForDb ? ' Kullanıcı adı: ' . $kaForDb : ''));
         }
     }
 
@@ -88,7 +121,12 @@ $edit = $editId ? db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE id=?', [
                 <td>
                   <b><?= e($r['ad_soyad']) ?></b>
                   <?php if ($r['id']==user_id()): ?><span class="badge bg-info ms-1">Siz</span><?php endif; ?>
-                  <div class="small text-muted"><?= e($r['email']) ?></div>
+                  <div class="small text-muted">
+                    <i class="bi bi-envelope"></i> <?= e($r['email']) ?>
+                    <?php if (!empty($r['kullanici_adi'])): ?>
+                      <span class="ms-2"><i class="bi bi-person-badge"></i> <code><?= e($r['kullanici_adi']) ?></code></span>
+                    <?php endif; ?>
+                  </div>
                 </td>
                 <td>
                   <?php
@@ -140,6 +178,15 @@ $edit = $editId ? db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE id=?', [
           <div class="row g-2">
             <div class="col-12"><label class="form-label small">Ad Soyad *</label><input type="text" name="ad_soyad" required class="form-control form-control-sm" value="<?= e($edit['ad_soyad'] ?? '') ?>"></div>
             <div class="col-12"><label class="form-label small">E-posta *</label><input type="email" name="email" required class="form-control form-control-sm" value="<?= e($edit['email'] ?? '') ?>"></div>
+            <div class="col-12">
+              <label class="form-label small">Kullanıcı Adı <span class="text-muted">(opsiyonel — login için kolaylık)</span></label>
+              <input type="text" name="kullanici_adi" class="form-control form-control-sm"
+                     pattern="[a-z0-9_.\-]{3,50}"
+                     maxlength="50"
+                     value="<?= e($edit['kullanici_adi'] ?? '') ?>"
+                     placeholder="ornek: yunus, mehmet.demir, satis_01">
+              <div class="form-text small">3-50 karakter, sadece <code>a-z 0-9 . _ -</code> Türkçe karakter kullanmayın. Boş bırakırsan e-posta adresinin <code>@</code> öncesinden otomatik üretilir.</div>
+            </div>
             <div class="col-12"><label class="form-label small">Telefon</label><input type="tel" name="telefon" class="form-control form-control-sm" value="<?= e($edit['telefon'] ?? '') ?>"></div>
             <div class="col-12"><label class="form-label small">Rol *</label>
               <select name="rol" class="form-select form-select-sm" required>

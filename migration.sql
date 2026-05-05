@@ -2990,3 +2990,29 @@ CREATE TABLE IF NOT EXISTS `mz_kampanyalar` (
   KEY `idx_aktif_tarih` (`aktif`,`baslangic_tarihi`,`bitis_tarihi`),
   KEY `idx_sira` (`sira`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- v1.1.23 - Kullanici adi ile giris destegi
+-- Yunus istegi: 'Yoneticilere kolaylik, Kullanici Adi VE Mail ile girebilsinler'
+-- ============================================================
+
+-- Idempotent: kullanici_adi kolonu yoksa ekle
+SET @col_exists := (
+    SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME   = 'mz_kullanicilar'
+      AND COLUMN_NAME  = 'kullanici_adi'
+);
+SET @sql := IF(@col_exists = 0,
+    'ALTER TABLE `mz_kullanicilar`
+       ADD COLUMN `kullanici_adi` VARCHAR(50) DEFAULT NULL COMMENT ''Login icin alternatif (email yerine kullanilabilir)'' AFTER `ad_soyad`,
+       ADD UNIQUE KEY `uk_kullanici_adi` (`kullanici_adi`)',
+    'SELECT ''Column kullanici_adi already exists'' AS msg'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- Mevcut kullanicilar icin kullanici_adi'ni email'in @ oncesinden otomatik doldur
+-- (sadece NULL olanlar icin, manuel set edilmis olanlar korunur)
+UPDATE `mz_kullanicilar`
+SET `kullanici_adi` = LOWER(SUBSTRING_INDEX(`email`, '@', 1))
+WHERE `kullanici_adi` IS NULL OR `kullanici_adi` = '';
