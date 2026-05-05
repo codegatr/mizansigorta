@@ -68,11 +68,124 @@ $footerCms     = $footerCms     ?? db_all('SELECT slug, baslik FROM ' . t('sayfa
       <a href="<?= u('/sayfa/acik-riza') ?>" style="color:#cbd5e1;text-decoration:none">Açık Rıza</a>
     </div>
   </div>
-  <div class="mz-copy text-center small">
-    © <?= date('Y') ?> <?= e(setting('firma_adi', SITE_NAME)) ?> — Tüm hakları saklıdır.
-    &nbsp;|&nbsp; v<?= e(MIZAN_RUNTIME_VERSION) ?> &nbsp;|&nbsp; <span class="text-light-emphasis">Yazılım: <a href="https://codega.com.tr" target="_blank" rel="noopener">CODEGA</a></span>
+  <div class="mz-copy">
+    <div class="container">
+      <div class="row align-items-center g-2">
+        <div class="col-md-6 text-center text-md-start">
+          <span class="mz-footer-copy">
+            © <?= date('Y') ?> <strong><?= e(setting('firma_adi', SITE_NAME)) ?></strong> — Tüm hakları saklıdır.
+          </span>
+          <span class="mz-footer-version" title="Sistem versiyonu">v<?= e(MIZAN_RUNTIME_VERSION) ?></span>
+        </div>
+        <div class="col-md-6 text-center text-md-end">
+          <a href="https://codega.com.tr" target="_blank" rel="noopener" class="mz-codega-link" title="CODEGA — Yazılım & Hosting Çözümleri">
+            <span class="mz-codega-prefix">Software <span class="mz-codega-amp">&amp;</span> Hosting</span>
+            <span class="mz-codega-divider"></span>
+            <span class="mz-codega-brand">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mz-codega-icon">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+              <span class="mz-codega-name">CODEGA</span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </footer>
+
+<style>
+.mz-copy { background: #050b18; padding: 14px 0; border-top: 1px solid rgba(255,255,255,.06); }
+.mz-footer-copy { color: #94a3b8; font-size: 12.5px; }
+.mz-footer-copy strong { color: #cbd5e1; font-weight: 600; }
+.mz-footer-version { display: inline-block; margin-left: 10px; padding: 2px 8px; background: rgba(255,255,255,.04); color: #64748b; font-size: 10.5px; font-family: 'Monaco',monospace; border-radius: 4px; letter-spacing: .5px; }
+
+/* CODEGA imzasi - afilli */
+.mz-codega-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px 6px 16px;
+  background: linear-gradient(135deg, rgba(99,102,241,.06) 0%, rgba(168,85,247,.06) 50%, rgba(236,72,153,.06) 100%);
+  border: 1px solid rgba(168,85,247,.18);
+  border-radius: 100px;
+  text-decoration: none;
+  transition: all .35s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  overflow: hidden;
+}
+.mz-codega-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(99,102,241,.15), rgba(168,85,247,.15), rgba(236,72,153,.15));
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+.mz-codega-link:hover {
+  border-color: rgba(168,85,247,.5);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(168,85,247,.18), 0 2px 6px rgba(99,102,241,.12);
+}
+.mz-codega-link:hover::before { opacity: 1; }
+.mz-codega-link > * { position: relative; z-index: 1; }
+
+.mz-codega-prefix {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.mz-codega-amp {
+  color: #a855f7;
+  font-weight: 700;
+  font-style: italic;
+  margin: 0 1px;
+}
+.mz-codega-divider {
+  width: 1px;
+  height: 14px;
+  background: linear-gradient(to bottom, transparent, rgba(168,85,247,.4), transparent);
+}
+.mz-codega-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-size: 13px;
+  background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: mzCodegaShimmer 4s linear infinite;
+}
+.mz-codega-icon {
+  color: #a855f7;
+  flex-shrink: 0;
+  transition: transform .35s ease;
+}
+.mz-codega-link:hover .mz-codega-icon {
+  transform: scale(1.15) rotate(-5deg);
+}
+.mz-codega-name {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+@keyframes mzCodegaShimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@media (max-width: 768px) {
+  .mz-copy { padding: 16px 0; text-align: center; }
+  .mz-codega-link { margin-top: 8px; }
+}
+</style>
 
 <?php require __DIR__ . '/teklif_wizard.php'; ?>
 
