@@ -60,18 +60,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $opMail = setting('teklif_bildirim_email') ?: setting('email');
+        $extra  = talep_bildirim_alicilari();
         if ($opMail) {
-            $body = mail_template('Yeni Hasar İhbarı', '
-                <h2>Hasar İhbarı: ' . e($no) . '</h2>
-                <p><strong>Ad Soyad:</strong> ' . e($ad) . '</p>
-                <p><strong>Telefon:</strong> ' . e($tel) . '</p>
-                <p><strong>E-posta:</strong> ' . e($email) . '</p>
-                <p><strong>Olay tarihi:</strong> ' . e($tarih ?: '-') . '</p>
-                <p><strong>Olay yeri:</strong> ' . e($yer) . '</p>
-                <p><strong>Açıklama:</strong> ' . nl2br(e($acik)) . '</p>
-                <p><a href="' . u('/yonetim/hasarlar.php?id=' . $hasarId) . '" style="background:#0d1b2a;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">Panelde aç</a></p>
-            ');
-            send_mail($opMail, 'Yeni hasar ihbarı: ' . $no, $body);
+            $infoTable = '<table cellpadding="0" cellspacing="0" style="width:100%;background:#fff5f5;border-left:4px solid #e30b30;border-radius:8px;margin:16px 0">'
+                . '<tr><td style="padding:12px 18px;border-bottom:1px solid #fecaca;width:140px;color:#6b7280;font-size:13px">İhbar No</td><td style="padding:12px 18px;border-bottom:1px solid #fecaca;font-weight:600">' . e($no) . '</td></tr>'
+                . '<tr><td style="padding:12px 18px;border-bottom:1px solid #fecaca;color:#6b7280;font-size:13px">Ad Soyad</td><td style="padding:12px 18px;border-bottom:1px solid #fecaca;font-weight:600">' . e($ad) . '</td></tr>'
+                . '<tr><td style="padding:12px 18px;border-bottom:1px solid #fecaca;color:#6b7280;font-size:13px">Telefon</td><td style="padding:12px 18px;border-bottom:1px solid #fecaca"><a href="tel:' . preg_replace('/\s+/', '', $tel) . '" style="color:#e30b30;text-decoration:none;font-weight:700">' . e($tel) . '</a></td></tr>';
+            if ($email !== '') {
+                $infoTable .= '<tr><td style="padding:12px 18px;border-bottom:1px solid #fecaca;color:#6b7280;font-size:13px">E-posta</td><td style="padding:12px 18px;border-bottom:1px solid #fecaca">' . e($email) . '</td></tr>';
+            }
+            $infoTable .= '<tr><td style="padding:12px 18px;border-bottom:1px solid #fecaca;color:#6b7280;font-size:13px">Olay Tarihi</td><td style="padding:12px 18px;border-bottom:1px solid #fecaca">' . e($tarih ?: '-') . '</td></tr>'
+                . '<tr><td style="padding:12px 18px;border-bottom:1px solid #fecaca;color:#6b7280;font-size:13px">Olay Yeri</td><td style="padding:12px 18px;border-bottom:1px solid #fecaca">' . e($yer) . '</td></tr>'
+                . '<tr><td style="padding:12px 18px;color:#6b7280;font-size:13px;vertical-align:top">Açıklama</td><td style="padding:12px 18px;line-height:1.6">' . nl2br(e($acik)) . '</td></tr>'
+                . '</table>';
+
+            $bodyHtml = '<h2 style="margin:0 0 8px;color:#e30b30;font-size:22px">⚠ Hasar İhbarı Geldi</h2>'
+                      . '<p style="color:#6b7280;margin:0 0 16px">Web sitesinden ' . date('d.m.Y H:i') . ' tarihinde gelen hasar ihbarı. Müşteriye ivedi dönüş yapılması önerilir.</p>'
+                      . $infoTable;
+            $html = mail_template('Hasar İhbarı: ' . $no, $bodyHtml, [
+                'badge'       => 'HASAR İHBARI',
+                'badge_color' => '#e30b30',
+                'preheader'   => 'Yeni hasar ihbari: ' . $ad . ' - ' . $no,
+                'cta_text'    => 'Panelde Aç',
+                'cta_url'     => u('/yonetim/hasarlar.php?id=' . $hasarId),
+            ]);
+            send_mail($opMail, 'Yeni hasar ihbarı: ' . $no, $html, '', ['bcc' => $extra['bcc']]);
         }
 
         safe_redirect('/hasar-ihbari?ok=1&no=' . urlencode($no));

@@ -2847,3 +2847,17 @@ WHERE `anahtar` = 'site_anahtar_kelimeler' AND LENGTH(`deger`) < 200;
 UPDATE `mz_ayarlar`
 SET `deger` = 'Anlasmali 12+ sigorta sirketinden kasko, trafik, konut, DASK, saglik, ferdi kaza ve diger tum sigorta urunleri icin en uygun teklifleri Mizan Sigorta Aracilik Hizmetleri olarak karsilastiriyoruz. Konya, Istanbul, Ankara ve Aksaray''da fiziksel ofislerimiz, 7/24 hasar destegimiz var.'
 WHERE `anahtar` = 'site_aciklamasi' AND LENGTH(`deger`) < 150;
+
+-- ============================================================
+-- v1.1.16 - Talep bildirim BCC + operator_email ayarlari
+-- Yunus istegi: Tum talepler (teklif/hasar/iletisim) ek olarak
+-- teklifmerkezi@mizansigorta.com.tr adresine de gizli kopya gonderilsin.
+-- ============================================================
+
+INSERT IGNORE INTO `mz_ayarlar` (`anahtar`,`deger`,`aciklama`,`grup`,`tip`) VALUES
+('talep_bildirim_bcc', 'teklifmerkezi@mizansigorta.com.tr',
+ 'Tum talepler (teklif/hasar/iletisim) ek olarak bu adres(ler)e gizli kopya gonderilir. Birden fazla email icin virgul ile ayirin: ornek1@x.com, ornek2@y.com',
+ 'smtp', 'textarea'),
+('operator_email', '',
+ 'Iletisim formundan gelen mesajlar bu adrese gonderilir (bos ise genel email kullanilir)',
+ 'smtp', 'email');

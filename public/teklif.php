@@ -71,31 +71,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $teklifNo = $no;
         $success = true;
 
-        // Operatore bildirim (panel + email)
+        // Operatore bildirim (panel + email) + talep merkezi BCC
         $opMail = setting('teklif_bildirim_email');
+        $extra  = talep_bildirim_alicilari();
         if ($opMail) {
-            $body = mail_template('Yeni teklif geldi', '
-                <h2 style="margin-top:0">Yeni Teklif: #' . e($no) . '</h2>
-                <p><strong>Ürün:</strong> ' . e($urun['baslik']) . '</p>
-                <p><strong>Ad Soyad:</strong> ' . e($ad) . '</p>
-                <p><strong>Telefon:</strong> ' . e($tel) . '</p>
-                <p><strong>E-posta:</strong> ' . e($email) . '</p>
-                <p><strong>İl/İlçe:</strong> ' . e($il . ' / ' . $ilce) . '</p>
-                <p><strong>Açıklama:</strong> ' . nl2br(e($aciklama)) . '</p>
-                <p><a href="' . u('/yonetim/teklif-detay.php?id=' . $teklifId) . '" style="display:inline-block;background:#0d1b2a;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">Panelde aç</a></p>
-            ');
-            send_mail($opMail, 'Yeni teklif: ' . $no, $body);
+            $infoTable = '<table cellpadding="0" cellspacing="0" style="width:100%;background:#f8fafc;border-radius:8px;margin:16px 0">'
+                . '<tr><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;width:140px;color:#6b7280;font-size:13px">Teklif No</td><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;font-weight:600">#' . e($no) . '</td></tr>'
+                . '<tr><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px">Ürün</td><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb">' . e($urun['baslik']) . '</td></tr>'
+                . '<tr><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px">Ad Soyad</td><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;font-weight:600">' . e($ad) . '</td></tr>'
+                . '<tr><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px">Telefon</td><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb"><a href="tel:' . preg_replace('/\s+/', '', $tel) . '" style="color:#e30b30;text-decoration:none;font-weight:600">' . e($tel) . '</a></td></tr>';
+            if ($email !== '') {
+                $infoTable .= '<tr><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px">E-posta</td><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb"><a href="mailto:' . e($email) . '" style="color:#0d1b2a;text-decoration:none">' . e($email) . '</a></td></tr>';
+            }
+            if ($il !== '' || $ilce !== '') {
+                $infoTable .= '<tr><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px">İl / İlçe</td><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb">' . e(trim($il . ' / ' . $ilce, ' /')) . '</td></tr>';
+            }
+            if ($aciklama !== '') {
+                $infoTable .= '<tr><td style="padding:12px 18px;color:#6b7280;font-size:13px;vertical-align:top">Açıklama</td><td style="padding:12px 18px;line-height:1.6">' . nl2br(e($aciklama)) . '</td></tr>';
+            }
+            $infoTable .= '</table>';
+
+            $bodyHtml = '<h2 style="margin:0 0 8px;color:#0d1b2a;font-size:22px">Yeni Teklif Talebi</h2>'
+                      . '<p style="color:#6b7280;margin:0 0 16px">Web sitesinden ' . date('d.m.Y H:i') . ' tarihinde gelen yeni teklif talebi:</p>'
+                      . $infoTable;
+            $html = mail_template('Yeni Teklif: ' . $no, $bodyHtml, [
+                'badge'       => 'YENİ TEKLİF',
+                'badge_color' => '#f4d35e',
+                'preheader'   => 'Yeni teklif talebi: ' . $ad . ' - ' . $urun['baslik'],
+                'cta_text'    => 'Panelde Aç',
+                'cta_url'     => u('/yonetim/teklif-detay.php?id=' . $teklifId),
+            ]);
+            send_mail($opMail, 'Yeni teklif: ' . $no, $html, '', ['bcc' => $extra['bcc']]);
         }
         // Musteriye otomatik tesekkur
         if ($email !== '') {
-            $body = mail_template('Teklif talebiniz alındı', '
-                <h2 style="margin-top:0">Merhaba ' . e($ad) . ',</h2>
-                <p>' . e($urun['baslik']) . ' için teklif talebiniz başarıyla iletildi.</p>
-                <p><strong>Teklif No:</strong> ' . e($no) . '</p>
-                <p>Uzman ekibimiz en kısa sürede sizinle iletişime geçecek ve size en uygun teklifi sunacaktır.</p>
-                <p>Teşekkür ederiz.<br><strong>' . e(setting('firma_adi', SITE_NAME)) . '</strong></p>
-            ');
-            send_mail($email, 'Teklif talebiniz alındı - ' . $no, $body);
+            $bodyHtml = '<h2 style="margin:0 0 12px;color:#0d1b2a;font-size:22px">Merhaba ' . e($ad) . ',</h2>'
+                      . '<p style="font-size:16px;color:#1f2937;margin-bottom:18px">' . e($urun['baslik']) . ' için teklif talebiniz başarıyla iletildi. Uzman ekibimiz en kısa sürede sizinle iletişime geçecek.</p>'
+                      . '<table cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:8px;margin:18px 0;width:100%"><tr><td style="padding:18px 22px"><div style="font-size:12px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:600;margin-bottom:6px">Teklif Numaranız</div><div style="font-size:22px;font-weight:800;color:#0d1b2a;font-family:Georgia,serif">' . e($no) . '</div></td></tr></table>'
+                      . '<p style="color:#374151">Talebinizi anlaşmalı 12+ sigorta şirketi arasında karşılaştırıyor, size en uygun paketi sunuyoruz. Sürecin tamamı boyunca KVKK kapsamında bilgileriniz koruma altındadır.</p>'
+                      . '<p style="color:#1f2937;margin-bottom:0"><strong>Teşekkür ederiz.</strong><br><span style="color:#6b7280">' . e(setting('firma_adi', SITE_NAME)) . '</span></p>';
+            $html = mail_template('Teklif Talebiniz Alındı', $bodyHtml, [
+                'badge'       => 'TALEBİNİZ ALINDI',
+                'badge_color' => '#22c55e',
+                'preheader'   => 'Teklif talebiniz alindi - Teklif No: ' . $no,
+            ]);
+            send_mail($email, 'Teklif talebiniz alındı - ' . $no, $html);
         }
 
         // Tesekkur sayfasina yonlendir (PRG)

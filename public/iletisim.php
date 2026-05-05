@@ -39,14 +39,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
 
             $opMail = setting('operator_email', setting('email'));
+            $extra  = talep_bildirim_alicilari();
             if ($opMail) {
-                $body = '<h2>Yeni İletişim Mesajı</h2>'
-                    . '<p><b>Ad Soyad:</b> ' . e($ad) . '</p>'
-                    . '<p><b>E-posta:</b> ' . e($email) . '</p>'
-                    . '<p><b>Telefon:</b> ' . e($tel) . '</p>'
-                    . '<p><b>Konu:</b> ' . e($konu) . '</p>'
-                    . '<p><b>Mesaj:</b><br>' . nl2br(e($msg)) . '</p>';
-                @send_mail($opMail, 'Mizan Sigorta', 'İletişim Mesajı — ' . $konu, mail_template('İletişim Mesajı', $body));
+                $infoTable = '<table cellpadding="0" cellspacing="0" style="width:100%;background:#f8fafc;border-radius:8px;margin:16px 0">'
+                    . '<tr><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;width:140px;color:#6b7280;font-size:13px">Ad Soyad</td><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;font-weight:600">' . e($ad) . '</td></tr>'
+                    . '<tr><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px">E-posta</td><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb"><a href="mailto:' . e($email) . '" style="color:#0d1b2a;text-decoration:none">' . e($email) . '</a></td></tr>'
+                    . '<tr><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px">Telefon</td><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb"><a href="tel:' . preg_replace('/\s+/', '', $tel) . '" style="color:#e30b30;text-decoration:none;font-weight:600">' . e($tel) . '</a></td></tr>'
+                    . '<tr><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px">Konu</td><td style="padding:12px 18px;border-bottom:1px solid #e5e7eb;font-weight:600">' . e($konu) . '</td></tr>'
+                    . '<tr><td style="padding:12px 18px;color:#6b7280;font-size:13px;vertical-align:top">Mesaj</td><td style="padding:12px 18px;line-height:1.6">' . nl2br(e($msg)) . '</td></tr>'
+                    . '</table>';
+
+                $bodyHtml = '<h2 style="margin:0 0 8px;color:#0d1b2a;font-size:22px">Yeni İletişim Mesajı</h2>'
+                          . '<p style="color:#6b7280;margin:0 0 16px">Web sitesi iletişim formundan ' . date('d.m.Y H:i') . ' tarihinde yeni mesaj geldi:</p>'
+                          . $infoTable;
+                $html = mail_template('İletişim Mesajı — ' . $konu, $bodyHtml, [
+                    'badge'       => 'YENİ MESAJ',
+                    'badge_color' => '#0d6efd',
+                    'preheader'   => 'Yeni iletisim mesaji: ' . $ad . ' - ' . $konu,
+                ]);
+                @send_mail($opMail, 'İletişim Mesajı — ' . $konu, $html, '', [
+                    'bcc'      => $extra['bcc'],
+                    'reply_to' => $email,
+                ]);
             }
 
             $ok = true;

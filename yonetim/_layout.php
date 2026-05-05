@@ -134,11 +134,14 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
   </header>
 
   <main class="mz-admin-content">
-    <?php if ($flash['type'] ?? ''): ?>
-      <div class="alert alert-<?= e($flash['type']) ?> alert-dismissible fade show">
-        <?= e($flash['msg']) ?>
-        <button class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
+    <?php if ($flash): ?>
+      <?php foreach ($flash as $f): ?>
+        <div class="alert alert-<?= e($f['type']) ?> alert-dismissible fade show shadow-sm">
+          <i class="bi bi-<?= $f['type'] === 'success' ? 'check-circle-fill' : ($f['type'] === 'danger' ? 'exclamation-triangle-fill' : ($f['type'] === 'warning' ? 'exclamation-circle-fill' : 'info-circle-fill')) ?>"></i>
+          <?= e($f['msg']) ?>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+        </div>
+      <?php endforeach; ?>
     <?php endif; ?>
 
 <?php else: ?>

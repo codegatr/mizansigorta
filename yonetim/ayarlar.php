@@ -39,10 +39,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($act === 'smtp_test') {
         $to = trim((string)($_POST['test_email'] ?? ''));
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) admin_redirect('ayarlar.php?tab=smtp', 'danger', 'Geçerli bir test e-postası giriniz.');
-        $html = mail_template('SMTP Test', '<p>Bu bir test e-postasıdır. SMTP ayarlarınız doğru çalışıyor.</p><p>Gönderim zamanı: <b>' . date('d.m.Y H:i:s') . '</b></p>');
-        $ok = send_mail($to, 'Test', 'Mizan Sigorta - SMTP Test', $html);
-        if ($ok) admin_redirect('ayarlar.php?tab=smtp', 'success', "Test e-postası $to adresine gönderildi.");
-        admin_redirect('ayarlar.php?tab=smtp', 'danger', 'E-posta gönderilemedi. Ayarları ve sunucu loglarını kontrol edin.');
+        $body = '<h2 style="margin-top:0;color:#0d1b2a;font-size:22px">SMTP Test E-postası</h2>'
+              . '<p>Bu, SMTP ayarlarınızın doğru çalıştığını doğrulamak için gönderilen bir test e-postasıdır.</p>'
+              . '<table cellpadding="0" cellspacing="0" style="margin:20px 0;background:#f8fafc;border-radius:8px;width:100%">'
+              . '<tr><td style="padding:14px 18px;border-bottom:1px solid #e5e7eb"><strong>Gönderim Zamanı:</strong> ' . date('d.m.Y H:i:s') . '</td></tr>'
+              . '<tr><td style="padding:14px 18px;border-bottom:1px solid #e5e7eb"><strong>SMTP Sunucu:</strong> ' . e(setting('smtp_host', '-')) . ':' . e(setting('smtp_port', '-')) . '</td></tr>'
+              . '<tr><td style="padding:14px 18px;border-bottom:1px solid #e5e7eb"><strong>Gönderen:</strong> ' . e(setting('smtp_from', '-')) . '</td></tr>'
+              . '<tr><td style="padding:14px 18px"><strong>Şifreleme:</strong> ' . strtoupper((string) setting('smtp_secure', 'tls')) . '</td></tr>'
+              . '</table>'
+              . '<p>Bu mailı düzgün biçimde aldıysanız, müşterilere gidecek teklif/hasar/iletişim bildirimleri de aynı şablonla iletiliyordur. ✓</p>';
+        $html = mail_template('SMTP Test', $body, [
+            'badge'       => 'SMTP TEST',
+            'badge_color' => '#22c55e',
+            'preheader'   => 'SMTP ayarlariniz dogru calisiyor - test e-postasi',
+        ]);
+        $res = send_mail($to, 'Mizan Sigorta - SMTP Test', $html);
+        if ($res['ok']) admin_redirect('ayarlar.php?tab=smtp', 'success', "Test e-postası $to adresine gönderildi.");
+        admin_redirect('ayarlar.php?tab=smtp', 'danger', 'E-posta gönderilemedi: ' . ($res['msg'] ?? 'Bilinmeyen hata') . '. Sunucu loglarını kontrol edin.');
     }
 }
 
