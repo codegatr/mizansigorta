@@ -3045,3 +3045,8 @@ SELECT 'talep_bildirim_bcc', 'teklifbirimi@mizansigorta.com.tr',
        'Teklif/hasar/iletisim/temsilci formlari ve hatirlatma mailleri bu adrese de BCC ile kopyalanir. Birden fazla adres virgulle ayrilabilir.',
        'mail', 'text'
 WHERE NOT EXISTS (SELECT 1 FROM `mz_ayarlar` WHERE `anahtar` = 'talep_bildirim_bcc');
+
+-- ============================================================
+-- v1.1.29 - Teklif toplu/tekil silme + durum degisikligi mail bildirimi
+-- (sadece kod, SQL yok)
+-- ============================================================

@@ -17,13 +17,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($act === 'durum_guncelle') {
         $yeni = (string)($_POST['durum'] ?? '');
+        $bildirim_gonder = !empty($_POST['bildirim']);
         $allowed = ['yeni','islemde','teklif_hazir','teklif_gonderildi','onaylandi','police_oldu','iptal','kayip'];
         if (in_array($yeni, $allowed, true)) {
+            $eskiDurum = $teklif['durum'];
             db_exec('UPDATE ' . t('teklifler') . ' SET durum=?, guncelleme_tarihi=NOW() WHERE id=?', [$yeni, $id]);
             db_exec('INSERT INTO ' . t('teklif_notlari') . ' (teklif_id, kullanici_id, tip, baslik, icerik, olusturma_tarihi)
                      VALUES (?,?, "sistem", "Durum güncellendi", ?, NOW())', [$id, user_id(), 'Yeni durum: ' . $yeni]);
-            audit_log('teklif_durum', 'teklif', $id, 'Eski: '.$teklif['durum'].' → Yeni: '.$yeni);
-            admin_redirect('teklif-detay.php?id=' . $id, 'success', 'Durum güncellendi.');
+            audit_log('teklif_durum', 'teklif', $id, 'Eski: '.$eskiDurum.' → Yeni: '.$yeni);
+
+            // Durum gercekten degisti VE bildirim isaretliyse musteriye mail gonder
+            $msgExtra = '';
+            if ($bildirim_gonder && $eskiDurum !== $yeni) {
+                if (teklif_durum_bildirim_gonder($id, $yeni)) {
+                    $msgExtra = ' Müşteriye bilgilendirme maili gönderildi.';
+                } else {
+                    $msgExtra = ' (Müşteri e-posta adresi olmadığı için mail gönderilemedi.)';
+                }
+            }
+            admin_redirect('teklif-detay.php?id=' . $id, 'success', 'Durum güncellendi.' . $msgExtra);
         }
     }
 
@@ -231,11 +243,24 @@ Saygılarımızla,
         <form method="post" class="mb-3">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="durum_guncelle">
-          <select name="durum" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
+          <select name="durum" class="form-select form-select-sm mb-2">
             <?php foreach (['yeni'=>'Yeni','islemde'=>'İşlemde','teklif_hazir'=>'Teklif Hazır','teklif_gonderildi'=>'Gönderildi','onaylandi'=>'Onaylandı','police_oldu'=>'Poliçe Oldu','iptal'=>'İptal','kayip'=>'Kayıp'] as $k=>$v): ?>
               <option value="<?= $k ?>" <?= $teklif['durum']===$k?'selected':'' ?>><?= $v ?></option>
             <?php endforeach; ?>
           </select>
+          <?php $musteriEmaili = trim((string)($teklif['email'] ?? '')); ?>
+          <?php if ($musteriEmaili): ?>
+            <div class="form-check form-check-sm mb-2">
+              <input class="form-check-input" type="checkbox" name="bildirim" id="ckBildirim" value="1" checked>
+              <label class="form-check-label small" for="ckBildirim">
+                <i class="bi bi-envelope-check text-primary"></i> Müşteriye mail gönder
+                <small class="d-block text-muted" style="font-size:.7rem"><?= e($musteriEmaili) ?></small>
+              </label>
+            </div>
+          <?php else: ?>
+            <div class="alert alert-light border small py-2 mb-2"><i class="bi bi-info-circle text-warning"></i> Müşteri e-posta adresi olmadığı için bildirim mail gönderilemez.</div>
+          <?php endif; ?>
+          <button class="btn btn-sm btn-warning w-100"><i class="bi bi-arrow-repeat"></i> Durumu Güncelle</button>
         </form>
 
         <form method="post" class="mb-3">

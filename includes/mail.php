@@ -179,6 +179,65 @@ function talep_bildirim_alicilari(): array
 }
 
 /**
+ * Teklif durumu degistiginde musteriye bilgilendirme maili gonderir.
+ * Sadece musteri email'i varsa ve durum gercekten farkli ise.
+ *
+ * @param int    $teklifId
+ * @param string $yeniDurum  - yeni/islemde/teklif_hazir/teklif_gonderildi/onaylandi/police_oldu/iptal/kayip
+ * @return bool gonderildi mi
+ */
+function teklif_durum_bildirim_gonder(int $teklifId, string $yeniDurum): bool
+{
+    $t = db_row('SELECT * FROM ' . t('teklifler') . ' WHERE id=?', [$teklifId]);
+    if (!$t) return false;
+
+    $email = trim((string)($t['email'] ?? ''));
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return false;
+
+    // Durum etiketleri ve renkleri
+    $etiketler = [
+        'yeni'              => ['Yeni',              '#0d6efd', 'Talebiniz alındı, ekibimiz değerlendirmeye başlıyor.'],
+        'islemde'           => ['İşleme Alındı',     '#f4d35e', 'Talebiniz değerlendirmeye alındı. Anlaşmalı şirketler arasından sizin için en uygun teminatları araştırıyoruz.'],
+        'teklif_hazir'      => ['Teklif Hazır',      '#22c55e', 'Sizin için hazırladığımız teklifler hazır. Yetkilimiz en kısa sürede sizinle iletişime geçecektir.'],
+        'teklif_gonderildi' => ['Teklif İletildi',   '#22c55e', 'Teklifimiz size iletildi. Sorularınız için bize ulaşabilirsiniz.'],
+        'onaylandi'         => ['Onaylandı',         '#0d6efd', 'Teklifiniz onaylandı. Poliçeleştirme süreci başlatıldı.'],
+        'police_oldu'       => ['Poliçeniz Düzenlendi', '#22c55e', 'Tebrikler! Poliçeniz düzenlendi. Detaylı poliçe bilgileri ve evrakları için sizinle iletişime geçeceğiz.'],
+        'iptal'             => ['İptal Edildi',      '#6b7280', 'Talebiniz iptal edildi. Yeniden değerlendirmek isterseniz bize ulaşabilirsiniz.'],
+        'kayip'             => ['Sonlandırıldı',     '#6b7280', 'Talebinize ilişkin süreç sonlandırıldı. Yeni bir talep için her zaman buradayız.'],
+    ];
+    if (!isset($etiketler[$yeniDurum])) return false;
+
+    [$durumLabel, $durumRenk, $aciklama] = $etiketler[$yeniDurum];
+    $teklifNo = $t['teklif_no'] ?? ('#' . $teklifId);
+    $ad       = trim((string)($t['ad_soyad'] ?? '')) ?: 'Sayın müşterimiz';
+
+    $body = '<p>Sayın <b>' . e($ad) . '</b>,</p>'
+          . '<p><b>' . e($teklifNo) . '</b> numaralı teklif talebinizin durumu güncellendi.</p>'
+          . '<table cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:8px;margin:18px 0;width:100%">'
+          .   '<tr><td style="padding:18px 22px">'
+          .     '<div style="font-size:12px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:600;margin-bottom:6px">Yeni Durum</div>'
+          .     '<div style="display:inline-block;background:' . e($durumRenk) . ';color:#ffffff;padding:8px 16px;border-radius:6px;font-weight:700;font-size:15px;letter-spacing:.3px">' . e($durumLabel) . '</div>'
+          .   '</td></tr>'
+          . '</table>'
+          . '<p style="color:#374151">' . e($aciklama) . '</p>'
+          . '<p style="color:#1f2937;margin-top:1.5rem;margin-bottom:0"><strong>Teşekkür ederiz.</strong><br>'
+          .   '<span style="color:#6b7280">' . e(setting('firma_adi', SITE_NAME)) . '</span></p>';
+
+    $html = mail_template('Teklifinizin Durumu Güncellendi', $body, [
+        'badge'       => 'DURUM GÜNCELLENDİ',
+        'badge_color' => $durumRenk,
+        'preheader'   => $teklifNo . ' - ' . $durumLabel,
+    ]);
+
+    $extra = talep_bildirim_alicilari();
+    $r = send_mail($email, 'Teklif durumunuz güncellendi - ' . $teklifNo, $html, '', [
+        'bcc' => $extra['bcc'],
+    ]);
+
+    return is_array($r) ? !empty($r['ok']) : (bool)$r;
+}
+
+/**
  * Kurumsal HTML e-posta sablonu - Mizan Sigorta marka kimligi
  *
  * @param string $title    Mail basligi (sadece <title>'da)
