@@ -3183,3 +3183,52 @@ SET @sql := IF(@col=0,
   'ALTER TABLE `mz_teklifler` ADD COLUMN `ruhsat_seri_no` VARCHAR(60) NULL DEFAULT NULL AFTER `arac_plakasi`',
   'SELECT "ruhsat_seri_no var" AS i');
 PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+-- ============================================================
+-- v1.1.44 - 4 slayt otomatik yukleme (Yunus'un Gemini gorselleri)
+-- Yunus istegi: 'Slider'da resimleri degistiremiyorum, sen uygun
+-- olanlari benim yerime ekler misin?'
+-- ============================================================
+
+-- Mevcut tum slaytlari sil (yeni 4 slayt ile yer degistir)
+DELETE FROM `mz_slaytlar`;
+
+-- Reset auto increment (1'den baslasin)
+ALTER TABLE `mz_slaytlar` AUTO_INCREMENT = 1;
+
+-- 4 yeni slayt: Hayatiniza, Kasko/Trafik, Saglik/DASK, Hasar 7/24
+-- Gorsel basili oldugu icin baslik/ust_metin/aciklama BOS birakildi
+-- (cift metin gozukmesin diye - sadece butonlar gozukur)
+INSERT INTO `mz_slaytlar`
+  (`baslik`, `accent_kelime`, `ust_metin`, `aciklama`,
+   `buton1_metin`, `buton1_link`, `buton1_ikon`,
+   `buton2_metin`, `buton2_link`, `buton2_ikon`,
+   `gorsel_tip`, `gorsel_url`, `aktif`, `sira`, `olusturma_tarihi`)
+VALUES
+  -- Slayt 1: Hayatiniza tam koruma (basili gorsel)
+  ('', '', '', '',
+   'Teklif Talebi Olustur', '/teklif-al', 'bi-headset',
+   'Bize Ulasin', '/iletisim', 'bi-telephone',
+   'custom_url', '/uploads/slaytlar/slayt-1-hayatiniza-tam-koruma.jpg',
+   1, 1, NOW()),
+
+  -- Slayt 2: Kasko & Trafik en uygun fiyat
+  ('', '', '', '',
+   'Kasko Teklifi Al', '/teklif-al', 'bi-car-front',
+   'Hemen Ara', 'tel:', 'bi-telephone',
+   'custom_url', '/uploads/slaytlar/slayt-2-kasko-trafik-uygun-fiyat.jpg',
+   1, 2, NOW()),
+
+  -- Slayt 3: Saglik & DASK guvenceye alin
+  ('', '', '', '',
+   'Saglik Teklifi', '/teklif-al', 'bi-heart-pulse',
+   'DASK Teklifi', '/teklif-al', 'bi-house-heart',
+   'custom_url', '/uploads/slaytlar/slayt-3-saglik-dask-guvence.jpg',
+   1, 3, NOW()),
+
+  -- Slayt 4: Hasar aninda 7/24
+  ('', '', '', '',
+   'Hasar Ihbari Olustur', '/hasar-ihbari', 'bi-exclamation-triangle',
+   'Hemen Ara', 'tel:', 'bi-telephone',
+   'custom_url', '/uploads/slaytlar/slayt-4-hasar-aninda-yaninizdayiz.jpg',
+   1, 4, NOW());

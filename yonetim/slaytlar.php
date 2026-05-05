@@ -36,12 +36,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'aktif'         => isset($_POST['aktif']) ? 1 : 0,
         ];
 
-        if ($d['baslik'] === '') admin_redirect('slaytlar.php', 'danger', 'Başlık zorunlu.');
+        if ($d['baslik'] === '' && empty($_FILES['gorsel_file']['name']) && empty($d['gorsel_url'])) {
+            // Eski: sadece baslik zorunlu. Yeni: gorsel basili oldugunda baslik bos olabilir,
+            // ama o zaman gorsel olmali (custom_url + dosya)
+            admin_redirect('slaytlar.php', 'danger', 'Başlık veya görsel zorunlu.');
+        }
         if (!in_array($d['gorsel_tip'], array_keys(mz_svg_illustration_options()), true)) {
             $d['gorsel_tip'] = 'svg_kalkan';
         }
-        if ($d['gorsel_tip'] === 'custom_url' && $d['gorsel_url'] && !filter_var($d['gorsel_url'], FILTER_VALIDATE_URL)) {
-            admin_redirect('slaytlar.php' . ($id ? '?edit=' . $id : ''), 'danger', 'Geçerli bir görsel URL\'i giriniz (https:// ile başlamalı).');
+
+        // Dosya yukleme (custom_url tipinde)
+        if ($d['gorsel_tip'] === 'custom_url' && !empty($_FILES['gorsel_file']['name'])) {
+            if (function_exists('upload_image')) {
+                $up = upload_image('gorsel_file', 'slaytlar');
+                if ($up['ok']) {
+                    // Eski dosyayi sil
+                    if ($id) {
+                        $eski = db_value('SELECT gorsel_url FROM ' . t('slaytlar') . ' WHERE id=?', [$id]);
+                        if ($eski && function_exists('delete_uploaded_image')) {
+                            delete_uploaded_image((string)$eski);
+                        }
+                    }
+                    $d['gorsel_url'] = $up['url'];
+                } else {
+                    admin_redirect('slaytlar.php' . ($id ? '?edit=' . $id : ''), 'danger', 'Görsel yüklenemedi: ' . $up['error']);
+                }
+            }
+        }
+
+        // gorsel_url URL validation - sadece http(s):// ile basliyorsa kontrol et
+        // (relative path /uploads/... ise kabul et)
+        if ($d['gorsel_tip'] === 'custom_url' && $d['gorsel_url']
+            && (strpos($d['gorsel_url'], 'http://') === 0 || strpos($d['gorsel_url'], 'https://') === 0)
+            && !filter_var($d['gorsel_url'], FILTER_VALIDATE_URL)) {
+            admin_redirect('slaytlar.php' . ($id ? '?edit=' . $id : ''), 'danger', 'Geçerli bir görsel URL\'i giriniz.');
         }
 
         if ($id) {
@@ -128,7 +156,7 @@ $gorselOptions = mz_svg_illustration_options();
           <?= $edit ? 'Slayt Düzenle: #' . (int)$edit['id'] : 'Yeni Slayt Ekle' ?>
         </h5>
 
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="save">
           <?php if ($edit): ?><input type="hidden" name="id" value="<?= (int)$edit['id'] ?>"><?php endif; ?>
@@ -189,11 +217,27 @@ $gorselOptions = mz_svg_illustration_options();
           </div>
 
           <div class="mb-3" id="gorselUrlGroup" style="display:none">
-            <label class="form-label small fw-semibold">Özel Görsel URL</label>
-            <input type="url" name="gorsel_url" id="gorselUrl" class="form-control form-control-sm"
-                   value="<?= e($edit['gorsel_url'] ?? '') ?>"
-                   placeholder="https://example.com/resim.png">
-            <small class="form-text text-muted">PNG/JPG/SVG. Şeffaf arkaplanlı PNG önerilir.</small>
+            <!-- Dosya Yukleme (yeni) -->
+            <label class="form-label small fw-semibold"><i class="bi bi-cloud-upload"></i> Görsel Yükle <small class="text-muted">(önerilen)</small></label>
+            <input type="file" name="gorsel_file" class="form-control form-control-sm mb-2" accept="image/jpeg,image/png,image/webp">
+            <small class="form-text text-muted d-block mb-3">JPG/PNG/WebP, max 5MB. Önerilen boyut: 1600×600 px. Yüklendikten sonra <code>uploads/slaytlar/</code> klasörüne kaydedilir.</small>
+
+            <!-- Veya URL (alternatif) -->
+            <div class="border-top pt-3 mt-2">
+              <label class="form-label small fw-semibold text-muted">VEYA Hazır Görsel URL'i <small>(zaten yüklü ise)</small></label>
+              <input type="text" name="gorsel_url" id="gorselUrl" class="form-control form-control-sm"
+                     value="<?= e($edit['gorsel_url'] ?? '') ?>"
+                     placeholder="/uploads/slaytlar/dosya.jpg veya https://...">
+              <small class="form-text text-muted">Mevcut bir URL'i girmek istiyorsanız buraya yazın. Dosya yüklenirse bu alan otomatik güncellenir.</small>
+            </div>
+
+            <?php if (!empty($edit['gorsel_url'])): ?>
+              <div class="mt-3">
+                <small class="text-muted d-block mb-1">Mevcut görsel:</small>
+                <img src="<?= e(strpos($edit['gorsel_url'], 'http') === 0 ? $edit['gorsel_url'] : asset(ltrim($edit['gorsel_url'], '/'))) ?>"
+                     style="max-width:100%;height:auto;max-height:120px;border-radius:6px;border:1px solid #e5e7eb">
+              </div>
+            <?php endif; ?>
           </div>
 
           <div class="gorsel-onizleme" id="gorselOnizleme"><!-- JS ile dolar --></div>
