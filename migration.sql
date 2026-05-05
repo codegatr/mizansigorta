@@ -2958,3 +2958,35 @@ INSERT IGNORE INTO `mz_subeler` (`id`,`sehir`,`ilce`,`etiket`,`adres`,`telefon`,
 -- ============================================================
 -- v1.1.21 - Admin POST redirect bug fix (sadece kod, SQL yok)
 -- ============================================================
+
+-- ============================================================
+-- v1.1.22 - Kampanya Pop-up Yonetim Sistemi
+-- Yunus istegi: 'Yeni bir Kampanya oldugunda bunu yayinlayabilmek icin
+-- birde Pop-Up lazim, Baslama ve Bitis Tarihlerini girdiğimde o zamana
+-- göre gelmesi gerek Kampanya.'
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `mz_kampanyalar` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `baslik` varchar(160) NOT NULL,
+  `alt_baslik` varchar(200) DEFAULT NULL COMMENT 'Kucuk metin baslik altinda',
+  `aciklama` text DEFAULT NULL,
+  `gorsel_url` varchar(500) DEFAULT NULL COMMENT 'Pop-up sol/ust gorseli URL (opsiyonel)',
+  `buton_metin` varchar(80) DEFAULT NULL,
+  `buton_link` varchar(255) DEFAULT NULL,
+  `buton_renk` enum('kirmizi','sari','mavi','yesil') NOT NULL DEFAULT 'kirmizi',
+  `baslangic_tarihi` datetime NOT NULL COMMENT 'Pop-up bu tarihten itibaren goruntulenir',
+  `bitis_tarihi` datetime NOT NULL COMMENT 'Pop-up bu tarihten sonra goruntulenmez',
+  `gosterim_kurali` enum('her_ziyaret','oturum_basina','gunde_bir','sadece_bir_kez') NOT NULL DEFAULT 'gunde_bir' COMMENT 'her_ziyaret=her sayfa yenilemesinde / oturum_basina=tarayici kapanana kadar 1 kez / gunde_bir=24 saatte 1 kez / sadece_bir_kez=kapatilirsa bir daha asla',
+  `acilis_gecikmesi` int(11) NOT NULL DEFAULT 3 COMMENT 'Sayfa yuklendikten kac saniye sonra acilsin',
+  `hedef_sayfa` enum('anasayfa','tum_sayfalar') NOT NULL DEFAULT 'tum_sayfalar' COMMENT 'anasayfa=sadece / tum_sayfalar=her sayfada',
+  `aktif` tinyint(1) NOT NULL DEFAULT 1,
+  `sira` int(11) NOT NULL DEFAULT 0 COMMENT 'Birden fazla aktif kampanya varsa sira buyuk olan gosterilir',
+  `gosterim_sayisi` int(11) NOT NULL DEFAULT 0 COMMENT 'Toplam gosterim (analytics)',
+  `tiklama_sayisi` int(11) NOT NULL DEFAULT 0 COMMENT 'Toplam buton tiklama (analytics)',
+  `olusturma_tarihi` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `guncelleme_tarihi` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_aktif_tarih` (`aktif`,`baslangic_tarihi`,`bitis_tarihi`),
+  KEY `idx_sira` (`sira`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
