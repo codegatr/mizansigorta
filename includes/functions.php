@@ -47,6 +47,19 @@ function asset(string $path): string
     return SITE_BASE_URL . '/' . ltrim($path, '/') . '?v=' . $v;
 }
 
+/**
+ * Sigorta sirketi logo URL'i — esnek yol cozumu
+ * - 'assets/img/sirketler/anadolu.svg' (path icerir) → direkt
+ * - 'mylogo.png' (sadece dosya adi) → uploads/sirket/mylogo.png
+ * - bos/null → null
+ */
+function sirket_logo_url(?string $logo): ?string
+{
+    if (!$logo) return null;
+    if (str_contains($logo, '/')) return u(ltrim($logo, '/'));
+    return u('uploads/sirket/' . rawurlencode($logo));
+}
+
 /** ASCII slug (Turkce karakterleri donusturur) */
 function slugify(string $text): string
 {

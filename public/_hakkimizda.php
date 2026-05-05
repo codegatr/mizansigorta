@@ -274,11 +274,17 @@ require MIZAN_INC . '/header.php';
 
     <div class="mz-anlasmali-grid">
       <?php
-      $sirketler = ['Anadolu Sigorta','Allianz','AXA','Türkiye Sigorta','HDI Sigorta','Quick Sigorta','Neova Sigorta','Ak Sigorta','Doğa Sigorta','Atlas Sigorta','Corpus Sigorta','Magdeburger Sigorta'];
-      foreach ($sirketler as $s): ?>
+      $sirketler = db_all('SELECT * FROM ' . t('sigorta_sirketleri') . ' WHERE aktif=1 ORDER BY sira ASC LIMIT 24');
+      foreach ($sirketler as $s):
+        $logoUrl = sirket_logo_url($s['logo']);
+      ?>
         <div class="mz-anlasmali-card">
-          <i class="bi bi-shield-fill-check"></i>
-          <?= e($s) ?>
+          <?php if ($logoUrl): ?>
+            <img src="<?= e($logoUrl) ?>" alt="<?= e($s['ad']) ?>" style="max-width:100%;max-height:50px;object-fit:contain">
+          <?php else: ?>
+            <i class="bi bi-shield-fill-check"></i>
+            <?= e($s['ad']) ?>
+          <?php endif; ?>
         </div>
       <?php endforeach; ?>
     </div>

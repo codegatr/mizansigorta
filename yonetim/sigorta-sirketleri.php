@@ -73,7 +73,7 @@ $edit = $editId ? db_row('SELECT * FROM ' . t('sigorta_sirketleri') . ' WHERE id
               <tr>
                 <td>
                   <?php if ($r['logo']): ?>
-                    <img src="<?= u('uploads/sirket/' . rawurlencode($r['logo'])) ?>" alt="" style="max-width:60px;max-height:40px;object-fit:contain">
+                    <img src="<?= e(sirket_logo_url($r["logo"])) ?>" alt="" style="max-width:60px;max-height:40px;object-fit:contain">
                   <?php else: ?>
                     <i class="bi bi-buildings text-muted fs-3"></i>
                   <?php endif; ?>

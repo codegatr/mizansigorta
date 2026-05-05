@@ -131,8 +131,9 @@ require MIZAN_INC . '/header.php';
     <div class="row g-3">
       <?php foreach ($sirketler as $s): ?>
         <div class="col-6 col-md-3 col-lg-2">
-          <?php if ($s['logo']): ?>
-            <div class="mz-partner-logo" title="<?= e($s['ad']) ?>"><img src="<?= u('uploads/sirket/' . rawurlencode($s['logo'])) ?>" alt="<?= e($s['ad']) ?>"></div>
+          <?php $logoUrl = sirket_logo_url($s['logo']); ?>
+          <?php if ($logoUrl): ?>
+            <div class="mz-partner-logo" title="<?= e($s['ad']) ?>"><img src="<?= e($logoUrl) ?>" alt="<?= e($s['ad']) ?>"></div>
           <?php else: ?>
             <div class="mz-partner-text"><?= e($s['ad']) ?></div>
           <?php endif; ?>

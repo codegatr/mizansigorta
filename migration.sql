@@ -1958,3 +1958,84 @@ INSERT IGNORE INTO `mz_referanslar` (`tip`, `ad`, `unvan`, `mesaj`, `puan`, `sir
 INSERT IGNORE INTO `mz_referanslar` (`tip`, `ad`, `unvan`, `mesaj`, `puan`, `sira`, `aktif`) VALUES ('yorum', 'Kerem Aydın', 'Gen. Müd. - İstanbul', 'Şirketimizin grup sağlık sigortasını yaptırırken 8 farklı sigorta şirketinden teklif aldık. Mizan profesyonel ekibiyle bizi en uygun şirkete yönlendirdi.', 5, 8, 1);
 
 -- BITIS
+-- ====================================================
+-- v1.1.9 - Sirket logolari + KVKK uyumlu referanslar
+-- ====================================================
+
+-- Sirket logo path'leri (assets/img/sirketler/...)
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/anadolu-sigorta.svg'      WHERE `ad` = 'Anadolu Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/allianz-sigorta.svg'      WHERE `ad` = 'Allianz Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/axa-sigorta.svg'          WHERE `ad` = 'AXA Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/turkiye-sigorta.svg'      WHERE `ad` = 'Türkiye Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/hdi-sigorta.svg'          WHERE `ad` = 'HDI Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/quick-sigorta.svg'        WHERE `ad` = 'Quick Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/neova-sigorta.svg'        WHERE `ad` = 'Neova Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/ak-sigorta.svg'           WHERE `ad` = 'Ak Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/doga-sigorta.svg'         WHERE `ad` = 'Doğa Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/atlas-sigorta.svg'        WHERE `ad` = 'Atlas Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/corpus-sigorta.svg'       WHERE `ad` = 'Corpus Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/magdeburger-sigorta.svg'  WHERE `ad` = 'Magdeburger Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/mapfre-sigorta.svg'       WHERE `ad` = 'Mapfre Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/ray-sigorta.svg'          WHERE `ad` = 'Ray Sigorta';
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/sompo-sigorta.svg'        WHERE `ad` = 'Sompo Sigorta';
+
+-- Referanslar UNIQUE constraint
+DELETE r1 FROM `mz_referanslar` r1
+INNER JOIN `mz_referanslar` r2 ON r1.id > r2.id AND r1.ad = r2.ad AND r1.mesaj = r2.mesaj;
+ALTER TABLE `mz_referanslar` ADD UNIQUE KEY `uk_ad_mesaj` (`ad`, `mesaj`(255));
+
+-- Eski full-name referanslari sil
+DELETE FROM `mz_referanslar` WHERE `ad` IN (
+  'Ahmet Yılmaz', 'Mehmet Kaya', 'Ayşe Demir', 'Mustafa Aksoy',
+  'Selin Öztürk', 'Hasan Çelik', 'Fatma Şahin', 'Kerem Aydın'
+);
+INSERT IGNORE INTO `mz_referanslar` (`tip`, `ad`, `unvan`, `mesaj`, `puan`, `sira`, `aktif`) VALUES
+('yorum', 'Ahmet Y.',    'Bireysel Müşteri',
+ 'Kasko poliçemi yenilerken birkaç şirketten teklif aldılar, hepsini açıklayarak en uygununu seçmeme yardımcı oldular. Hasar sürecinde de gerçekten yanımda hissettim. 5 yıldır müşteri kalmamın sebebi bu.',
+ 5, 1, 1),
+
+('yorum', 'Mehmet K.',   'Otelci · Konya',
+ 'Otelimiz için kapsamlı işyeri sigortası arıyorduk. Mizan ekibi 12 farklı şirketten teklif çekip karşılaştırmalı tablo hâlinde sundu. Şeffaf, profesyonel hizmet — saygı duyduğum noktada.',
+ 5, 2, 1),
+
+('yorum', 'Ayşe D.',     'Doktor',
+ 'Mesleki sorumluluk sigortam için yıllarca farklı şirketlerle çalıştım. Mizan Sigorta hem fiyat hem de hizmet kalitesinde fark yaratıyor; özellikle yenileme dönemini ben hatırlamadan onlar arıyor.',
+ 5, 3, 1),
+
+('yorum', 'Mustafa A.',  'İnşaat Firması',
+ 'Şantiyemizde inşaat all risk poliçemizi Mizan üzerinden yaptırdık. Yaşadığımız bir vinç hasarında eksperle koordinasyondan tazminat ödemesine kadar tüm süreci onlar yönetti. Tavsiye ederim.',
+ 5, 4, 1),
+
+('yorum', 'Selin Ö.',    'Bireysel Müşteri',
+ 'DASK ve konut sigortamı bir paket olarak yaptırdığımda fark ücreti almadılar, üstelik ek indirim sundular. Yenileme dönemini benden önce takip ediyorlar — gerçekten profesyonel.',
+ 5, 5, 1),
+
+('yorum', 'Hasan Ç.',    'Lojistik Firma Sahibi',
+ 'Filo sigortamızı yıllardır Mizan Sigorta yapıyor; 25+ aracımızın tüm yenileme takibi tek noktadan yapılıyor. Hasar bildiriminde 7/24 destek aldığımız tek acente.',
+ 5, 6, 1),
+
+('yorum', 'Fatma Ş.',    'Tarım Üreticisi · Aksaray',
+ 'TARSİM bitkisel ürün sigortamı Mizan üzerinden yaptırdım. Devlet desteğini de hesaba katıp en uygun primi sundular. Geçen yıl dolu hasarımı sorunsuz aldım — köyde herkese tavsiye ediyorum.',
+ 5, 7, 1),
+
+('yorum', 'Kerem A.',    'Genel Müdür · İstanbul',
+ 'Şirketimizin grup sağlık sigortasını yenilerken 8 farklı sigorta şirketinden teklif aldık. Mizan profesyonel ekibiyle çalışanlarımıza en uygun teminatı sunan paketi belirlememizde büyük katkı sağladı.',
+ 5, 8, 1),
+
+('yorum', 'Burcu T.',    'Eczacı',
+ 'Eczanemiz için işyeri sigortası ararken yangın, hırsızlık ve mali sorumluluk teminatlarını ayrı ayrı incelediler. Mevzuatla uyumlu, eksiksiz bir paket hazırlamışlar — meslektaşlarıma da öneriyorum.',
+ 5, 9, 1),
+
+('yorum', 'Emre B.',     'Yazılım Mühendisi',
+ 'Aracımı Türkiye dışına çıkarırken yeşilkart sigortası gerektiğini bilmiyordum. Aradığım gün hızlı bir şekilde poliçeyi düzenlediler, sınırda hiç sorun yaşamadım. Hızlı ve net hizmet.',
+ 5, 10, 1);
+
+
+-- ===========================================================================
+-- KONTROL SORGULARI (Yunus calistirip dogrulayabilir):
+-- ===========================================================================
+-- SELECT 'sirket_logo_dolu' k, COUNT(*) v FROM mz_sigorta_sirketleri WHERE logo LIKE 'assets/img/sirketler/%'
+-- UNION SELECT 'sirket_toplam', COUNT(*) FROM mz_sigorta_sirketleri WHERE aktif=1
+-- UNION SELECT 'referans_toplam', COUNT(*) FROM mz_referanslar WHERE aktif=1
+-- UNION SELECT 'referans_kvkk_uyumsuz', COUNT(*) FROM mz_referanslar WHERE ad LIKE '% %' AND ad NOT LIKE '% _.';
+-- Beklenen: sirket_logo_dolu=15, sirket_toplam=15, referans_toplam=10, referans_kvkk_uyumsuz=0
