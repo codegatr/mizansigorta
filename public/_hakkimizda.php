@@ -402,7 +402,7 @@ require MIZAN_INC . '/header.php';
     <h2 class="display-6 fw-bold mb-3">Sizinle tanışmak için sabırsızlanıyoruz</h2>
     <p class="lead text-white-50 mb-4 mx-auto" style="max-width:560px">Bir teklif kadar basit. Bilgileriniz bizde tamamen güvende, kararı siz veriyorsunuz.</p>
     <div class="d-flex gap-3 justify-content-center flex-wrap">
-      <button type="button" class="btn btn-warning btn-lg fw-semibold px-4" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-lightning-charge-fill"></i> Hızlı Teklif Al</button>
+      <button type="button" class="btn btn-warning btn-lg fw-semibold px-4" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-headset"></i> Teklif Talebi Oluştur</button>
       <a href="<?= u('/iletisim') ?>" class="btn btn-outline-light btn-lg fw-semibold px-4"><i class="bi bi-telephone"></i> Bize Ulaşın</a>
     </div>
   </div>

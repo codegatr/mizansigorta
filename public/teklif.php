@@ -106,17 +106,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $captchaA = random_int(2, 9);
 $captchaB = random_int(2, 9);
 
-$pageTitle = 'Online Teklif Al - ' . setting('firma_adi', SITE_NAME);
+$pageTitle = 'Teklif Talebi - ' . setting('firma_adi', SITE_NAME);
 require MIZAN_INC . '/header.php';
 ?>
 
 <section class="mz-page-head">
   <div class="container py-4">
-    <h1 class="fw-bold mb-1">Online Teklif Al</h1>
+    <h1 class="fw-bold mb-1">Teklif Talebi Oluştur</h1>
     <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
       <li class="breadcrumb-item"><a href="<?= u('/') ?>">Anasayfa</a></li>
-      <li class="breadcrumb-item active">Teklif Al</li>
+      <li class="breadcrumb-item active">Teklif Talebi</li>
     </ol></nav>
+    <p class="small text-muted mb-0 mt-2"><i class="bi bi-info-circle"></i> Bilgilerinizi paylaşın, müsait temsilcimiz en kısa sürede sizinle iletişime geçerek size özel teklif hazırlasın.</p>
   </div>
 </section>
 

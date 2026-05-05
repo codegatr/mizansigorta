@@ -71,7 +71,7 @@ require MIZAN_INC . '/header.php';
           <a class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode(SITE_BASE_URL . '/blog/' . $post['slug']) ?>"><i class="bi bi-linkedin"></i></a>
           <a class="btn btn-outline-success btn-sm" target="_blank" rel="noopener" href="https://wa.me/?text=<?= urlencode($post['baslik'] . ' ' . SITE_BASE_URL . '/blog/' . $post['slug']) ?>"><i class="bi bi-whatsapp"></i></a>
         </div>
-        <a href="<?= u('/teklif-al') ?>" class="btn btn-warning fw-semibold"><i class="bi bi-shield-check"></i> Teklif Al</a>
+        <a href="<?= u('/teklif-al') ?>" class="btn btn-warning fw-semibold"><i class="bi bi-headset"></i> Teklif Talebi</a>
       </div>
     </div>
   </div>

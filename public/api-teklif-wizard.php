@@ -108,7 +108,7 @@ try {
     // Operatör bildirimi
     $opMail = setting('teklif_bildirim_email', setting('email'));
     if ($opMail) {
-        $body = '<h2>Yeni Hızlı Teklif (Wizard)</h2>'
+        $body = '<h2>Yeni Teklif Talebi (Wizard)</h2>'
               . '<p><b>Teklif No:</b> ' . e($teklifNo) . '</p>'
               . '<p><b>Ürün:</b> ' . e($urun['baslik']) . '</p>'
               . '<p><b>Tip:</b> ' . e(ucfirst($tip)) . '</p>'
@@ -119,7 +119,7 @@ try {
               . ($il ? '<p><b>Şehir:</b> ' . e($il . ($ilce ? ' / ' . $ilce : '')) . '</p>' : '')
               . ($mesaj ? '<p><b>Mesaj:</b><br>' . nl2br(e($mesaj)) . '</p>' : '')
               . '<hr><p>Yönetim panelinden teklifi inceleyebilirsiniz.</p>';
-        @send_mail($opMail, 'Mizan Sigorta', "Yeni Hızlı Teklif — $teklifNo", mail_template('Yeni Hızlı Teklif', $body));
+        @send_mail($opMail, 'Mizan Sigorta', "Yeni Teklif Talebi — $teklifNo", mail_template('Yeni Teklif Talebi', $body));
     }
 
     // Müşteriye teyit

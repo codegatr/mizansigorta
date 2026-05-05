@@ -18,14 +18,15 @@ require MIZAN_INC . '/header.php';
       <div class="col-lg-6 text-white">
         <span class="mz-script mz-script-lg mz-script-red d-inline-block mb-3"><?= e(setting('site_slogan', 'Güven ve Özen İle')) ?></span>
         <h1 class="display-4 fw-bold lh-1 mb-3">Hayatınıza, aracınıza ve işinize <span class="text-warning">tam koruma</span></h1>
-        <p class="lead mb-4">Anlaşmalı sigorta şirketleri arasından sizin için en uygun teminatları karşılaştırır, en avantajlı teklifi sunarız. Online teklif almak ücretsizdir ve sizi bağlamaz.</p>
+        <p class="lead mb-4">Anlaşmalı sigorta şirketleri arasından sizin için en uygun teminatları karşılaştırır, uzman temsilcilerimiz aracılığıyla en avantajlı çözümü sunarız. Talebinizi iletin, müsait temsilcimiz en kısa sürede sizinle iletişime geçsin.</p>
         <div class="d-flex flex-wrap gap-2 mb-4">
-          <a href="<?= u('/teklif-al') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-shield-check"></i> Hızlı Teklif Al</a>
-          <a href="<?= u('/iletisim') ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-headset"></i> Bize Ulaşın</a>
+          <a href="<?= u('/teklif-al') ?>" class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-headset"></i> Teklif Talebi Oluştur</a>
+          <a href="<?= u('/iletisim') ?>" class="btn btn-outline-light btn-lg"><i class="bi bi-telephone"></i> Bize Ulaşın</a>
         </div>
         <div class="d-flex flex-wrap gap-2 mb-4">
-          <span class="mz-trust-badge"><i class="bi bi-shield-check"></i> KVKK Uyumlu</span>
           <span class="mz-trust-badge"><i class="bi bi-patch-check"></i> Lisanslı Acente</span>
+          <span class="mz-trust-badge"><i class="bi bi-shield-check"></i> KVKK Uyumlu</span>
+          <span class="mz-trust-badge"><i class="bi bi-people"></i> Uzman Temsilci Kadrosu</span>
           <span class="mz-trust-badge"><i class="bi bi-clock-history"></i> 7/24 Hasar Desteği</span>
         </div>
         <ul class="mz-hero-stats list-unstyled d-flex flex-wrap gap-4 mt-4 mb-0">
@@ -37,10 +38,10 @@ require MIZAN_INC . '/header.php';
       <div class="col-lg-6">
         <div class="mz-hero-quote">
           <div class="mz-hero-quote-head">
-            <span class="mz-hero-quote-icon"><i class="bi bi-lightning-charge-fill"></i></span>
+            <span class="mz-hero-quote-icon"><i class="bi bi-headset"></i></span>
             <div>
-              <div class="mz-hero-quote-title">60 saniyede teklif alın</div>
-              <div class="mz-hero-quote-sub">Bilgilerinizi girin, en uygun teklifi sunalım</div>
+              <div class="mz-hero-quote-title">Teklif Talebi Oluşturun</div>
+              <div class="mz-hero-quote-sub">Bilgilerinizi alalım, müsait temsilcimiz sizinle iletişime geçsin</div>
             </div>
           </div>
           <form action="<?= u('/teklif-al') ?>" method="get" class="row g-3">
@@ -49,21 +50,17 @@ require MIZAN_INC . '/header.php';
               <select name="urun" class="form-select" required>
                 <option value="">Sigorta türü seçin</option>
                 <?php foreach ($kategoriler as $k): ?>
-                  <optgroup label="<?= e($k['baslik']) ?>">
-                    <?php $alt = db_all('SELECT slug, baslik FROM ' . t('urunler') . ' WHERE aktif=1 AND parent_id=? ORDER BY sira', [$k['id']]); ?>
-                    <?php foreach ($alt as $a): ?>
-                      <option value="<?= e($a['slug']) ?>"><?= e($a['baslik']) ?></option>
-                    <?php endforeach; ?>
-                  </optgroup>
+                  <option value="<?= e($k['slug']) ?>"><?= e($k['baslik']) ?></option>
                 <?php endforeach; ?>
               </select>
+              <div class="form-text small">Detaylı ürün seçimini temsilcimiz sizinle birlikte belirleyecektir.</div>
             </div>
             <div class="col-12">
               <label class="form-label small fw-semibold text-secondary mb-1">Cep telefonu</label>
               <input type="tel" name="tel" class="form-control" placeholder="0XXX XXX XX XX" pattern="[0-9 +]+" required>
             </div>
             <div class="col-12 d-grid mt-2">
-              <button class="btn btn-warning fw-semibold">Teklif Al <i class="bi bi-arrow-right"></i></button>
+              <button class="btn btn-warning fw-semibold">Talep Oluştur <i class="bi bi-arrow-right"></i></button>
             </div>
             <div class="col-12 small text-muted text-center mb-0 mt-1">
               <i class="bi bi-shield-check"></i> KVKK kapsamında bilgileriniz yalnızca teklif sürecinde kullanılır.
@@ -106,7 +103,7 @@ require MIZAN_INC . '/header.php';
         <span class="mz-script mz-script-md mz-script-red d-inline-block mb-2">Neden Mizan?</span>
         <h2 class="fw-bold mb-3">Önem verdiklerinizi <span class="text-warning">güvence altına</span> alıyoruz.</h2>
         <p class="text-muted">Mizan Sigorta Aracılık Hizmetleri olarak, sizi ve değer verdiğiniz her şeyi korumak için yıllardır çalışıyoruz. İşyerinizden konutunuza, sağlığınızdan aracınıza kadar her ihtiyacınıza özel çözümler sunarız.</p>
-        <a href="<?= u('/teklif-al') ?>" class="btn btn-warning fw-semibold mt-2"><i class="bi bi-shield-check"></i> Hemen Teklif Al</a>
+        <a href="<?= u('/teklif-al') ?>" class="btn btn-warning fw-semibold mt-2"><i class="bi bi-headset"></i> Teklif Talebi Oluştur</a>
       </div>
       <div class="col-lg-7">
         <div class="row g-3">

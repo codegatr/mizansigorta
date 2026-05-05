@@ -75,7 +75,7 @@ $wa         = setting('whatsapp');
               <hr class="my-2">
               <div class="d-flex justify-content-between align-items-center px-2">
                 <small class="text-muted"><i class="bi bi-info-circle"></i> 35+ ürün, 12+ şirket</small>
-                <button class="btn btn-sm btn-warning fw-semibold" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-lightning-charge-fill"></i> Hızlı Teklif</button>
+                <button class="btn btn-sm btn-warning fw-semibold" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-headset"></i> Teklif Talebi</button>
               </div>
             </li>
           </ul>
@@ -90,7 +90,7 @@ $wa         = setting('whatsapp');
         <li class="nav-item"><a class="nav-link fw-semibold" href="<?= u('/temsilcimiz-olun') ?>" style="color:var(--mz-red) !important"><i class="bi bi-stars"></i> Temsilcimiz Olun</a></li>
       </ul>
       <div class="d-flex gap-2">
-        <button type="button" class="btn btn-warning btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-lightning-charge-fill"></i> Hızlı Teklif</button>
+        <button type="button" class="btn btn-warning btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-headset"></i> Teklif Talebi</button>
       </div>
     </div>
   </div>

@@ -120,9 +120,9 @@ require MIZAN_INC . '/header.php';
 
       <div class="mz-cta-box text-center">
         <i class="bi bi-shield-check display-5 text-warning"></i>
-        <h6 class="fw-bold mt-2">Hızlı Teklif Alın</h6>
+        <h6 class="fw-bold mt-2">Teklif Talebi Oluşturun</h6>
         <p class="small text-muted">Dakikalar içinde size özel fiyat.</p>
-        <a href="<?= u('/teklif-al') ?>" class="btn btn-primary btn-sm w-100">Teklif Al</a>
+        <a href="<?= u('/teklif-al') ?>" class="btn btn-primary btn-sm w-100">Teklif Talebi</a>
       </div>
     </aside>
   </div>

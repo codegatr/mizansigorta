@@ -332,7 +332,7 @@ $aksaray  = setting('aksaray_adres');
             <?php if ($wa = setting('whatsapp')): ?>
               <a href="https://wa.me/<?= e($wa) ?>" target="_blank" class="btn btn-success w-100 mb-2"><i class="bi bi-whatsapp"></i> WhatsApp ile yaz</a>
             <?php endif; ?>
-            <button type="button" class="btn btn-outline-warning w-100" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-lightning-charge-fill"></i> Hızlı Teklif Al</button>
+            <button type="button" class="btn btn-outline-warning w-100" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-headset"></i> Teklif Talebi</button>
 
             <hr class="my-4">
 

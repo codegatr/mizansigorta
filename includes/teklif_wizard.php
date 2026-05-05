@@ -25,11 +25,11 @@ foreach ($wizKategoriler as $k) {
       <div class="modal-header border-0 text-white" style="background:linear-gradient(135deg,var(--mz-navy),var(--mz-navy-2));padding:1.5rem">
         <div class="d-flex align-items-center gap-3">
           <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--mz-red),var(--mz-red-2));display:inline-flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0">
-            <i class="bi bi-lightning-charge-fill"></i>
+            <i class="bi bi-headset"></i>
           </div>
           <div>
-            <span class="mz-script mz-script-md mz-script-red d-block" style="line-height:1">Hızlı Teklif</span>
-            <h5 class="modal-title fw-bold mb-0 mt-1" id="wizTitle">60 saniyede teklif</h5>
+            <span class="mz-script mz-script-md mz-script-red d-block" style="line-height:1">Teklif Talebi</span>
+            <h5 class="modal-title fw-bold mb-0 mt-1" id="wizTitle">Müsait temsilcimiz sizi arasın</h5>
           </div>
         </div>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
@@ -53,7 +53,7 @@ foreach ($wizKategoriler as $k) {
 
         <!-- ====== ADIM 1: Kategori → Alt ürün ====== -->
         <div class="wiz-step" data-step="1">
-          <h5 class="fw-bold mb-2">Hangi sigorta için teklif almak istiyorsunuz?</h5>
+          <h5 class="fw-bold mb-2">Hangi sigorta türü için talep oluşturuyorsunuz?</h5>
           <p class="text-muted small mb-3">Önce kategoriyi, sonra alt ürünü seçin.</p>
 
           <div class="wiz-pane wiz-pane-cats">
@@ -154,8 +154,9 @@ foreach ($wizKategoriler as $k) {
             <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width:90px;height:90px;border-radius:50%;background:rgba(34,197,94,.12);color:#16a34a;font-size:3rem">
               <i class="bi bi-check-circle-fill"></i>
             </div>
-            <h3 class="fw-bold">Teklifiniz alındı!</h3>
-            <p class="text-muted lead">Yetkili ekibimiz <b id="wizThankPhone" class="text-warning"></b> üzerinden en kısa sürede sizinle iletişime geçecek.</p>
+            <h3 class="fw-bold">Talebiniz alındı!</h3>
+            <p class="text-muted lead">Müsait temsilcimiz <b id="wizThankPhone" class="text-warning"></b> numaranızdan en kısa sürede sizinle iletişime geçecek.</p>
+            <p class="small text-muted mb-0">Çalışma saatlerimiz dışında iletilen talepler bir sonraki iş günü değerlendirilir.</p>
             <p class="mz-script mz-script-md mz-script-red mt-3 mb-0">Güven ve Özen İle</p>
           </div>
         </div>
@@ -180,7 +181,7 @@ foreach ($wizKategoriler as $k) {
         <span></span>
         <div class="d-flex gap-2">
           <button type="button" class="btn btn-warning fw-semibold wiz-next" onclick="wizNext()" disabled>İleri <i class="bi bi-arrow-right"></i></button>
-          <button type="button" class="btn btn-warning fw-semibold wiz-submit d-none" onclick="wizSubmit()"><i class="bi bi-send"></i> Teklifi Gönder</button>
+          <button type="button" class="btn btn-warning fw-semibold wiz-submit d-none" onclick="wizSubmit()"><i class="bi bi-send"></i> Talebi Gönder</button>
         </div>
       </div>
 

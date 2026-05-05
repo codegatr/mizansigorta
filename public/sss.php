@@ -220,7 +220,7 @@ mark { background: rgba(244, 211, 94, 0.5); color: inherit; padding: 0 2px; bord
     <h2 class="fw-bold display-6 mt-2 mb-3">Yetkililerimize sor</h2>
     <p class="text-muted lead mb-4">7/24 destek hattımız ve uzman ekibimizle her sorunu çözüyoruz.</p>
     <div class="d-flex gap-2 justify-content-center flex-wrap">
-      <button type="button" class="btn btn-warning fw-semibold" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-lightning-charge-fill"></i> Hızlı Teklif</button>
+      <button type="button" class="btn btn-warning fw-semibold" data-bs-toggle="modal" data-bs-target="#teklifWizard"><i class="bi bi-headset"></i> Teklif Talebi</button>
       <a href="<?= u('/iletisim') ?>" class="btn btn-outline-warning fw-semibold"><i class="bi bi-envelope"></i> Mesaj Gönder</a>
       <?php if ($v = setting('telefon')): ?>
         <a href="tel:<?= e(preg_replace('/\s+/', '', $v)) ?>" class="btn btn-outline-secondary fw-semibold"><i class="bi bi-telephone"></i> <?= e($v) ?></a>

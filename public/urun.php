@@ -80,10 +80,10 @@ require MIZAN_INC . '/header.php';
 
         <div class="mz-cta-box d-flex justify-content-between align-items-center flex-wrap gap-3 mt-4">
           <div>
-            <h5 class="mb-1 text-warning fw-bold"><?= e($urun['baslik']) ?> için teklif alın</h5>
-            <p class="mb-0 small text-light-emphasis">60 saniyede ücretsiz, bağlayıcı olmayan teklif</p>
+            <h5 class="mb-1 text-warning fw-bold"><?= e($urun['baslik']) ?> için teklif talep edin</h5>
+            <p class="mb-0 small text-light-emphasis">Bilgilerinizi alalım, müsait temsilcimiz sizinle iletişime geçsin.</p>
           </div>
-          <a href="<?= u('/teklif-al?urun=' . $urun['slug']) ?>" class="btn btn-warning fw-semibold"><i class="bi bi-shield-check"></i> Hızlı Teklif Al</a>
+          <a href="<?= u('/teklif-al?urun=' . $urun['slug']) ?>" class="btn btn-warning fw-semibold"><i class="bi bi-headset"></i> Teklif Talebi Oluştur</a>
         </div>
       </div>
 
