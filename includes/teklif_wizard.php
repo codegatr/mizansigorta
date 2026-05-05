@@ -103,11 +103,11 @@ foreach ($wizKategoriler as $k) {
           <div class="row g-2">
             <div class="col-md-6">
               <label class="form-label small fw-semibold mb-1">İl</label>
-              <input type="text" id="wizIl" class="form-control" placeholder="Konya">
+              <input type="text" id="wizIl" class="form-control" placeholder="İstanbul">
             </div>
             <div class="col-md-6">
               <label class="form-label small fw-semibold mb-1">İlçe</label>
-              <input type="text" id="wizIlce" class="form-control" placeholder="Selçuklu">
+              <input type="text" id="wizIlce" class="form-control" placeholder="Ataşehir">
             </div>
           </div>
 

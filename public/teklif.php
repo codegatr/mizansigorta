@@ -258,11 +258,11 @@ require MIZAN_INC . '/header.php';
             </div>
             <div class="col-md-6">
               <label class="form-label small fw-semibold">İl</label>
-              <input type="text" name="il" class="form-control" value="<?= e($_POST['il'] ?? '') ?>" placeholder="Konya, İstanbul, Ankara...">
+              <input type="text" name="il" class="form-control" value="<?= e($_POST['il'] ?? '') ?>" placeholder="İstanbul">
             </div>
             <div class="col-md-6">
               <label class="form-label small fw-semibold">İlçe</label>
-              <input type="text" name="ilce" class="form-control" value="<?= e($_POST['ilce'] ?? '') ?>" placeholder="Selçuklu, Kadıköy...">
+              <input type="text" name="ilce" class="form-control" value="<?= e($_POST['ilce'] ?? '') ?>" placeholder="Ataşehir">
             </div>
             <div class="col-12">
               <label class="form-label small fw-semibold">Ek Açıklama / Talep <small class="text-muted fw-normal">(opsiyonel)</small></label>

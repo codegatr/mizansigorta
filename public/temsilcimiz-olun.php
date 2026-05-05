@@ -281,8 +281,8 @@ require MIZAN_INC . '/header.php';
                 <div class="col-md-6"><label class="form-label small fw-semibold">Firma Adı (varsa)</label><input type="text" name="firma_adi" class="form-control" value="<?= e($_POST['firma_adi'] ?? '') ?>"></div>
                 <div class="col-md-6"><label class="form-label small fw-semibold">E-posta *</label><input type="email" name="email" inputmode="email" autocomplete="email" required class="form-control" value="<?= e($_POST['email'] ?? '') ?>"></div>
                 <div class="col-md-6"><label class="form-label small fw-semibold">Cep Telefonu *</label><input type="tel" name="telefon" inputmode="tel" autocomplete="tel" required class="form-control" placeholder="0XXX XXX XX XX" value="<?= e($_POST['telefon'] ?? '') ?>"></div>
-                <div class="col-md-6"><label class="form-label small fw-semibold">İl</label><input type="text" name="il" class="form-control" placeholder="Konya" value="<?= e($_POST['il'] ?? '') ?>"></div>
-                <div class="col-md-6"><label class="form-label small fw-semibold">İlçe</label><input type="text" name="ilce" class="form-control" value="<?= e($_POST['ilce'] ?? '') ?>"></div>
+                <div class="col-md-6"><label class="form-label small fw-semibold">İl</label><input type="text" name="il" class="form-control" placeholder="İstanbul" value="<?= e($_POST['il'] ?? '') ?>"></div>
+                <div class="col-md-6"><label class="form-label small fw-semibold">İlçe</label><input type="text" name="ilce" class="form-control" placeholder="Ataşehir" value="<?= e($_POST['ilce'] ?? '') ?>"></div>
               </div>
 
               <h6 class="fw-bold text-uppercase text-muted small mb-3"><i class="bi bi-briefcase"></i> Mesleki Bilgiler</h6>
