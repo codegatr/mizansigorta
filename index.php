@@ -64,12 +64,7 @@ foreach ($routes as $regex => $file) {
 
 // 404
 http_response_code(404);
-$pageTitle = 'Sayfa bulunamadi - ' . SITE_NAME;
+$pageTitle = 'Sayfa bulunamadı - ' . SITE_NAME;
 require MIZAN_INC . '/header.php';
-?>
-<section class="container py-5 text-center">
-  <h1 class="display-4 text-warning">404</h1>
-  <p class="lead">Aradığınız sayfa bulunamadı.</p>
-  <a href="<?= u('/') ?>" class="btn btn-primary">Anasayfaya Dön</a>
-</section>
-<?php require MIZAN_INC . '/footer.php';
+require MIZAN_INC . '/_404_template.php';
+require MIZAN_INC . '/footer.php';

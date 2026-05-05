@@ -19,7 +19,7 @@ $pag   = paginate($total, $per, $page);
 
 $posts = db_all('SELECT * FROM ' . t('blog') . " WHERE $where ORDER BY yayin_tarihi DESC LIMIT $per OFFSET " . $pag['offset'], $params);
 
-// Öne çıkan: ilk sayfa + filtre yoksa en yeni yazıyı feature olarak ayır
+// Öne çıkan yazı: ilk sayfa + filtre yoksa en yeni 1'i ayır
 $featured = null;
 if ($page === 1 && $q === '' && $cat === '' && count($posts) > 0) {
     $featured = array_shift($posts);
@@ -29,69 +29,151 @@ $kategoriler = db_all('SELECT kategori, COUNT(*) c FROM ' . t('blog') . ' WHERE 
 $populer     = db_all('SELECT slug, baslik, kapak_gorseli, yayin_tarihi FROM ' . t('blog') . ' WHERE aktif=1 ORDER BY goruntulenme DESC LIMIT 5');
 $totalAll    = (int)db_value('SELECT COUNT(*) FROM ' . t('blog') . ' WHERE aktif=1');
 
+// Suggestion data: tum yayinda olan yazilarin minimum metaverisi (slug, baslik, kategori, ozet)
+$suggestData = db_all('SELECT slug, baslik, kategori, ozet FROM ' . t('blog') . ' WHERE aktif=1 AND yayin_tarihi<=NOW() ORDER BY yayin_tarihi DESC LIMIT 200');
+
 require MIZAN_INC . '/header.php';
 ?>
 
-<section class="mz-page-head">
-  <div class="container">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-      <div>
-        <h1 class="fw-bold mb-1">Blog</h1>
-        <p class="mb-0 small" style="color:rgba(255,255,255,.8)">Sigorta dünyasından <strong><?= $totalAll ?> bilgilendirici yazı</strong></p>
-        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item"><a href="<?= u('/') ?>">Anasayfa</a></li>
-          <li class="breadcrumb-item active">Blog</li>
-        </ol></nav>
-      </div>
-      <div class="d-none d-md-block">
-        <i class="bi bi-journal-bookmark-fill" style="font-size:2.5rem;color:rgba(238,39,55,.5)"></i>
-      </div>
-    </div>
-  </div>
-</section>
+<style>
+/* ============== HERO ============== */
+.mz-blog-hero {
+  position: relative; padding: 4.5rem 0 4rem;
+  background: linear-gradient(135deg, var(--mz-navy) 0%, var(--mz-navy-2) 100%);
+  color: #fff; overflow: hidden;
+}
+.mz-blog-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(227,11,48,.14) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(227,11,48,.08) 0%, transparent 50%);
+  pointer-events: none;
+}
 
-<!-- Search bar + kategori chips -->
-<section style="background:#fff;border-bottom:1px solid var(--mz-border)">
-  <div class="container py-3">
-    <div class="row g-2 align-items-center">
-      <div class="col-md-6 col-lg-5">
-        <form method="get" class="input-group">
-          <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-          <input type="text" name="q" class="form-control border-start-0" placeholder="Blog yazılarında ara..." value="<?= e($q) ?>">
-          <?php if ($cat !== ''): ?><input type="hidden" name="kategori" value="<?= e($cat) ?>"><?php endif; ?>
-          <button class="btn btn-warning fw-semibold">Ara</button>
-        </form>
-      </div>
-      <div class="col-md-6 col-lg-7">
-        <div class="d-flex flex-wrap gap-1 justify-content-md-end">
-          <a href="<?= u('/blog') ?>" class="badge <?= $cat === '' && $q === '' ? 'bg-danger text-white' : 'bg-light text-dark border' ?> text-decoration-none px-3 py-2">Tümü</a>
-          <?php foreach (array_slice($kategoriler, 0, 6) as $k): ?>
-            <a href="?kategori=<?= urlencode($k['kategori']) ?>"
-               class="badge <?= $cat === $k['kategori'] ? 'bg-danger text-white' : 'bg-light text-dark border' ?> text-decoration-none px-3 py-2">
-              <?= e($k['kategori']) ?>
-            </a>
-          <?php endforeach; ?>
-        </div>
-      </div>
+/* ============== SEARCH ============== */
+.mz-blog-search { position: relative; max-width: 720px; margin: 2rem auto 0; z-index: 5; }
+.mz-blog-search input {
+  width: 100%; padding: 1.15rem 3.5rem 1.15rem 3.5rem;
+  border: 0; border-radius: 50px;
+  font-size: 1.05rem; box-shadow: 0 25px 50px rgba(15,30,55,.3);
+  background: #fff; color: var(--mz-navy);
+}
+.mz-blog-search input:focus { outline: 3px solid rgba(227,11,48,.3); }
+.mz-blog-search-icon {
+  position: absolute; left: 1.25rem; top: 1.15rem;
+  color: var(--mz-red); font-size: 1.25rem; pointer-events: none;
+}
+.mz-blog-search-clear {
+  position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,.05); border: 0; width: 32px; height: 32px; border-radius: 50%;
+  display: none; align-items: center; justify-content: center; cursor: pointer; color: var(--mz-navy);
+}
+.mz-blog-search-clear:hover { background: rgba(0,0,0,.1); }
+
+/* ============== SUGGESTIONS ============== */
+.mz-blog-suggestions {
+  position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+  background: #fff; border-radius: 16px; box-shadow: 0 30px 60px rgba(15,30,55,.25);
+  padding: .5rem; max-height: 420px; overflow-y: auto;
+  display: none; z-index: 100; text-align: left;
+}
+.mz-blog-suggest-item {
+  display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 1rem; border-radius: 10px;
+  cursor: pointer; text-decoration: none; color: var(--mz-navy);
+  transition: background .12s;
+}
+.mz-blog-suggest-item:hover, .mz-blog-suggest-item.active { background: rgba(227,11,48,.07); color: var(--mz-navy); }
+.mz-blog-suggest-cat {
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; opacity: .65;
+  margin-bottom: .15rem;
+}
+.mz-blog-suggest-text { font-weight: 600; line-height: 1.35; }
+.mz-blog-suggest-excerpt { font-size: .82rem; opacity: .7; margin-top: .15rem; line-height: 1.4; }
+.mz-blog-suggest-empty { padding: 1.5rem; text-align: center; color: #888; font-size: .9rem; }
+.mz-blog-suggest-footer { padding: .65rem 1rem; border-top: 1px solid rgba(0,0,0,.06); font-size: .8rem; color: #888; display: flex; justify-content: space-between; align-items: center; }
+.mz-blog-suggest-kbd { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-family: monospace; font-size: .7rem; }
+
+/* ============== CHIPS ============== */
+.mz-blog-cat-chips { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin: 1.5rem 0 0; position: relative; z-index: 5; }
+.mz-blog-chip {
+  padding: .4rem 1.05rem; border-radius: 50px;
+  background: rgba(255,255,255,.1); color: #fff;
+  border: 1px solid rgba(255,255,255,.25); font-size: .88rem;
+  text-decoration: none; transition: all .15s;
+}
+.mz-blog-chip:hover { background: rgba(255,255,255,.2); color: #fff; }
+.mz-blog-chip.active { background: var(--mz-red); border-color: var(--mz-red); color: #fff; box-shadow: 0 8px 20px rgba(227,11,48,.35); }
+
+.mz-blog-stat { display: inline-flex; align-items: center; gap: .35rem; color: rgba(255,255,255,.85); font-size: .85rem; }
+
+mark { background: rgba(244, 211, 94, 0.55); color: inherit; padding: 0 2px; border-radius: 3px; }
+
+/* ============== FEATURED ============== */
+.mz-blog-featured { background:#fff; border:1px solid var(--mz-border); border-radius:16px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.06); transition:all .25s; }
+.mz-blog-featured:hover { transform:translateY(-3px); box-shadow:0 16px 44px rgba(0,0,0,.12); }
+.mz-blog-featured-img { width:100%; height:100%; min-height:300px; object-fit:cover; display:block; }
+.mz-blog-featured .mz-blog-img-ph { min-height:300px; }
+@media (max-width: 767.98px) { .mz-blog-featured-img { min-height:200px; } }
+
+/* ============== EMPTY ============== */
+.mz-blog-empty {
+  text-align: center; padding: 4rem 1.5rem;
+  background: #fff; border-radius: 16px; border: 1px solid var(--mz-border);
+}
+.mz-blog-empty i { font-size: 4rem; color: #cbd5e1; }
+</style>
+
+<!-- ============== HERO ============== -->
+<section class="mz-blog-hero">
+  <div class="container text-center position-relative">
+    <span class="mz-script mz-script-md mz-script-red d-block mb-1" style="color:#f4d35e !important">Sigorta Rehberi</span>
+    <h1 class="display-4 fw-bold mb-2">Blog</h1>
+    <p class="lead text-white-50 mx-auto mb-0" style="max-width:600px">
+      Kasko, konut, sağlık, işyeri sigortaları ve daha fazlası — tarafsız, anlaşılır içerikler
+    </p>
+
+    <!-- Live arama (suggestion'li) -->
+    <div class="mz-blog-search">
+      <i class="bi bi-search mz-blog-search-icon"></i>
+      <input type="text" id="blogSearch" placeholder="Aramaya başlayın... (örn. kasko fiyatı, DASK, hasar süreci)" autocomplete="off" value="<?= e($q) ?>">
+      <button type="button" class="mz-blog-search-clear" id="blogSearchClear" title="Temizle"><i class="bi bi-x-lg"></i></button>
+      <div class="mz-blog-suggestions" id="blogSuggestions"></div>
     </div>
-    <?php if ($q !== '' || $cat !== ''): ?>
-      <div class="mt-2 small text-muted">
-        <i class="bi bi-funnel"></i> Filtre:
-        <?php if ($q !== ''): ?><span class="badge bg-secondary me-1">"<?= e($q) ?>"</span><?php endif; ?>
-        <?php if ($cat !== ''): ?><span class="badge bg-secondary me-1"><?= e($cat) ?></span><?php endif; ?>
-        · <strong><?= $total ?></strong> sonuç ·
-        <a href="<?= u('/blog') ?>" class="text-decoration-none">Filtreleri temizle <i class="bi bi-x-circle"></i></a>
+
+    <!-- Kategori chip filtreleri -->
+    <?php if ($kategoriler): ?>
+      <div class="mz-blog-cat-chips">
+        <a href="<?= u('/blog') ?>" class="mz-blog-chip <?= $cat === '' ? 'active' : '' ?>">Tümü</a>
+        <?php foreach (array_slice($kategoriler, 0, 8) as $k): ?>
+          <a href="?kategori=<?= urlencode($k['kategori']) ?>" class="mz-blog-chip <?= $cat === $k['kategori'] ? 'active' : '' ?>"><?= e($k['kategori']) ?></a>
+        <?php endforeach; ?>
       </div>
     <?php endif; ?>
+
+    <div class="mt-3">
+      <span class="mz-blog-stat"><i class="bi bi-collection"></i> <?= $totalAll ?> yazı</span>
+      <span class="mz-blog-stat ms-3"><i class="bi bi-tags"></i> <?= count($kategoriler) ?> kategori</span>
+    </div>
   </div>
 </section>
 
+<!-- ============== ICERIK ============== -->
 <section class="container py-5">
+  <?php if ($q !== '' || $cat !== ''): ?>
+    <div class="mb-4 small text-muted">
+      <i class="bi bi-funnel"></i> Filtre:
+      <?php if ($q !== ''): ?><span class="badge bg-secondary me-1">"<?= e($q) ?>"</span><?php endif; ?>
+      <?php if ($cat !== ''): ?><span class="badge bg-secondary me-1"><?= e($cat) ?></span><?php endif; ?>
+      · <strong><?= $total ?></strong> sonuç ·
+      <a href="<?= u('/blog') ?>" class="text-decoration-none">Filtreleri temizle <i class="bi bi-x-circle"></i></a>
+    </div>
+  <?php endif; ?>
+
   <div class="row g-4">
     <div class="col-lg-8">
       <?php if (!$posts && !$featured): ?>
-        <div class="text-center py-5" style="background:#fff;border-radius:12px;border:1px solid var(--mz-border)">
-          <i class="bi bi-search display-3 text-muted d-block mb-3"></i>
+        <div class="mz-blog-empty">
+          <i class="bi bi-search d-block mb-3"></i>
           <h5 class="fw-bold">Sonuç bulunamadı</h5>
           <p class="text-muted mb-3">Aramanızla eşleşen yazı yok. Farklı bir kelime deneyin veya filtreleri temizleyin.</p>
           <a href="<?= u('/blog') ?>" class="btn btn-outline-primary"><i class="bi bi-arrow-left"></i> Tüm yazılar</a>
@@ -236,12 +318,137 @@ require MIZAN_INC . '/header.php';
   </div>
 </section>
 
-<style>
-.mz-blog-featured { background:#fff; border:1px solid var(--mz-border); border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,.04); transition:all .25s; }
-.mz-blog-featured:hover { transform:translateY(-3px); box-shadow:0 14px 36px rgba(0,0,0,.1); }
-.mz-blog-featured-img { width:100%; height:100%; min-height:280px; object-fit:cover; display:block; }
-.mz-blog-featured .mz-blog-img-ph { min-height:280px; }
-@media (max-width: 767.98px) { .mz-blog-featured-img { min-height:200px; } }
-</style>
+<script>
+(function () {
+  'use strict';
+
+  // PHP'den gelen suggestion verisi (slug, baslik, kategori, ozet)
+  const POSTS = <?= json_encode(array_map(function($r){
+      return [
+          'slug'  => $r['slug'],
+          'title' => $r['baslik'],
+          'cat'   => $r['kategori'] ?? '',
+          'excerpt' => mb_substr((string)($r['ozet'] ?? ''), 0, 110),
+      ];
+  }, $suggestData), JSON_UNESCAPED_UNICODE) ?>;
+  const BLOG_BASE = '<?= u('/blog/') ?>';
+
+  const searchInput = document.getElementById('blogSearch');
+  const searchClear = document.getElementById('blogSearchClear');
+  const suggestions = document.getElementById('blogSuggestions');
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+  function highlight(text, q) {
+    if (!q) return escapeHtml(text);
+    const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return escapeHtml(text).replace(re, '<mark>$1</mark>');
+  }
+
+  function turkishLower(s) {
+    return s.toLocaleLowerCase('tr-TR').replace(/i̇/g, 'i');
+  }
+
+  let activeIdx = -1;
+  let currentMatches = [];
+
+  function renderSuggestions() {
+    const qRaw = searchInput.value.trim();
+    const q = turkishLower(qRaw);
+    if (q.length < 2) {
+      suggestions.style.display = 'none';
+      currentMatches = [];
+      activeIdx = -1;
+      return;
+    }
+
+    // Eslesen yazilar (baslik veya ozet'te), max 6
+    currentMatches = [];
+    for (const p of POSTS) {
+      if (currentMatches.length >= 6) break;
+      const haystack = turkishLower(p.title + ' ' + p.excerpt + ' ' + p.cat);
+      if (haystack.indexOf(q) !== -1) {
+        currentMatches.push(p);
+      }
+    }
+    activeIdx = -1;
+
+    if (currentMatches.length === 0) {
+      suggestions.innerHTML = '<div class="mz-blog-suggest-empty"><i class="bi bi-info-circle"></i> "' + escapeHtml(qRaw) + '" için eşleşen yazı bulunamadı</div>';
+    } else {
+      let html = currentMatches.map(p =>
+        '<a href="' + BLOG_BASE + encodeURIComponent(p.slug) + '" class="mz-blog-suggest-item">'
+        + '<i class="bi bi-journal-text text-warning fs-5"></i>'
+        + '<div class="flex-grow-1">'
+        +   (p.cat ? '<div class="mz-blog-suggest-cat">' + escapeHtml(p.cat) + '</div>' : '')
+        +   '<div class="mz-blog-suggest-text">' + highlight(p.title, qRaw) + '</div>'
+        +   (p.excerpt ? '<div class="mz-blog-suggest-excerpt">' + highlight(p.excerpt, qRaw) + '…</div>' : '')
+        + '</div>'
+        + '</a>'
+      ).join('');
+      html += '<div class="mz-blog-suggest-footer">'
+           + '<span><span class="mz-blog-suggest-kbd">↑↓</span> gez · <span class="mz-blog-suggest-kbd">↵</span> aç</span>'
+           + '<span>' + currentMatches.length + ' sonuç</span>'
+           + '</div>';
+      suggestions.innerHTML = html;
+    }
+    suggestions.style.display = 'block';
+  }
+
+  function updateActive() {
+    suggestions.querySelectorAll('.mz-blog-suggest-item').forEach((el, idx) => {
+      el.classList.toggle('active', idx === activeIdx);
+    });
+    const active = suggestions.querySelector('.mz-blog-suggest-item.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+
+  searchInput.addEventListener('input', () => {
+    searchClear.style.display = searchInput.value ? 'flex' : 'none';
+    renderSuggestions();
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (suggestions.style.display !== 'block' || currentMatches.length === 0) {
+      if (e.key === 'Enter') {
+        // Enter ile direkt arama sayfasina git
+        e.preventDefault();
+        if (searchInput.value.trim()) {
+          window.location = '<?= u('/blog') ?>?q=' + encodeURIComponent(searchInput.value.trim());
+        }
+      }
+      return;
+    }
+    if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = (activeIdx + 1) % currentMatches.length; updateActive(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = (activeIdx - 1 + currentMatches.length) % currentMatches.length; updateActive(); }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeIdx >= 0 && currentMatches[activeIdx]) {
+        window.location = BLOG_BASE + encodeURIComponent(currentMatches[activeIdx].slug);
+      } else if (searchInput.value.trim()) {
+        window.location = '<?= u('/blog') ?>?q=' + encodeURIComponent(searchInput.value.trim());
+      }
+    }
+    else if (e.key === 'Escape') { suggestions.style.display = 'none'; }
+  });
+
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    searchClear.style.display = 'none';
+    suggestions.style.display = 'none';
+    searchInput.focus();
+  });
+
+  // Disari tiklayinca kapat
+  document.addEventListener('click', (e) => {
+    if (!searchInput.parentElement.contains(e.target)) {
+      suggestions.style.display = 'none';
+    }
+  });
+
+  // URL'de q varsa input'u doldur ve clear butonunu goster
+  if (searchInput.value) searchClear.style.display = 'flex';
+})();
+</script>
 
 <?php require MIZAN_INC . '/footer.php';

@@ -6,9 +6,9 @@ $sayfa = db_row('SELECT * FROM ' . t('sayfalar') . ' WHERE slug=? AND aktif=1 LI
 
 if (!$sayfa) {
     http_response_code(404);
-    $pageTitle = 'Sayfa bulunamadı';
+    $pageTitle = 'Sayfa bulunamadı - ' . SITE_NAME;
     require MIZAN_INC . '/header.php';
-    echo '<section class="container py-5 text-center"><h1 class="display-4 text-warning">404</h1><p>Sayfa bulunamadı.</p><a href="' . u('/') . '" class="btn btn-primary">Anasayfa</a></section>';
+    require MIZAN_INC . '/_404_template.php';
     require MIZAN_INC . '/footer.php';
     exit;
 }
