@@ -2916,3 +2916,37 @@ INSERT IGNORE INTO `mz_slaytlar` (`id`,`baslik`,`accent_kelime`,`ust_metin`,`aci
  'Hasar İhbarı Yap', '/hasar-ihbari', 'bi-exclamation-triangle-fill',
  'Bizi Arayın', 'tel:', 'bi-telephone-fill',
  'svg_kulaklik', 1, 40);
+
+-- ============================================================
+-- v1.1.19 - Subeler Tablosu (iletisim sayfasi sube telefonlari)
+-- Yunus istegi: 'mizansigorta.com.tr/iletisim subelerin Iletisim
+-- numaralari nerede?'
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `mz_subeler` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `sehir` varchar(60) NOT NULL,
+  `ilce` varchar(80) DEFAULT NULL,
+  `etiket` varchar(80) DEFAULT 'Sube Ofis' COMMENT 'Sube Ofis / Genel Merkez vb.',
+  `adres` text NOT NULL,
+  `telefon` varchar(40) DEFAULT NULL,
+  `telefon_2` varchar(40) DEFAULT NULL COMMENT 'Ikinci hat veya cep',
+  `email` varchar(120) DEFAULT NULL,
+  `harita_url` varchar(500) DEFAULT NULL COMMENT 'Google Maps link, bos ise adresten otomatik uretilir',
+  `calisma_saatleri` varchar(160) DEFAULT NULL COMMENT 'Pzt-Cum 09:00-18:00',
+  `merkez_mi` tinyint(1) NOT NULL DEFAULT 0 COMMENT '1=Genel Merkez (sayfada vurgulu)',
+  `aktif` tinyint(1) NOT NULL DEFAULT 1,
+  `sira` int(11) NOT NULL DEFAULT 0,
+  `olusturma_tarihi` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `guncelleme_tarihi` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_aktif_sira` (`aktif`,`sira`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Eski sehir-bazli setting alanlarindan ilk kurulum seed (idempotent: id=1 cakisirsa atlanir)
+-- Yunus admin panelden duzenleyebilir/silebilir, yenilerini ekleyebilir.
+INSERT IGNORE INTO `mz_subeler` (`id`,`sehir`,`ilce`,`etiket`,`adres`,`telefon`,`merkez_mi`,`aktif`,`sira`) VALUES
+(1, 'Istanbul', NULL, 'Genel Merkez', 'Adres bilgisi yonetim panelden duzenlenebilir.', NULL, 1, 1, 10),
+(2, 'Konya',    'Karatay', 'Sube Ofis', 'Adres bilgisi yonetim panelden duzenlenebilir.', NULL, 0, 1, 20),
+(3, 'Ankara',   NULL,      'Sube Ofis', 'Adres bilgisi yonetim panelden duzenlenebilir.', NULL, 0, 1, 30),
+(4, 'Aksaray',  NULL,      'Sube Ofis', 'Adres bilgisi yonetim panelden duzenlenebilir.', NULL, 0, 1, 40);

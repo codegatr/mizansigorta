@@ -70,10 +70,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require MIZAN_INC . '/header.php';
 
-$istanbul = setting('istanbul_adres');
-$konya    = setting('konya_adres');
-$ankara   = setting('ankara_adres');
-$aksaray  = setting('aksaray_adres');
+// Subeler DB'den (v1.1.19+) - tablo yoksa veya bos donerse legacy setting'lere fallback
+$subelerDb = [];
+try {
+    $subelerDb = db_all('SELECT * FROM ' . t('subeler') . ' WHERE aktif=1 ORDER BY merkez_mi DESC, sira ASC, id ASC');
+} catch (Throwable $e) { $subelerDb = []; }
+
+$merkez   = null;
+$digerler = [];
+foreach ($subelerDb as $s) {
+    if ($s['merkez_mi']) { $merkez = $merkez ?: $s; }
+    else { $digerler[] = $s; }
+}
+
+// Legacy fallback: tablo bos ise eski setting'lerden minimum bilgi
+if (!$merkez && !$digerler) {
+    $istanbul = setting('istanbul_adres');
+    $konya    = setting('konya_adres');
+    $ankara   = setting('ankara_adres');
+    $aksaray  = setting('aksaray_adres');
+    if ($istanbul) {
+        $merkez = ['sehir' => 'İstanbul', 'ilce' => null, 'etiket' => 'Genel Merkez', 'adres' => $istanbul,
+                   'telefon' => setting('telefon'), 'telefon_2' => null, 'email' => setting('email'),
+                   'harita_url' => null, 'calisma_saatleri' => setting('calisma_saatleri', 'Pzt-Cum 09:00-18:00'), 'merkez_mi' => 1, 'aktif' => 1];
+    }
+    foreach ([['Konya', 'Karatay', $konya], ['Ankara', null, $ankara], ['Aksaray', null, $aksaray]] as $i => $row) {
+        [$sehir, $ilce, $adres] = $row;
+        if ($adres) {
+            $digerler[] = ['sehir' => $sehir, 'ilce' => $ilce, 'etiket' => 'Şube Ofis', 'adres' => $adres,
+                           'telefon' => null, 'telefon_2' => null, 'email' => null, 'harita_url' => null,
+                           'calisma_saatleri' => null, 'merkez_mi' => 0, 'aktif' => 1];
+        }
+    }
+}
+
+// Harita URL helper - admin URL girdiyse onu, yoksa adresten Google Maps embed
+$_haritaSrc = function(array $s): string {
+    if (!empty($s['harita_url'])) {
+        $u = $s['harita_url'];
+        // Eger harita_url tam Google Maps embed degilse, adres aramasina cevir
+        if (strpos($u, 'output=embed') === false && strpos($u, '/embed') === false) {
+            return 'https://maps.google.com/maps?q=' . rawurlencode((string)$s['adres']) . '&output=embed';
+        }
+        return $u;
+    }
+    return 'https://maps.google.com/maps?q=' . rawurlencode((string)$s['adres']) . '&output=embed';
+};
 ?>
 
 <style>
@@ -136,10 +178,20 @@ $aksaray  = setting('aksaray_adres');
   <div class="container text-center position-relative">
     <span class="mz-script mz-script-md mz-script-red d-inline-block mb-2" style="color:#f4d35e !important">İletişim</span>
     <h1 class="display-4 fw-bold">Bize Ulaşın</h1>
-    <p class="lead text-white-50 mb-0 mx-auto" style="max-width:640px">İstanbul Genel Merkez ve 3 şubemizle Türkiye'nin önde gelen acentesi olarak hizmetinizdeyiz.</p>
+    <?php
+    $subeSayisi = count($digerler);
+    $heroAciklama = $merkez
+        ? sprintf('%s Genel Merkez%s%sile Türkiye\'nin önde gelen acentesi olarak hizmetinizdeyiz.',
+                  e($merkez['sehir']),
+                  $subeSayisi > 0 ? sprintf(' ve %d şubemiz', $subeSayisi) : '',
+                  $subeSayisi > 0 ? ' ' : ' ')
+        : 'Türkiye\'nin önde gelen acentelerinden olarak hizmetinizdeyiz.';
+    ?>
+    <p class="lead text-white-50 mb-0 mx-auto" style="max-width:640px"><?= $heroAciklama ?></p>
   </div>
 </section>
 
+<?php if ($merkez): ?>
 <!-- ===== GENEL MERKEZ — Vurgulu ===== -->
 <div class="container">
   <div class="mz-merkez-card">
@@ -147,45 +199,54 @@ $aksaray  = setting('aksaray_adres');
       <div class="col-md-7 p-4 p-md-5">
         <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
           <div>
-            <span class="mz-merkez-badge"><i class="bi bi-gem"></i> Genel Merkez</span>
-            <h2 class="fw-bold mt-3 mb-1">İstanbul · Ataşehir</h2>
+            <span class="mz-merkez-badge"><i class="bi bi-gem"></i> <?= e($merkez['etiket'] ?: 'Genel Merkez') ?></span>
+            <h2 class="fw-bold mt-3 mb-1"><?= e($merkez['sehir']) ?><?php if (!empty($merkez['ilce'])): ?> <small class="text-muted">· <?= e($merkez['ilce']) ?></small><?php endif; ?></h2>
             <p class="text-muted mb-0">Mizan Sigorta'nın yönetim ve operasyon merkezi</p>
           </div>
-          <div class="text-end">
-            <small class="text-muted d-block">Çalışma Saatleri</small>
-            <strong class="text-warning"><?= e(setting('calisma_saatleri', 'Pzt-Cum 09:00-18:00')) ?></strong>
-          </div>
+          <?php if (!empty($merkez['calisma_saatleri']) || ($cs = setting('calisma_saatleri'))): ?>
+            <div class="text-end">
+              <small class="text-muted d-block">Çalışma Saatleri</small>
+              <strong class="text-warning"><?= e($merkez['calisma_saatleri'] ?? setting('calisma_saatleri', 'Pzt-Cum 09:00-18:00')) ?></strong>
+            </div>
+          <?php endif; ?>
         </div>
 
         <hr class="my-3">
 
-        <?php if ($istanbul): ?>
-          <div class="mz-channel mb-2">
-            <div class="mz-channel-icon"><i class="bi bi-geo-alt-fill"></i></div>
-            <div class="flex-grow-1">
-              <small class="text-muted d-block">Adres</small>
-              <span><?= nl2br(e($istanbul)) ?></span>
-            </div>
+        <div class="mz-channel mb-2">
+          <div class="mz-channel-icon"><i class="bi bi-geo-alt-fill"></i></div>
+          <div class="flex-grow-1">
+            <small class="text-muted d-block">Adres</small>
+            <span><?= nl2br(e($merkez['adres'])) ?></span>
           </div>
-        <?php endif; ?>
+        </div>
 
-        <?php if ($v = setting('telefon')): ?>
-          <a class="mz-channel mb-2" href="tel:<?= e(preg_replace('/\s+/', '', $v)) ?>">
+        <?php
+        // Telefon: once merkez kayitli, yoksa genel ayardan
+        $telMerkez = $merkez['telefon'] ?: setting('telefon');
+        $telMerkez2 = $merkez['telefon_2'] ?? null;
+        if ($telMerkez):
+        ?>
+          <a class="mz-channel mb-2" href="tel:<?= e(preg_replace('/\s+/', '', $telMerkez)) ?>">
             <div class="mz-channel-icon"><i class="bi bi-telephone-fill"></i></div>
             <div class="flex-grow-1">
               <small class="text-muted d-block">Telefon</small>
-              <strong><?= e($v) ?></strong>
+              <strong><?= e($telMerkez) ?><?php if ($telMerkez2): ?> <span class="text-muted fw-normal">· <?= e($telMerkez2) ?></span><?php endif; ?></strong>
             </div>
             <i class="bi bi-arrow-right"></i>
           </a>
         <?php endif; ?>
 
-        <?php if ($v = setting('email')): ?>
-          <a class="mz-channel mb-2" href="mailto:<?= e($v) ?>">
+        <?php
+        // E-posta: merkez kayitli olan veya genel ayar
+        $emailMerkez = $merkez['email'] ?: setting('email');
+        if ($emailMerkez):
+        ?>
+          <a class="mz-channel mb-2" href="mailto:<?= e($emailMerkez) ?>">
             <div class="mz-channel-icon"><i class="bi bi-envelope-fill"></i></div>
             <div class="flex-grow-1">
               <small class="text-muted d-block">E-posta</small>
-              <strong><?= e($v) ?></strong>
+              <strong><?= e($emailMerkez) ?></strong>
             </div>
             <i class="bi bi-arrow-right"></i>
           </a>
@@ -204,69 +265,79 @@ $aksaray  = setting('aksaray_adres');
       </div>
 
       <div class="col-md-5" style="background:linear-gradient(135deg,#f8fafc,#fff);min-height:380px;position:relative;display:flex;align-items:center;justify-content:center">
-        <?php if ($istanbul): ?>
-          <iframe
-            src="https://maps.google.com/maps?q=<?= rawurlencode($istanbul) ?>&output=embed"
-            style="width:100%;height:100%;border:0;min-height:380px"
-            loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-        <?php else: ?>
-          <div class="text-center text-muted p-4"><i class="bi bi-geo-alt" style="font-size:3rem"></i><p>Harita</p></div>
-        <?php endif; ?>
+        <iframe
+          src="<?= e($_haritaSrc($merkez)) ?>"
+          style="width:100%;height:100%;border:0;min-height:380px"
+          loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
     </div>
   </div>
 </div>
+<?php endif; ?>
 
+<?php if ($digerler): ?>
 <!-- ===== ŞUBELER ===== -->
 <section class="mz-band">
   <div class="container">
     <div class="text-center mb-5">
       <span class="mz-script mz-script-md mz-script-red">Şubelerimiz</span>
-      <h2 class="fw-bold display-6 mt-2">3 Şehirde Yanınızdayız</h2>
-      <p class="text-muted lead">Genel Merkez İstanbul'a ek olarak Anadolu'nun stratejik noktalarında</p>
+      <h2 class="fw-bold display-6 mt-2"><?= count($digerler) ?> Şehirde Yanınızdayız</h2>
+      <?php if ($merkez): ?>
+        <p class="text-muted lead"><?= e($merkez['etiket'] ?: 'Genel Merkez') ?> <?= e($merkez['sehir']) ?>'a ek olarak Türkiye'nin stratejik noktalarında</p>
+      <?php endif; ?>
     </div>
 
     <div class="row g-4">
-      <?php
-      $subeler = [
-          ['no' => '01', 'sehir' => 'Konya',   'ilce' => 'Karatay',   'adres' => $konya,   'icon' => 'bi-geo-alt-fill'],
-          ['no' => '02', 'sehir' => 'Ankara',  'ilce' => '',          'adres' => $ankara,  'icon' => 'bi-geo-alt-fill'],
-          ['no' => '03', 'sehir' => 'Aksaray', 'ilce' => '',          'adres' => $aksaray, 'icon' => 'bi-geo-alt-fill'],
-      ];
-      foreach ($subeler as $s):
-          if (!$s['adres']) continue;
+      <?php foreach ($digerler as $idx => $s):
+        $no = str_pad((string)($idx + 1), 2, '0', STR_PAD_LEFT);
+        $tel = $s['telefon'] ?? null;
+        $tel2 = $s['telefon_2'] ?? null;
       ?>
         <div class="col-md-6 col-lg-4">
           <div class="mz-sube-card">
             <div class="mz-sube-card-head">
               <div>
-                <h5 class="fw-bold mb-0" style="color:var(--mz-navy)"><?= e($s['sehir']) ?> <?php if ($s['ilce']): ?><small class="text-muted">· <?= e($s['ilce']) ?></small><?php endif; ?></h5>
-                <small class="text-muted">Şube Ofis</small>
+                <h5 class="fw-bold mb-0" style="color:var(--mz-navy)"><?= e($s['sehir']) ?> <?php if (!empty($s['ilce'])): ?><small class="text-muted">· <?= e($s['ilce']) ?></small><?php endif; ?></h5>
+                <small class="text-muted"><?= e($s['etiket'] ?? 'Şube Ofis') ?></small>
               </div>
-              <span class="mz-sube-num"><?= $s['no'] ?></span>
+              <span class="mz-sube-num"><?= e($no) ?></span>
             </div>
             <div class="p-3">
-              <p class="small text-muted mb-3" style="line-height:1.55"><?= nl2br(e($s['adres'])) ?></p>
-              <a href="https://www.google.com/maps/search/<?= rawurlencode($s['adres']) ?>" target="_blank" class="btn btn-sm btn-outline-warning w-100"><i class="bi bi-map"></i> Haritada Göster</a>
+              <p class="small text-muted mb-3" style="line-height:1.55"><i class="bi bi-geo-alt-fill text-danger"></i> <?= nl2br(e($s['adres'])) ?></p>
+
+              <?php if ($tel): ?>
+                <a href="tel:<?= e(preg_replace('/\s+/', '', $tel)) ?>" class="d-flex align-items-center gap-2 mb-2 small text-decoration-none" style="color:var(--mz-navy)">
+                  <i class="bi bi-telephone-fill text-danger"></i>
+                  <strong><?= e($tel) ?></strong>
+                  <?php if ($tel2): ?><span class="text-muted">· <?= e($tel2) ?></span><?php endif; ?>
+                </a>
+              <?php endif; ?>
+
+              <?php if (!empty($s['email'])): ?>
+                <a href="mailto:<?= e($s['email']) ?>" class="d-flex align-items-center gap-2 mb-2 small text-decoration-none" style="color:var(--mz-navy)">
+                  <i class="bi bi-envelope-fill text-danger"></i>
+                  <span><?= e($s['email']) ?></span>
+                </a>
+              <?php endif; ?>
+
+              <?php if (!empty($s['calisma_saatleri'])): ?>
+                <div class="d-flex align-items-center gap-2 mb-3 small text-muted">
+                  <i class="bi bi-clock-fill text-danger"></i>
+                  <span><?= e($s['calisma_saatleri']) ?></span>
+                </div>
+              <?php else: ?>
+                <div class="mb-3"></div>
+              <?php endif; ?>
+
+              <a href="<?= e($s['harita_url'] ?: ('https://www.google.com/maps/search/' . rawurlencode((string)$s['adres']))) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-outline-warning w-100"><i class="bi bi-map"></i> Haritada Göster</a>
             </div>
           </div>
         </div>
       <?php endforeach; ?>
-
-      <?php
-      $bos = array_filter($subeler, fn($s) => !$s['adres']);
-      if ($bos):
-      ?>
-        <div class="col-12">
-          <div class="alert alert-light border text-center small">
-            <i class="bi bi-info-circle text-warning"></i>
-            <?php foreach ($bos as $b): ?><strong><?= e($b['sehir']) ?></strong> ofisimiz <?php endforeach; ?> yakında hizmetinizde olacak.
-          </div>
-        </div>
-      <?php endif; ?>
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <!-- ===== Mesaj Formu ===== -->
 <section class="mz-band bg-light">
@@ -319,7 +390,7 @@ $aksaray  = setting('aksaray_adres');
                 <div class="col-md-6">
                   <label class="form-label small fw-semibold">E-posta <span class="text-danger">*</span></label>
                   <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                    <input type="email" name="email" class="form-control" required value="<?= e($_POST['email'] ?? '') ?>" placeholder="ornek@eposta.com">
+                    <input type="email" name="email" class="form-control" required value="<?= e($_POST['email'] ?? '') ?>" placeholder="ornek@email.com">
                   </div>
                 </div>
                 <div class="col-md-6">

@@ -277,7 +277,7 @@ require MIZAN_INC . '/header.php';
           <div class="col-12">
             <label class="form-label small fw-semibold">E-posta <small class="text-muted fw-normal">(opsiyonel — bilgilendirme için)</small></label>
             <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-              <input type="email" name="email" class="form-control" placeholder="ornek@eposta.com">
+              <input type="email" name="email" class="form-control" placeholder="ornek@email.com">
             </div>
           </div>
         </div>

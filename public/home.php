@@ -271,7 +271,7 @@ require MIZAN_INC . '/header.php';
     <div class="mz-cta-box">
       <span class="mz-script mz-script-lg mz-script-red d-block mb-2">Bize Katılın</span>
       <h3>Mizan Sigorta Temsilcisi Olun</h3>
-      <p class="text-light-emphasis mb-4">Sigortacılık tecrübenizi Mizan'ın gücüyle birleştirin. Güçlü altyapı, lisans desteği ve kurumsal kimlikle yan yana çalışalım.</p>
+      <p class="mb-4">Sigortacılık tecrübenizi Mizan'ın gücüyle birleştirin. Güçlü altyapı, lisans desteği ve kurumsal kimlikle yan yana çalışalım.</p>
       <a href="<?= u('/temsilcimiz-olun') ?>" class="btn btn-warning"><i class="bi bi-stars"></i> Temsilci Başvurusu</a>
     </div>
   </div>

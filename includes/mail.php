@@ -202,7 +202,7 @@ function mail_template(string $title, string $bodyHtml, array $opts = []): strin
     $teklifUrl  = $web . '/teklif-al';
     $hasarUrl   = $web . '/hasar-ihbari';
 
-    $preheader = e((string)($opts['preheader'] ?? 'Mizan Sigorta - Guven ve Ozen Ile'));
+    $preheader = e((string)($opts['preheader'] ?? 'Mizan Sigorta - Güven ve Özen İle'));
     $ctaText   = (string)($opts['cta_text'] ?? '');
     $ctaUrl    = (string)($opts['cta_url'] ?? '');
     $badge     = (string)($opts['badge'] ?? '');
@@ -267,7 +267,7 @@ function mail_template(string $title, string $bodyHtml, array $opts = []): strin
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td>
-                    <div style="font-family:Georgia,'Times New Roman',serif;color:#e30b30;font-size:14px;font-style:italic;letter-spacing:1px;margin-bottom:6px">Guven ve Ozen Ile</div>
+                    <div style="font-family:Georgia,'Times New Roman',serif;color:#e30b30;font-size:14px;font-style:italic;letter-spacing:1px;margin-bottom:6px">Güven ve Özen İle</div>
                     <div style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:.5px">{$brandShort}</div>
                   </td>
                   <td align="right" valign="top">
@@ -289,12 +289,12 @@ function mail_template(string $title, string $bodyHtml, array $opts = []): strin
             <td style="background:#f8fafc;padding:18px 40px;border-top:1px solid #e5e7eb">
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td align="center" style="font-size:11px;color:#6b7280;letter-spacing:.8px;text-transform:uppercase;font-weight:600;padding-bottom:10px">Hizli Erisim</td>
+                  <td align="center" style="font-size:11px;color:#6b7280;letter-spacing:.8px;text-transform:uppercase;font-weight:600;padding-bottom:10px">Hızlı Erişim</td>
                 </tr>
                 <tr>
                   <td align="center">
                     <a href="{$teklifUrl}" style="display:inline-block;color:#0d1b2a;text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;margin:2px">Teklif Al</a>
-                    <a href="{$hasarUrl}" style="display:inline-block;color:#0d1b2a;text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;margin:2px">Hasar Ihbari</a>
+                    <a href="{$hasarUrl}" style="display:inline-block;color:#0d1b2a;text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;margin:2px">Hasar İhbarı</a>
                     <a href="{$web}" style="display:inline-block;color:#0d1b2a;text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;margin:2px">Web Sitesi</a>
                   </td>
                 </tr>
@@ -304,7 +304,7 @@ function mail_template(string $title, string $bodyHtml, array $opts = []): strin
 
           <tr>
             <td style="padding:24px 40px 16px;background:#ffffff">
-              <div style="font-size:11px;color:#9ca3af;letter-spacing:1px;text-transform:uppercase;font-weight:700;margin-bottom:6px">Iletisim</div>
+              <div style="font-size:11px;color:#9ca3af;letter-spacing:1px;text-transform:uppercase;font-weight:700;margin-bottom:6px">İletişim</div>
               {$contactBlock}
             </td>
           </tr>

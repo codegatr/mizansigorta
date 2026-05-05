@@ -240,7 +240,7 @@ require MIZAN_INC . '/header.php';
             <div class="col-md-6">
               <label class="form-label small fw-semibold">E-posta <small class="text-muted fw-normal">(opsiyonel)</small></label>
               <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                <input type="email" name="email" class="form-control" value="<?= e($_POST['email'] ?? '') ?>" placeholder="ornek@eposta.com">
+                <input type="email" name="email" class="form-control" value="<?= e($_POST['email'] ?? '') ?>" placeholder="ornek@email.com">
               </div>
             </div>
             <div class="col-md-6">
