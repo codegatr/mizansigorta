@@ -29,17 +29,18 @@ function start_session(): void
 function user_login(string $identifier, string $password): array
 {
     // $identifier email veya kullanici_adi olabilir.
-    // Iceren '@' ise email olarak, aksi halde kullanici_adi olarak ara.
-    $identifier = strtolower(trim($identifier));
+    // DB collation utf8mb4_unicode_ci => case-insensitive (Yunus = yunus = YUNUS otomatik eslesir).
+    // Email icin de email kolonu utf8mb4_unicode_ci (PHP'de strtolower zorlamiyoruz).
+    $identifier = trim($identifier);
     if ($identifier === '') {
         return ['ok' => false, 'msg' => 'E-posta veya kullanici adi giriniz.'];
     }
 
     if (strpos($identifier, '@') !== false) {
-        // Email gibi gorunuyor - email kolonundan ara
+        // Email gibi gorunuyor - email kolonundan ara (collation case-insensitive)
         $u = db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE email = ? LIMIT 1', [$identifier]);
     } else {
-        // Kullanici adi - kullanici_adi kolonundan ara (yoksa fallback olarak emailin @ oncesi)
+        // Kullanici adi - collation sayesinde 'Yunus' yazilirsa 'Yunus'/'yunus'/'YUNUS' kayitlarini bulur
         $u = null;
         try {
             $u = db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE kullanici_adi = ? LIMIT 1', [$identifier]);
@@ -49,7 +50,7 @@ function user_login(string $identifier, string $password): array
         }
         // Bulunamazsa: emailin @ oncesi karsilastirmasi (kolon yokken cakismayi onler)
         if (!$u) {
-            $u = db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE LOWER(SUBSTRING_INDEX(email, "@", 1)) = ? LIMIT 1', [$identifier]);
+            $u = db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE LOWER(SUBSTRING_INDEX(email, "@", 1)) = LOWER(?) LIMIT 1', [$identifier]);
         }
     }
 

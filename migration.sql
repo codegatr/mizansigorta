@@ -3021,3 +3021,8 @@ WHERE `kullanici_adi` IS NULL OR `kullanici_adi` = '';
 -- v1.1.24 - Admin topbar hizli aksiyon butonlari (sadece kod, SQL yok)
 -- + /sitemap.php legacy URL 301 redirect (sadece kod, SQL yok)
 -- ============================================================
+
+-- ============================================================
+-- v1.1.25 - Kullanici adi: Turkce + buyuk harf izni (sadece kod)
+-- DB collation utf8mb4_unicode_ci zaten case-insensitive
+-- ============================================================

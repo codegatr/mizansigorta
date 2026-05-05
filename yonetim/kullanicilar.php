@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id            = (int)($_POST['id'] ?? 0);
         $ad_soyad      = trim((string)($_POST['ad_soyad'] ?? ''));
         $email         = strtolower(trim((string)($_POST['email'] ?? '')));
-        $kullanici_adi = strtolower(trim((string)($_POST['kullanici_adi'] ?? '')));
+        $kullanici_adi = trim((string)($_POST['kullanici_adi'] ?? ''));
         $rol           = (string)($_POST['rol'] ?? 'operator');
         $telefon       = normalize_phone((string)($_POST['telefon'] ?? ''));
         $aktif         = isset($_POST['aktif']) ? 1 : 0;
@@ -25,10 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($ad_soyad === '' || $email === '') admin_redirect('kullanicilar.php', 'danger', 'Ad soyad ve e-posta zorunlu.');
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) admin_redirect('kullanicilar.php', 'danger', 'Geçerli bir e-posta giriniz.');
 
-        // Kullanici adi opsiyonel, ama girildiyse formati dogrula
+        // Kullanici adi opsiyonel, ama girildiyse formati dogrula:
+        // - Harf (Turkce dahil tum diller \p{L}), rakam, nokta, alt cizgi, tire
+        // - Bosluk yok (login icin pratik degil)
+        // - @ yok (email ile cakismayi onler)
+        // - 3-50 karakter
+        // Buyuk/kucuk harf serbest. DB collation utf8mb4_unicode_ci sayesinde
+        // 'Yunus' ve 'yunus' otomatik ayni kabul edilir (UNIQUE check + login ararken).
         if ($kullanici_adi !== '') {
-            if (!preg_match('/^[a-z0-9_.-]{3,50}$/', $kullanici_adi)) {
-                admin_redirect('kullanicilar.php', 'danger', 'Kullanıcı adı 3-50 karakter, sadece a-z 0-9 . _ - karakterleri içerebilir (Türkçe karakter kullanmayın).');
+            if (!preg_match('/^[\p{L}0-9_.\-]{3,50}$/u', $kullanici_adi)) {
+                admin_redirect('kullanicilar.php', 'danger', 'Kullanıcı adı 3-50 karakter olmalı; harf, rakam, nokta, alt çizgi ve tire kullanılabilir (boşluk olmasın).');
             }
             if (strpos($kullanici_adi, '@') !== false) {
                 admin_redirect('kullanicilar.php', 'danger', 'Kullanıcı adı "@" içeremez (e-posta gibi görünür, çakışmayı önler).');
@@ -181,11 +187,10 @@ $edit = $editId ? db_row('SELECT * FROM ' . t('kullanicilar') . ' WHERE id=?', [
             <div class="col-12">
               <label class="form-label small">Kullanıcı Adı <span class="text-muted">(opsiyonel — login için kolaylık)</span></label>
               <input type="text" name="kullanici_adi" class="form-control form-control-sm"
-                     pattern="[a-z0-9_.\-]{3,50}"
                      maxlength="50"
                      value="<?= e($edit['kullanici_adi'] ?? '') ?>"
-                     placeholder="ornek: yunus, mehmet.demir, satis_01">
-              <div class="form-text small">3-50 karakter, sadece <code>a-z 0-9 . _ -</code> Türkçe karakter kullanmayın. Boş bırakırsan e-posta adresinin <code>@</code> öncesinden otomatik üretilir.</div>
+                     placeholder="Yunus, Oktay, Beyza, Mesut, mehmet.demir, satis_01...">
+              <div class="form-text small">3-50 karakter. Türkçe karakter ve büyük harf serbest. <code>@</code> ve boşluk olmasın. Boş bırakırsan e-posta adresinin <code>@</code> öncesinden otomatik üretilir.</div>
             </div>
             <div class="col-12"><label class="form-label small">Telefon</label><input type="tel" name="telefon" class="form-control form-control-sm" value="<?= e($edit['telefon'] ?? '') ?>"></div>
             <div class="col-12"><label class="form-label small">Rol *</label>
