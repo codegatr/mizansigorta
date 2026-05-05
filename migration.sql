@@ -1959,25 +1959,15 @@ INSERT IGNORE INTO `mz_referanslar` (`tip`, `ad`, `unvan`, `mesaj`, `puan`, `sir
 
 -- BITIS
 -- ====================================================
--- v1.1.9 - Sirket logolari + KVKK uyumlu referanslar
+-- v1.1.9 - KVKK uyumlu referanslar + UNIQUE constraint
 -- ====================================================
+-- (NOT: v1.1.11'de placeholder SVG'ler kaldirildi; logo path'leri NULL'a cekildi.
+--       Yonetim panelinden gercek logolar tek tek upload edilebilir.)
 
--- Sirket logo path'leri (assets/img/sirketler/...)
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/anadolu-sigorta.svg'      WHERE `ad` = 'Anadolu Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/allianz-sigorta.svg'      WHERE `ad` = 'Allianz Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/axa-sigorta.svg'          WHERE `ad` = 'AXA Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/turkiye-sigorta.svg'      WHERE `ad` = 'Türkiye Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/hdi-sigorta.svg'          WHERE `ad` = 'HDI Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/quick-sigorta.svg'        WHERE `ad` = 'Quick Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/neova-sigorta.svg'        WHERE `ad` = 'Neova Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/ak-sigorta.svg'           WHERE `ad` = 'Ak Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/doga-sigorta.svg'         WHERE `ad` = 'Doğa Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/atlas-sigorta.svg'        WHERE `ad` = 'Atlas Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/corpus-sigorta.svg'       WHERE `ad` = 'Corpus Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/magdeburger-sigorta.svg'  WHERE `ad` = 'Magdeburger Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/mapfre-sigorta.svg'       WHERE `ad` = 'Mapfre Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/ray-sigorta.svg'          WHERE `ad` = 'Ray Sigorta';
-UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/sompo-sigorta.svg'        WHERE `ad` = 'Sompo Sigorta';
+-- v1.1.9'da seedlenen broken path'leri temizle
+UPDATE `mz_sigorta_sirketleri`
+SET `logo` = NULL
+WHERE `logo` LIKE 'assets/img/sirketler/%';
 
 -- Referanslar UNIQUE constraint
 DELETE r1 FROM `mz_referanslar` r1

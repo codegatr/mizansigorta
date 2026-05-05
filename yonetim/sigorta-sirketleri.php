@@ -61,6 +61,16 @@ $editId = (int)($_GET['edit'] ?? 0);
 $edit = $editId ? db_row('SELECT * FROM ' . t('sigorta_sirketleri') . ' WHERE id=?', [$editId]) : null;
 ?>
 
+<div class="alert alert-info d-flex gap-3 align-items-start mb-3">
+  <i class="bi bi-info-circle-fill fs-4"></i>
+  <div class="flex-grow-1 small">
+    <strong class="d-block mb-1">Şirket logoları hakkında</strong>
+    Anasayfada ve hakkımızda sayfasında, logo yüklü olan şirketler için logo, yüklü olmayanlar için şirket adı metin olarak görünür.
+    Resmi logoları acente sözleşmenizle veya şirketin <a href="https://www.tsb.org.tr/tr/uye-sirketler" target="_blank" rel="noopener">TSB üye listesi <i class="bi bi-box-arrow-up-right small"></i></a> üzerinden temin ettiğiniz kurumsal kit sayfasından edinebilirsiniz.
+    Önerilen format: <strong>PNG/SVG, şeffaf zemin, 240×90 px civarı, ~50 KB altı.</strong>
+  </div>
+</div>
+
 <div class="row g-3">
   <div class="col-lg-8">
     <div class="card border-0 shadow-sm">
@@ -115,8 +125,17 @@ $edit = $editId ? db_row('SELECT * FROM ' . t('sigorta_sirketleri') . ' WHERE id
           <input type="hidden" name="id" value="<?= (int)($edit['id'] ?? 0) ?>">
           <div class="row g-2">
             <div class="col-12"><label class="form-label small">Şirket Adı *</label><input type="text" name="ad" required class="form-control form-control-sm" value="<?= e($edit['ad'] ?? '') ?>"></div>
-            <div class="col-12"><label class="form-label small">Logo</label><input type="file" name="logo" class="form-control form-control-sm" accept="image/*">
-              <?php if ($edit && $edit['logo']): ?><div class="small text-muted mt-1">Mevcut: <?= e($edit['logo']) ?></div><?php endif; ?>
+            <div class="col-12">
+              <label class="form-label small">Logo</label>
+              <input type="file" name="logo" class="form-control form-control-sm" accept="image/png,image/svg+xml,image/webp,image/jpeg">
+              <?php if ($edit && $edit['logo']): ?>
+                <div class="small text-muted mt-1"><i class="bi bi-image"></i> Mevcut: <code><?= e($edit['logo']) ?></code></div>
+              <?php endif; ?>
+              <div class="form-text small">
+                Önerilen: <strong>PNG/SVG, şeffaf zemin, 240×90 px civarı.</strong>
+                Şirketin resmi web sitesinden veya acente portalından temin ettiğiniz logoyu yükleyin.
+                Logo yüklenmediği takdirde anasayfada şirket adı metin olarak görünür.
+              </div>
             </div>
             <div class="col-md-7"><label class="form-label small">Web Sitesi</label><input type="url" name="web_sitesi" class="form-control form-control-sm" value="<?= e($edit['web_sitesi'] ?? '') ?>"></div>
             <div class="col-md-5"><label class="form-label small">Acente Kodu</label><input type="text" name="acente_kodu" class="form-control form-control-sm" value="<?= e($edit['acente_kodu'] ?? '') ?>"></div>

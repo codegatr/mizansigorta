@@ -33,23 +33,20 @@ require MIZAN_INC . '/header.php';
 ?>
 
 <section class="mz-page-head">
-  <div class="container py-5">
-    <div class="row align-items-center g-4">
-      <div class="col-lg-8">
-        <span class="mz-script mz-script-md mz-script-red d-inline-block mb-2">Sigorta Rehberi</span>
-        <h1 class="display-5 fw-bold mb-2">Blog</h1>
-        <p class="lead mb-0" style="color:rgba(255,255,255,.85)">
-          Sigorta dünyasından <strong><?= $totalAll ?> bilgilendirici yazı</strong> · Kasko, konut, sağlık, işyeri ve daha fazlası
-        </p>
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h1 class="fw-bold mb-1">Blog</h1>
+        <p class="mb-0 small" style="color:rgba(255,255,255,.8)">Sigorta dünyasından <strong><?= $totalAll ?> bilgilendirici yazı</strong></p>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="<?= u('/') ?>">Anasayfa</a></li>
+          <li class="breadcrumb-item active">Blog</li>
+        </ol></nav>
       </div>
-      <div class="col-lg-4 d-none d-lg-block text-end">
-        <i class="bi bi-journal-bookmark-fill" style="font-size:6rem;color:rgba(238,39,55,.25)"></i>
+      <div class="d-none d-md-block">
+        <i class="bi bi-journal-bookmark-fill" style="font-size:2.5rem;color:rgba(238,39,55,.5)"></i>
       </div>
     </div>
-    <nav aria-label="breadcrumb" class="mt-4"><ol class="breadcrumb mb-0">
-      <li class="breadcrumb-item"><a href="<?= u('/') ?>">Anasayfa</a></li>
-      <li class="breadcrumb-item active">Blog</li>
-    </ol></nav>
   </div>
 </section>
 

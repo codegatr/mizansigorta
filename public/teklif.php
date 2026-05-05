@@ -111,30 +111,21 @@ require MIZAN_INC . '/header.php';
 ?>
 
 <section class="mz-page-head">
-  <div class="container py-5">
-    <div class="row align-items-center g-4">
-      <div class="col-lg-8">
-        <span class="mz-script mz-script-md mz-script-red d-inline-block mb-2">Güven ve Özen İle</span>
-        <h1 class="display-5 fw-bold mb-2">Teklif Talebi Oluşturun</h1>
-        <p class="lead mb-3" style="color:rgba(255,255,255,.9);max-width:680px">
-          Bilgilerinizi paylaşın, anlaşmalı 12+ sigorta şirketinden size en uygun teklifleri karşılaştıralım.
-          <strong>Müsait temsilcimiz</strong> en kısa sürede telefonla iletişime geçerek size özel çözümü sunacaktır.
-        </p>
-        <div class="d-flex flex-wrap gap-2">
-          <span class="mz-trust-badge"><i class="bi bi-patch-check"></i> Lisanslı Acente</span>
-          <span class="mz-trust-badge"><i class="bi bi-shield-lock"></i> KVKK Uyumlu</span>
-          <span class="mz-trust-badge"><i class="bi bi-people"></i> Uzman Temsilci</span>
-          <span class="mz-trust-badge"><i class="bi bi-currency-exchange"></i> Bağlayıcılığı Yok</span>
-        </div>
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h1 class="fw-bold mb-1">Teklif Talebi Oluşturun</h1>
+        <p class="mb-0 small" style="color:rgba(255,255,255,.8)">Bilgilerinizi alalım, müsait temsilcimiz sizi arayarak en uygun teklifi sunsun.</p>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="<?= u('/') ?>">Anasayfa</a></li>
+          <li class="breadcrumb-item active">Teklif Talebi</li>
+        </ol></nav>
       </div>
-      <div class="col-lg-4 d-none d-lg-block text-end">
-        <i class="bi bi-headset" style="font-size:7rem;color:rgba(238,39,55,.25)"></i>
+      <div class="d-none d-md-flex flex-wrap gap-2">
+        <span class="mz-trust-badge"><i class="bi bi-patch-check"></i> Lisanslı Acente</span>
+        <span class="mz-trust-badge"><i class="bi bi-shield-lock"></i> KVKK Uyumlu</span>
       </div>
     </div>
-    <nav aria-label="breadcrumb" class="mt-4"><ol class="breadcrumb mb-0">
-      <li class="breadcrumb-item"><a href="<?= u('/') ?>">Anasayfa</a></li>
-      <li class="breadcrumb-item active">Teklif Talebi</li>
-    </ol></nav>
   </div>
 </section>
 
