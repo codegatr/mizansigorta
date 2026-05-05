@@ -118,7 +118,7 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
 
 <div class="mz-admin-main">
   <header class="mz-admin-topbar">
-    <button class="btn btn-sm btn-outline-light d-lg-none me-2" id="sidebarToggle" type="button"><i class="bi bi-list"></i></button>
+    <button class="btn btn-sm btn-outline-secondary d-lg-none me-2" id="sidebarToggle" type="button"><i class="bi bi-list"></i></button>
     <h5 class="mb-0 fw-bold"><?= e($adminTitle) ?></h5>
     <div class="ms-auto d-flex align-items-center gap-2">
 
@@ -153,11 +153,11 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
         <span class="mz-quick-divider d-none d-md-inline"></span>
       <?php endif; ?>
 
-      <span class="text-white-50 small d-none d-lg-inline"><i class="bi bi-clock"></i> <?= date('d.m.Y H:i') ?></span>
+      <span class="text-muted small d-none d-lg-inline" style="color:#6b7280!important"><i class="bi bi-clock"></i> <?= date('d.m.Y H:i') ?></span>
 
       <div class="dropdown">
-        <a class="text-white text-decoration-none dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" href="#" style="padding:.4rem .65rem">
-          <i class="bi bi-person-circle" style="font-size:1.2rem"></i>
+        <a class="text-decoration-none dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" href="#" style="padding:.4rem .65rem;color:var(--mz-navy)">
+          <i class="bi bi-person-circle" style="font-size:1.2rem;color:var(--mz-red)"></i>
           <span class="d-none d-md-inline small fw-semibold"><?= e($me['ad_soyad'] ?? 'Kullanıcı') ?></span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">

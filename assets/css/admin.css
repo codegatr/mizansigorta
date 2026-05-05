@@ -164,10 +164,10 @@ body.mz-admin { background: var(--mz-bg); font-family: 'Inter', system-ui, -appl
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: .42rem .7rem;
-    color: rgba(255,255,255,.92);
-    background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.16);
+    padding: .42rem .8rem;
+    color: #ffffff;
+    background: linear-gradient(135deg, #475569, #334155); /* slate koyu - notr */
+    border: 1px solid transparent;
     border-radius: 8px;
     text-decoration: none;
     font-size: .85rem;
@@ -175,6 +175,7 @@ body.mz-admin { background: var(--mz-bg); font-family: 'Inter', system-ui, -appl
     transition: all .15s ease;
     line-height: 1;
     white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(13, 27, 42, .12);
 }
 
 .mz-quick-btn i {
@@ -183,55 +184,60 @@ body.mz-admin { background: var(--mz-bg); font-family: 'Inter', system-ui, -appl
 }
 
 .mz-quick-btn:hover {
-    background: rgba(255,255,255,.18);
+    background: linear-gradient(135deg, #64748b, #475569);
     color: #ffffff;
-    border-color: rgba(255,255,255,.3);
     transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(13, 27, 42, .2);
 }
 
 .mz-quick-btn.active {
     background: linear-gradient(135deg, #e30b30, #a91020);
     color: #ffffff !important;
-    border-color: rgba(255,255,255,.25);
+    border-color: transparent;
     box-shadow: 0 4px 12px rgba(227, 11, 48, .35);
 }
 
-/* Akilli Guncelleme - solid sari + koyu navy text (okunur) */
+/* Akilli Guncelleme - sari accent */
 .mz-quick-btn-warning {
     background: linear-gradient(135deg, #f4d35e, #d4af37);
-    border-color: #d4af37;
+    border-color: transparent;
     color: #0d1b2a !important;
     font-weight: 700;
-    box-shadow: 0 2px 8px rgba(244, 211, 94, .25);
+    box-shadow: 0 3px 10px rgba(244, 211, 94, .35);
 }
 .mz-quick-btn-warning:hover {
     background: linear-gradient(135deg, #ffd966, #e6bf3f);
     color: #0d1b2a !important;
-    border-color: #ffd966;
-    box-shadow: 0 6px 18px rgba(244, 211, 94, .45);
+    box-shadow: 0 6px 16px rgba(244, 211, 94, .5);
     transform: translateY(-1px);
 }
 
-/* Cikis - solid kirmizi + beyaz text (okunur) */
+/* Cikis - kirmizi marka */
 .mz-quick-btn-danger {
     background: linear-gradient(135deg, #e30b30, #a91020);
-    border-color: #a91020;
+    border-color: transparent;
     color: #ffffff !important;
     font-weight: 700;
-    box-shadow: 0 2px 8px rgba(227, 11, 48, .25);
+    box-shadow: 0 3px 10px rgba(227, 11, 48, .3);
 }
 .mz-quick-btn-danger:hover {
     background: linear-gradient(135deg, #ff1f44, #c91328);
     color: #ffffff !important;
-    border-color: #ff1f44;
-    box-shadow: 0 6px 18px rgba(227, 11, 48, .5);
+    box-shadow: 0 6px 16px rgba(227, 11, 48, .45);
     transform: translateY(-1px);
 }
 
+/* Site (globe) - mavi accent ikon - ozel ikon rengi */
+.mz-quick-btn[href*="/"] i.bi-globe { color: #60a5fa; }
+.mz-quick-btn[href="kullanicilar.php"] i.bi-person-gear { color: #93c5fd; }
+.mz-quick-btn[href="ayarlar.php"] i.bi-gear { color: #cbd5e1; }
+.mz-quick-btn:hover i { color: #ffffff; }
+.mz-quick-btn.active i { color: #ffffff !important; }
+
 .mz-quick-divider {
     width: 1px;
-    height: 22px;
-    background: rgba(255,255,255,.18);
+    height: 26px;
+    background: rgba(13, 27, 42, .15);
     margin: 0 4px;
 }
 
