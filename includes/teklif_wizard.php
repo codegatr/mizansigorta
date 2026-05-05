@@ -131,8 +131,9 @@ foreach ($wizKategoriler as $k) {
           </div>
 
           <div class="mb-3">
-            <label class="form-label small fw-semibold mb-1">E-posta <span class="text-muted">(opsiyonel)</span></label>
-            <input type="email" id="wizEmail" class="form-control" placeholder="ornek@email.com">
+            <label class="form-label small fw-semibold mb-1">E-posta <span class="text-danger">*</span></label>
+            <input type="email" id="wizEmail" class="form-control" placeholder="ornek@email.com" required>
+            <small class="text-muted">Teklif sonucu ve süreç güncellemeleri bu adrese gönderilecek</small>
           </div>
 
           <div class="mb-3">
@@ -296,8 +297,10 @@ foreach ($wizKategoriler as $k) {
       ok = ad.length >= 3 && (state.tip === 'bireysel' || firma.length >= 2);
     } else if (state.step === 3) {
       const tel = document.getElementById('wizTel').value.replace(/\s/g, '');
+      const email = document.getElementById('wizEmail').value.trim();
       const kvkk = document.getElementById('wizKvkk').checked;
-      ok = tel.length >= 10 && kvkk;
+      const emailOk = email.length > 4 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      ok = tel.length >= 10 && emailOk && kvkk;
     }
     next.disabled = !ok;
     submit.disabled = !ok;

@@ -5,20 +5,18 @@
  * Sol alt kosede sabit floating WhatsApp butonu + acilan chat panel.
  * Tum public sayfalarda gorunur (footer.php ile include edilir).
  *
- * Whatsapp numarasi 'whatsapp' setting'inden gelir (uluslararasi format,
- * 'Ayarlar > Iletisim' bolumunden ayarlanabilir).
- *
- * Widget'in calismasi icin sayfada Bootstrap Icons CDN gerekir
- * (zaten header.php'de var).
+ * Whatsapp numarasi 'whatsapp' setting'inden gelir; otomatik
+ * uluslararasi formata cevrilir (0552... -> 905526943232).
  */
 if (defined('MZ_ADMIN')) return; // admin panelinde gosterme
 
 $wa = trim((string) setting('whatsapp', ''));
-if ($wa === '') return; // numara yoksa hic gosterme
+if ($wa === '') return;
 
-// Numarayi temizle: sadece rakam
-$waClean = preg_replace('/[^0-9]/', '', $wa);
-if ($waClean === '' || strlen($waClean) < 10) return;
+// Numara normalize (TR yerel format -> uluslararasi)
+// 0552 694 32 32 -> 905526943232 / 5526943232 -> 905526943232 / 905526943232 -> 905526943232
+$waClean = function_exists('normalize_phone') ? normalize_phone($wa) : preg_replace('/[^0-9]/', '', $wa);
+if (strlen($waClean) < 11) return; // gecerli numara yok
 
 // Karsilama mesaji
 $brand   = (string) setting('site_basligi', 'Mizan Sigorta');

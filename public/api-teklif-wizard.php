@@ -63,8 +63,8 @@ if ($tel === '' || strlen(preg_replace('/[^0-9]/', '', $tel)) < 10) {
     echo json_encode(['ok' => false, 'error' => 'Geçerli bir telefon numarası girin.']);
     exit;
 }
-if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    echo json_encode(['ok' => false, 'error' => 'Geçerli bir e-posta adresi girin.']);
+if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    echo json_encode(['ok' => false, 'error' => 'Geçerli bir e-posta adresi girin (süreç takibi için zorunlu).']);
     exit;
 }
 if (!$kvkk) {

@@ -16,7 +16,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $key = preg_replace('/[^a-z0-9_]/i', '', (string)$key);
             if ($key === '') continue;
             if (is_array($val)) $val = implode(',', $val);
-            setting_set($key, (string)$val);
+            $val = (string)$val;
+            // WhatsApp numarasi: otomatik uluslararasi formata cevir
+            // (kullanici 0552... veya 552... yazsa da DB'ye 905526943232 olarak yaz)
+            if ($key === 'whatsapp' && trim($val) !== '') {
+                $val = normalize_phone($val);
+            }
+            // Telefon ayarlari icin de standart format
+            if (in_array($key, ['telefon', 'telefon_2', 'gsm'], true) && trim($val) !== '') {
+                // Sadece rakam ve + bosluk birak (kullanici okunakli yazmis olabilir, koru)
+                // Ama 'telefon' gosterim icin, bozulmasin
+            }
+            setting_set($key, $val);
             $count++;
         }
         // Checkbox'lar gonderilmediginde 0 yapilmali

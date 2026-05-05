@@ -3084,3 +3084,21 @@ CREATE TABLE IF NOT EXISTS `mz_mail_log` (
 -- v1.1.31 - Kampanya gorsel upload + WhatsApp floating widget
 -- (sadece kod + dosya sistemi, SQL yok)
 -- ============================================================
+
+-- ============================================================
+-- v1.1.32 - BCC ayari iletisim grubuna tasi + WhatsApp normalize
+-- ============================================================
+
+-- Yunus 'BCC ayarini ayarlardan girebilmem gerek' dedi.
+-- Onceden grup='smtp' tabindaydi - Yunus 'iletisim' tabinda ariyor.
+-- Daha gorunur ve aciklayici hale getir.
+UPDATE `mz_ayarlar`
+   SET `grup` = 'iletisim',
+       `aciklama` = 'ÖNEMLİ: Sisteme gelen tüm form mailleri (teklif/hasar/iletişim/temsilci başvurusu) ve müşteri hatırlatmaları bu adrese BCC ile kopyalanır. Birden fazla adres için virgülle ayırın: ornek1@x.com, ornek2@y.com',
+       `tip` = 'textarea'
+ WHERE `anahtar` = 'talep_bildirim_bcc';
+
+-- WhatsApp ayar aciklamasini netlestir (0552... yazinca otomatik duzeltilir)
+UPDATE `mz_ayarlar`
+   SET `aciklama` = 'WhatsApp numarası. 0552 694 32 32 veya 5526943232 yazsanız da kayıt sırasında otomatik 905526943232 formatına çevrilir.'
+ WHERE `anahtar` = 'whatsapp';
