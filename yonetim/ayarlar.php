@@ -278,9 +278,77 @@ $renderField = function(array $r) {
           <p>Hatırlatma cron'unu otomatik çalıştırmak için</p>
         </div>
       </div>
-      <p class="small text-muted">Aşağıdaki komutu cPanel/DirectAdmin → Cron Jobs ekranına ekleyin (her gün saat 09:00):</p>
-      <div class="bg-dark text-white p-3 rounded font-monospace small mb-3" style="word-break:break-all"><?= e('wget -q -O- "' . SITE_BASE_URL . '/cron/teklif-hatirlatma.php?key=' . (setting('cron_anahtar') ?: 'ANAHTAR_BELIRLENMEDI') . '" > /dev/null 2>&1') ?></div>
-      <form method="post" class="d-inline" onsubmit="return confirm('Cron anahtarı yenilensin mi?\n\nMevcut cron komutunuzu güncellemeniz gerekecek.');">
+      <p class="small text-muted mb-3"><i class="bi bi-info-circle text-primary"></i> <strong>DirectAdmin → Advanced Features → Cron Jobs</strong> ekranını açın ve aşağıdaki bilgileri 6 alana yapıştırın (her gün saat 09:00'da çalıştırmak için):</p>
+
+      <?php
+      $cronUrl = SITE_BASE_URL . '/cron/teklif-hatirlatma.php?key=' . (setting('cron_anahtar') ?: 'ANAHTAR_BELIRLENMEDI');
+      $cronCmd = '/usr/bin/curl -s "' . $cronUrl . '" > /dev/null 2>&1';
+      $cronCmdAlt = 'wget -q -O- "' . $cronUrl . '" > /dev/null 2>&1';
+      ?>
+
+      <!-- DirectAdmin alan-bazli kart -->
+      <div class="card border-0 mb-3" style="background:#f8fafc;border:1px solid #e5e7eb !important;border-radius:10px">
+        <div class="card-body p-3">
+          <div class="small fw-bold text-uppercase text-muted mb-2" style="letter-spacing:.5px"><i class="bi bi-clock"></i> Zamanlama (DirectAdmin alanları)</div>
+          <table class="table table-sm mb-0" style="background:transparent">
+            <thead>
+              <tr style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.4px">
+                <th style="border:0">Minute</th>
+                <th style="border:0">Hour</th>
+                <th style="border:0">Day</th>
+                <th style="border:0">Month</th>
+                <th style="border:0">Day of Week</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="font-family:Monaco,monospace;font-size:14px;font-weight:700;color:#0d1b2a">
+                <td style="border:0;background:#fff;border-radius:6px;padding:8px 10px"><span title="Saatin 0. dakikası">0</span></td>
+                <td style="border:0;background:#fff;border-radius:6px;padding:8px 10px;margin-left:4px"><span title="Saat 09:00">9</span></td>
+                <td style="border:0;background:#fff;border-radius:6px;padding:8px 10px"><span title="Her ayın her günü">*</span></td>
+                <td style="border:0;background:#fff;border-radius:6px;padding:8px 10px"><span title="Her ay">*</span></td>
+                <td style="border:0;background:#fff;border-radius:6px;padding:8px 10px"><span title="Her gün">*</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="small text-muted mt-1" style="font-size:11.5px">
+            <i class="bi bi-lightbulb"></i> Bu zamanlama: <strong>her gün saat 09:00'da</strong> çalışır.
+            Saati değiştirmek için "Hour" değerini güncelleyin (örn: 10:00 için 10, 14:30 için Minute=30, Hour=14).
+          </div>
+        </div>
+      </div>
+
+      <!-- Komut alani (kopyalama butonlu) -->
+      <div class="mb-2 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="small fw-bold text-uppercase text-muted" style="letter-spacing:.5px"><i class="bi bi-terminal"></i> Komut (Command alanı)</div>
+        <small class="text-success"><i class="bi bi-check-circle-fill"></i> Önerilen: <strong>curl</strong> (DirectAdmin'de daha güvenilir)</small>
+      </div>
+      <div class="position-relative mb-3">
+        <pre class="bg-dark text-white p-3 rounded font-monospace small mb-0" style="word-break:break-all;white-space:pre-wrap;font-size:12.5px;line-height:1.6" id="cronCmdBox"><?= e($cronCmd) ?></pre>
+        <button type="button" class="btn btn-sm btn-light position-absolute top-0 end-0 m-2" onclick="navigator.clipboard.writeText(document.getElementById('cronCmdBox').textContent).then(()=>{this.innerHTML='<i class=\'bi bi-check\'></i> Kopyalandı';setTimeout(()=>this.innerHTML='<i class=\'bi bi-clipboard\'></i> Kopyala',2000)})" style="font-size:11px"><i class="bi bi-clipboard"></i> Kopyala</button>
+      </div>
+
+      <!-- Alternatif: wget -->
+      <details class="mb-3">
+        <summary class="small text-muted" style="cursor:pointer"><i class="bi bi-chevron-right"></i> Alternatif: <code>wget</code> komutu (curl çalışmazsa)</summary>
+        <div class="position-relative mt-2">
+          <pre class="bg-dark text-white p-3 rounded font-monospace small mb-0" style="word-break:break-all;white-space:pre-wrap;font-size:12.5px;line-height:1.6" id="cronCmdAlt"><?= e($cronCmdAlt) ?></pre>
+          <button type="button" class="btn btn-sm btn-light position-absolute top-0 end-0 m-2" onclick="navigator.clipboard.writeText(document.getElementById('cronCmdAlt').textContent).then(()=>{this.innerHTML='<i class=\'bi bi-check\'></i> Kopyalandı';setTimeout(()=>this.innerHTML='<i class=\'bi bi-clipboard\'></i> Kopyala',2000)})" style="font-size:11px"><i class="bi bi-clipboard"></i> Kopyala</button>
+        </div>
+      </details>
+
+      <!-- DirectAdmin adim-adim ipucu -->
+      <div class="alert alert-info small mb-3" style="border-left:4px solid #0d6efd;background:#eff6ff">
+        <strong><i class="bi bi-question-circle"></i> DirectAdmin'de nereye eklenecek?</strong>
+        <ol class="mb-0 mt-1" style="padding-left:1.4rem;font-size:13px">
+          <li>DirectAdmin'e giriş yapın</li>
+          <li>Sol menü <strong>"Advanced Features"</strong> → <strong>"Cron Jobs"</strong></li>
+          <li>Yukarıdaki 5 zaman alanını (0, 9, *, *, *) doldurun</li>
+          <li>Komut kutusuna yukarıdaki <code>curl ...</code> komutunu yapıştırın</li>
+          <li><strong>"Add"</strong> butonuna tıklayın → İşlem tamam ✓</li>
+        </ol>
+      </div>
+
+      <form method="post" class="d-inline" onsubmit="return confirm('Cron anahtarı yenilensin mi?\n\nMevcut cron komutunuzu güncellemeniz gerekecek (yeni anahtarla yukarıdaki komutu DirectAdmin\'de tekrar oluşturun).');">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="cron_yenile">
         <button class="btn btn-warning btn-sm fw-semibold"><i class="bi bi-arrow-repeat"></i> Cron Anahtarını Yenile</button>
