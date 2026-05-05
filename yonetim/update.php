@@ -284,9 +284,24 @@ function upd_runMigrations(): array
     foreach ($statements as $st) {
         if ($st === '' || stripos($st, 'DELIMITER') === 0) continue;
         try {
-            db()->exec($st);
+            // SET @x := (SELECT ...), SHOW, SELECT gibi result-set doneren statement'lar
+            // db()->exec() ile cursor acik kalabiliyor (unbuffered hatasi).
+            // Cozum: prepare + execute + closeCursor (tum result'lari tuket)
+            $stmt = db()->prepare($st);
+            $stmt->execute();
+            // Birden fazla result set olabilir (SET ... := SELECT, CALL vb)
+            do {
+                $stmt->fetchAll();
+            } while ($stmt->nextRowset());
+            $stmt->closeCursor();
+            unset($stmt);
             $ok++;
         } catch (Throwable $e) {
+            // closeCursor exception'i yutmasin
+            if (isset($stmt) && $stmt instanceof PDOStatement) {
+                try { $stmt->closeCursor(); } catch (Throwable $ignored) {}
+                unset($stmt);
+            }
             $msg = $e->getMessage();
             $ignored = false;
             foreach ($ignorablePatterns as $pat) {

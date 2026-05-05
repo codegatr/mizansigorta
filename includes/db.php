@@ -21,10 +21,11 @@ function db(): PDO
     $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', DB_HOST, DB_NAME, DB_CHARSET);
     try {
         $pdo = new PDO($dsn, DB_USER, DB_PASS, [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES " . DB_CHARSET . " COLLATE utf8mb4_unicode_ci, time_zone='+03:00'",
+            PDO::ATTR_ERRMODE              => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE   => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES     => false,
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+            PDO::MYSQL_ATTR_INIT_COMMAND   => "SET NAMES " . DB_CHARSET . " COLLATE utf8mb4_unicode_ci, time_zone='+03:00'",
         ]);
         return $pdo;
     } catch (PDOException $e) {
@@ -48,6 +49,7 @@ function db_row(string $sql, array $params = []): ?array
     $st = db()->prepare($sql);
     $st->execute($params);
     $r = $st->fetch();
+    $st->closeCursor();
     return $r ?: null;
 }
 
@@ -56,7 +58,9 @@ function db_value(string $sql, array $params = [])
 {
     $st = db()->prepare($sql);
     $st->execute($params);
-    return $st->fetchColumn();
+    $v = $st->fetchColumn();
+    $st->closeCursor();
+    return $v;
 }
 
 /** Coklu satir donduren kisayol */
@@ -64,7 +68,9 @@ function db_all(string $sql, array $params = []): array
 {
     $st = db()->prepare($sql);
     $st->execute($params);
-    return $st->fetchAll() ?: [];
+    $r = $st->fetchAll() ?: [];
+    $st->closeCursor();
+    return $r;
 }
 
 /** Insert/update/delete; etkilenen satir sayisini doner */
@@ -72,7 +78,9 @@ function db_exec(string $sql, array $params = []): int
 {
     $st = db()->prepare($sql);
     $st->execute($params);
-    return $st->rowCount();
+    $n = $st->rowCount();
+    $st->closeCursor();
+    return $n;
 }
 
 /** Son insert id */
