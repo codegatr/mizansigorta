@@ -85,3 +85,19 @@
     });
   }
 })();
+
+/* ===== Scroll to Top ===== */
+(function () {
+  var btn = document.getElementById('mzScrollTop');
+  if (!btn) return;
+  var visibleAt = 320;
+  function onScroll() {
+    if (window.pageYOffset > visibleAt) btn.classList.add('is-visible');
+    else btn.classList.remove('is-visible');
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  btn.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  onScroll();
+})();

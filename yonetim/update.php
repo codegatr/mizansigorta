@@ -341,6 +341,54 @@ if (isset($_GET['ajax'])) {
     $token = upd_token();
 
     try {
+        // ---- diagnostics ----
+        if ($aj === 'diagnostics') {
+            $checks = [];
+            // PHP version
+            $checks[] = ['name' => 'PHP sürümü', 'ok' => version_compare(PHP_VERSION, '8.1.0', '>='), 'detail' => PHP_VERSION . (version_compare(PHP_VERSION, '8.1.0', '>=') ? ' (yeterli)' : ' (8.1+ gerekli)')];
+            // Required extensions
+            foreach (['curl', 'pdo_mysql', 'zip', 'mbstring', 'json', 'openssl'] as $ext) {
+                $checks[] = ['name' => "PHP eklentisi: $ext", 'ok' => extension_loaded($ext), 'detail' => extension_loaded($ext) ? 'yüklü' : 'YOK — hosting destek isteyin'];
+            }
+            // ZipArchive class
+            $checks[] = ['name' => 'ZipArchive sınıfı', 'ok' => class_exists('ZipArchive'), 'detail' => class_exists('ZipArchive') ? 'mevcut' : 'eksik'];
+            // Klasor izinleri
+            foreach (['MIZAN_ROOT' => MIZAN_ROOT, 'backups/' => MIZAN_ROOT . '/backups', 'uploads/' => MIZAN_ROOT . '/uploads', 'config/' => MIZAN_ROOT . '/config'] as $label => $path) {
+                $exists = is_dir($path);
+                $writable = $exists && is_writable($path);
+                $checks[] = [
+                    'name' => "Klasör: $label",
+                    'ok' => $writable,
+                    'detail' => !$exists ? 'YOK (oluşturulmalı)' : ($writable ? 'yazılabilir' : 'YAZILAMIYOR (izin: ' . substr(sprintf('%o', @fileperms($path)), -4) . ')')
+                ];
+            }
+            // manifest.json
+            $manExists = is_file(MIZAN_ROOT . '/manifest.json');
+            $checks[] = ['name' => 'manifest.json', 'ok' => $manExists, 'detail' => $manExists ? 'sürüm: ' . upd_localVer() : 'YOK'];
+            // migration.sql
+            $migExists = is_file(MIZAN_ROOT . '/migration.sql');
+            $migSize = $migExists ? filesize(MIZAN_ROOT . '/migration.sql') : 0;
+            $checks[] = ['name' => 'migration.sql', 'ok' => $migExists, 'detail' => $migExists ? upd_humanSize((int)$migSize) : 'YOK'];
+            // GitHub token
+            $tokOk = (bool)$token;
+            $checks[] = ['name' => 'GitHub Token', 'ok' => $tokOk, 'detail' => $tokOk ? 'tanımlı (' . substr($token, 0, 8) . '...)' : 'TANIMLI DEĞİL — Ayarlar sekmesi'];
+            // GitHub API erisimi
+            if ($tokOk) {
+                $r = upd_ghAPI('/repos/' . $GLOBALS['repoFull'], $token);
+                $checks[] = ['name' => 'GitHub API erişimi', 'ok' => (bool)$r, 'detail' => $r ? 'OK (repo: ' . ($r['full_name'] ?? '?') . ')' : 'API çağrısı başarısız'];
+            }
+            // DB baglantisi
+            $dbOk = false;
+            try { db_value('SELECT 1'); $dbOk = true; } catch (\Throwable $e) {}
+            $checks[] = ['name' => 'Veritabanı bağlantısı', 'ok' => $dbOk, 'detail' => $dbOk ? 'OK' : 'BAŞARISIZ — config/config.php DB ayarlarını kontrol edin'];
+            // SITE_BASE_URL
+            $checks[] = ['name' => 'SITE_BASE_URL', 'ok' => true, 'detail' => SITE_BASE_URL];
+
+            $totalOk = count(array_filter($checks, fn($c) => $c['ok']));
+            echo json_encode(['ok' => true, 'checks' => $checks, 'total' => count($checks), 'passed' => $totalOk]);
+            exit;
+        }
+
         // ---- status ----
         if ($aj === 'status') {
             if (!$token) { echo json_encode(['ok' => false, 'error' => 'GitHub token tanımlı değil. Ayarlar sekmesinden ekleyin.']); exit; }
@@ -639,6 +687,7 @@ $localVersion = upd_localVer();
   <button class="upd-tab" data-tab="commits"><i class="bi bi-git"></i> Commits</button>
   <button class="upd-tab" data-tab="backups"><i class="bi bi-archive"></i> Yedekler</button>
   <button class="upd-tab" data-tab="database"><i class="bi bi-database"></i> Veritabanı</button>
+  <button class="upd-tab" data-tab="diagnostics"><i class="bi bi-heart-pulse"></i> Tanılama</button>
   <button class="upd-tab" data-tab="settings"><i class="bi bi-gear"></i> Ayarlar</button>
 </div>
 
@@ -756,7 +805,36 @@ $localVersion = upd_localVer();
   </div>
 </div>
 
-<!-- ============== TAB 6: AYARLAR ============== -->
+<!-- ============== TAB 6: TANILAMA ============== -->
+<div class="upd-pane" id="upd-diagnostics">
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h6 class="fw-bold mb-1"><i class="bi bi-heart-pulse text-warning"></i> Sistem Sağlık Kontrolü</h6>
+          <p class="small text-muted mb-0">Güncelleme sisteminin çalışması için gereken tüm bileşenleri kontrol eder. Bir sorun varsa kırmızı satır gösterilir.</p>
+        </div>
+        <button class="btn btn-warning fw-semibold" onclick="updDiag()" data-no-spinner><i class="bi bi-arrow-clockwise"></i> Kontrolü Çalıştır</button>
+      </div>
+      <div id="diagResult" class="small text-muted">Kontrolü çalıştırmak için yukarıdaki butona basın.</div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h6 class="fw-bold mb-2"><i class="bi bi-life-preserver text-warning"></i> Sık Karşılaşılan Sorunlar</h6>
+      <ul class="small mb-0">
+        <li><b>"Yedek alınamadı"</b> → <code>backups/</code> klasörü yok veya yazma izni yok. Bu klasör paket çıkarımı sonrası bootstrap tarafından otomatik oluşturulur, ama hosting izinleri sınırlı olabilir. DA File Manager'dan klasör izinlerini <code>755</code> yapın.</li>
+        <li><b>"Token yok / 401"</b> → Ayarlar sekmesinden GitHub Personal Access Token girin (<code>repo</code> yetkisi yeter).</li>
+        <li><b>"Repo ağacı okunamadı"</b> → Token süresi dolmuş veya yetki yetersiz. <a href="https://github.com/settings/tokens" target="_blank">Yeni token üretin</a>.</li>
+        <li><b>"cURL eklentisi yok"</b> → Hosting destek ekibinden cURL aktivasyonu isteyin.</li>
+        <li><b>Root taşıma sonrası</b> → Eski <code>/v2/backups</code> klasörünü unutmayın, gerekirse manuel oluşturun. <code>config/config.php</code>'de <code>SITE_BASE_URL</code> doğru mu (<code>/v2</code> yok)?</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============== TAB 7: AYARLAR ============== -->
 <div class="upd-pane" id="upd-settings">
   <div class="row g-3">
     <div class="col-md-7">
@@ -803,7 +881,7 @@ $localVersion = upd_localVer();
 (function () {
   'use strict';
 
-  const TABS = ['overview', 'files', 'commits', 'backups', 'database', 'settings'];
+  const TABS = ['overview', 'files', 'commits', 'backups', 'database', 'diagnostics', 'settings'];
   document.querySelectorAll('.upd-tab').forEach(b => {
     b.addEventListener('click', () => {
       document.querySelectorAll('.upd-tab').forEach(x => x.classList.remove('on'));
@@ -978,6 +1056,32 @@ $localVersion = upd_localVer();
     }
     txt += '\n\n' + (r.ok ? '✓ TAMAMLANDI' : '✗ HATALAR VAR');
     log.textContent = txt;
+  };
+
+  // ---- Diagnostics tab ----
+  window.updDiag = async function () {
+    const box = document.getElementById('diagResult');
+    box.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Kontroller çalıştırılıyor...';
+    try {
+      const r = await updFetch('diagnostics');
+      if (!r.ok) { box.innerHTML = '<span class="text-danger">Hata: ' + (r.error || '?') + '</span>'; return; }
+      const allOk = r.passed === r.total;
+      let html = '<div class="alert ' + (allOk ? 'alert-success' : 'alert-warning') + ' small mb-3">'
+        + '<b><i class="bi bi-' + (allOk ? 'check-circle' : 'exclamation-triangle') + '"></i> ' + r.passed + ' / ' + r.total + '</b> kontrol başarılı'
+        + (allOk ? '. Sistem güncelleme için hazır.' : '. Aşağıdaki kırmızı satırları gözden geçirin.')
+        + '</div>'
+        + '<table class="table table-sm mb-0"><tbody>';
+      r.checks.forEach(c => {
+        const ic = c.ok ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>';
+        html += '<tr><td style="width:30px">' + ic + '</td>'
+          + '<td><b>' + c.name + '</b></td>'
+          + '<td class="' + (c.ok ? 'text-muted' : 'text-danger fw-semibold') + '">' + c.detail + '</td></tr>';
+      });
+      html += '</tbody></table>';
+      box.innerHTML = html;
+    } catch (e) {
+      box.innerHTML = '<span class="text-danger">Hata: ' + e.message + '</span>';
+    }
   };
 
   // ---- Settings tab ----
