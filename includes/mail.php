@@ -319,6 +319,28 @@ function teklif_durum_bildirim_gonder(int $teklifId, string $yeniDurum): bool
  *                            'badge'       => string  - ust sag rozet (or. "YENI TEKLIF")
  *                            'badge_color' => string  - rozet bg rengi
  */
+
+/**
+ * Kurumsal HTML e-posta sablonu - Outlook-safe + yatay duzen
+ *
+ * Outlook 2007/2010/2013/2016/2019/365 icin uyumlu:
+ * - SVG yok (PNG/emoji/HTML entity)
+ * - Linear-gradient yok (MSO VML fallback)
+ * - Box-shadow yok
+ * - Modern CSS yok (table-based layout)
+ * - Sistem fontlar (Arial, Helvetica, Verdana, Georgia, Tahoma)
+ * - bgcolor attribute fallback
+ * - mso-line-height-rule, mso-table-lspace
+ *
+ * @param string $title    Mail basligi (sadece <title>'da)
+ * @param string $bodyHtml Ana icerik HTML
+ * @param array  $opts     Opsiyonlar:
+ *                            'preheader'   => string  - inbox onizleme
+ *                            'cta_text'    => string  - buton metni
+ *                            'cta_url'     => string  - buton link
+ *                            'badge'       => string  - rozet (or. "YENI TEKLIF")
+ *                            'badge_color' => string  - rozet bg (#22c55e gibi)
+ */
 function mail_template(string $title, string $bodyHtml, array $opts = []): string
 {
     $brand      = e(setting('firma_adi', SITE_NAME));
@@ -333,218 +355,252 @@ function mail_template(string $title, string $bodyHtml, array $opts = []): strin
     $teklifUrl  = $web . '/teklif-al';
     $hasarUrl   = $web . '/hasar-ihbari';
 
-    $preheader = e((string)($opts['preheader'] ?? 'Mizan Sigorta — 12+ anlaşmalı şirket arasında en uygun teminat'));
+    $preheader = e((string)($opts['preheader'] ?? 'Mizan Sigorta - 12+ anlasmali sirket arasinda en uygun teminat'));
     $ctaText   = (string)($opts['cta_text'] ?? '');
     $ctaUrl    = (string)($opts['cta_url'] ?? '');
     $badge     = (string)($opts['badge'] ?? '');
     $badgeBg   = (string)($opts['badge_color'] ?? '#22c55e');
 
-    // Sosyal medya icon'lari (SVG inline - mail-safe)
-    $socialIcons = [
-        'facebook'  => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>',
-        'instagram' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>',
-        'twitter'   => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
-        'linkedin'  => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>',
-        'youtube'   => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>',
-    ];
-
-    $socials = [];
-    foreach (['facebook', 'instagram', 'twitter', 'linkedin', 'youtube'] as $key) {
+    // Sosyal medya - text linkler (Outlook'ta SVG render olmaz)
+    $socialNames = ['facebook' => 'Facebook', 'instagram' => 'Instagram', 'twitter' => 'X (Twitter)', 'linkedin' => 'LinkedIn', 'youtube' => 'YouTube'];
+    $socialHtml = '';
+    foreach ($socialNames as $key => $label) {
         if ($u = trim((string) setting($key))) {
-            $socials[] = ['url' => e($u), 'icon' => $socialIcons[$key] ?? '', 'label' => ucfirst($key)];
+            $socialHtml .= '<a href="' . e($u) . '" style="color:#cbd5e1;text-decoration:none;font-size:12px;font-weight:600;padding:6px 12px;background:#1b263b;border-radius:4px;margin:0 3px;display:inline-block">' . e($label) . '</a>';
         }
     }
-    $socialHtml = '';
-    foreach ($socials as $s) {
-        $socialHtml .= '<a href="' . $s['url'] . '" style="display:inline-block;width:36px;height:36px;line-height:36px;border-radius:50%;background:rgba(255,255,255,.08);color:#9ca3af;text-align:center;text-decoration:none;margin:0 4px;vertical-align:middle" title="' . e($s['label']) . '">' . $s['icon'] . '</a>';
-    }
+    if (!$socialHtml) $socialHtml = '<span style="color:#64748b;font-size:11px">Sosyal medya hesaplari yakinda</span>';
 
-    // CTA buton (varsa)
+    // CTA buton (Outlook bulletproof - VML)
     $ctaHtml = '';
     if ($ctaText !== '' && $ctaUrl !== '') {
-        $ctaHtml = '<table cellpadding="0" cellspacing="0" border="0" style="margin:28px 0"><tr><td>'
-                 . '<a href="' . e($ctaUrl) . '" style="display:inline-block;background:linear-gradient(135deg,#e30b30 0%,#a91020 100%);color:#ffffff;padding:16px 36px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:.3px;box-shadow:0 4px 14px rgba(227,11,48,.35)">'
-                 . e($ctaText) . ' &rarr;</a></td></tr></table>';
+        $ctaText = e($ctaText);
+        $ctaUrlE = e($ctaUrl);
+        $ctaHtml = <<<CTA
+<table cellpadding="0" cellspacing="0" border="0" style="margin:24px 0">
+  <tr><td align="left">
+    <!--[if mso]>
+    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{$ctaUrlE}" style="height:48px;v-text-anchor:middle;width:240px;" arcsize="17%" stroke="f" fillcolor="#e30b30">
+      <w:anchorlock/>
+      <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">{$ctaText}</center>
+    </v:roundrect>
+    <![endif]-->
+    <!--[if !mso]><!-- -->
+    <a href="{$ctaUrlE}" style="background:#e30b30;color:#ffffff;padding:14px 32px;text-decoration:none;font-weight:bold;font-size:15px;border-radius:6px;display:inline-block;font-family:Arial,Helvetica,sans-serif">{$ctaText} &rarr;</a>
+    <!--<![endif]-->
+  </td></tr>
+</table>
+CTA;
     }
 
-    // Badge (rozet)
+    // Badge (Outlook'ta basit rozet)
     $badgeHtml = '';
     if ($badge !== '') {
-        $badgeHtml = '<table cellpadding="0" cellspacing="0" border="0"><tr><td style="background:' . e($badgeBg) . ';color:#ffffff;padding:7px 16px;border-radius:100px;font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;box-shadow:0 2px 8px rgba(0,0,0,.18)">&#10004; ' . e($badge) . '</td></tr></table>';
+        $badgeBgE = e($badgeBg);
+        $badgeE = e($badge);
+        $badgeHtml = '<table cellpadding="0" cellspacing="0" border="0" align="right"><tr><td bgcolor="' . $badgeBgE . '" style="background:' . $badgeBgE . ';padding:7px 14px;font-family:Arial,sans-serif;font-size:11px;font-weight:bold;color:#ffffff;letter-spacing:.8px;text-transform:uppercase;border-radius:4px">' . $badgeE . '</td></tr></table>';
     }
 
-    // Iletisim bloğu (kart sıralı)
-    $iletisimCards = '';
+    // Iletisim 3-sutun yatay grid (Outlook table)
+    $telClean = preg_replace('/[^0-9+]/', '', $tel);
+    $iletisimRow = '<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>';
+
     if ($tel) {
-        $telClean = preg_replace('/[^0-9+]/', '', $tel);
-        $iletisimCards .= '<td style="padding:8px;width:33.33%;vertical-align:top">'
-            . '<a href="tel:' . $telClean . '" style="display:block;text-decoration:none;color:inherit">'
-            .   '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center"><tr><td>'
-            .     '<div style="width:40px;height:40px;line-height:40px;border-radius:50%;background:linear-gradient(135deg,#e30b30,#a91020);color:#ffffff;font-size:18px;margin:0 auto 8px">&#9742;</div>'
-            .     '<div style="font-size:10px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-bottom:4px">Telefon</div>'
-            .     '<div style="font-size:13px;color:#0d1b2a;font-weight:700">' . $tel . '</div>'
-            .   '</td></tr></table>'
-            . '</a></td>';
+        $iletisimRow .= '<td valign="top" align="center" width="33%" style="padding:8px;width:33.33%">'
+            . '<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px"><tr><td align="center" style="padding:14px 8px">'
+            .   '<table cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#e30b30" style="background:#e30b30;width:36px;height:36px;border-radius:50%;text-align:center;color:#ffffff;font-size:18px;font-family:Arial,sans-serif" align="center">&#9742;</td></tr></table>'
+            .   '<div style="font-family:Arial,sans-serif;font-size:10px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:bold;margin-top:8px">Telefon</div>'
+            .   '<a href="tel:' . $telClean . '" style="font-family:Arial,sans-serif;font-size:13px;color:#0d1b2a;font-weight:bold;text-decoration:none;display:block;margin-top:3px">' . $tel . '</a>'
+            . '</td></tr></table></td>';
     }
+
     if ($whatsapp && strlen($whatsapp) >= 11) {
-        $iletisimCards .= '<td style="padding:8px;width:33.33%;vertical-align:top">'
-            . '<a href="https://wa.me/' . $whatsapp . '" style="display:block;text-decoration:none;color:inherit">'
-            .   '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center"><tr><td>'
-            .     '<div style="width:40px;height:40px;line-height:40px;border-radius:50%;background:linear-gradient(135deg,#25d366,#128c7e);color:#ffffff;font-size:18px;margin:0 auto 8px;font-weight:700">W</div>'
-            .     '<div style="font-size:10px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-bottom:4px">WhatsApp</div>'
-            .     '<div style="font-size:13px;color:#0d1b2a;font-weight:700">Hemen Yaz</div>'
-            .   '</td></tr></table>'
-            . '</a></td>';
+        $iletisimRow .= '<td valign="top" align="center" width="33%" style="padding:8px;width:33.33%">'
+            . '<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px"><tr><td align="center" style="padding:14px 8px">'
+            .   '<table cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#25d366" style="background:#25d366;width:36px;height:36px;border-radius:50%;text-align:center;color:#ffffff;font-size:18px;font-weight:bold;font-family:Arial,sans-serif" align="center">W</td></tr></table>'
+            .   '<div style="font-family:Arial,sans-serif;font-size:10px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:bold;margin-top:8px">WhatsApp</div>'
+            .   '<a href="https://wa.me/' . $whatsapp . '" style="font-family:Arial,sans-serif;font-size:13px;color:#0d1b2a;font-weight:bold;text-decoration:none;display:block;margin-top:3px">Hemen Yaz</a>'
+            . '</td></tr></table></td>';
     }
+
     if ($email) {
-        $iletisimCards .= '<td style="padding:8px;width:33.33%;vertical-align:top">'
-            . '<a href="mailto:' . $email . '" style="display:block;text-decoration:none;color:inherit">'
-            .   '<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;text-align:center"><tr><td>'
-            .     '<div style="width:40px;height:40px;line-height:40px;border-radius:50%;background:linear-gradient(135deg,#0d6efd,#0a58ca);color:#ffffff;font-size:18px;margin:0 auto 8px">&#9993;</div>'
-            .     '<div style="font-size:10px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:700;margin-bottom:4px">E-posta</div>'
-            .     '<div style="font-size:12px;color:#0d1b2a;font-weight:700;word-break:break-all">' . $email . '</div>'
-            .   '</td></tr></table>'
-            . '</a></td>';
+        $iletisimRow .= '<td valign="top" align="center" width="33%" style="padding:8px;width:33.33%">'
+            . '<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="background:#ffffff;border:1px solid #e5e7eb;border-radius:6px"><tr><td align="center" style="padding:14px 8px">'
+            .   '<table cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#0d6efd" style="background:#0d6efd;width:36px;height:36px;border-radius:50%;text-align:center;color:#ffffff;font-size:18px;font-family:Arial,sans-serif" align="center">&#9993;</td></tr></table>'
+            .   '<div style="font-family:Arial,sans-serif;font-size:10px;color:#6b7280;letter-spacing:.5px;text-transform:uppercase;font-weight:bold;margin-top:8px">E-posta</div>'
+            .   '<a href="mailto:' . $email . '" style="font-family:Arial,sans-serif;font-size:11.5px;color:#0d1b2a;font-weight:bold;text-decoration:none;display:block;margin-top:3px;word-break:break-all">' . $email . '</a>'
+            . '</td></tr></table></td>';
     }
 
-    // Trust badges (guven simgeleri)
-    $trustHtml = '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px"><tr>'
-        . '<td align="center" style="padding:6px 4px"><div style="font-size:18px;color:#f4d35e;line-height:1">&#9733;</div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-top:2px">12+ Şirket</div></td>'
-        . '<td align="center" style="padding:6px 4px"><div style="font-size:18px;color:#f4d35e;line-height:1">&#10004;</div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-top:2px">KVKK Uyumlu</div></td>'
-        . '<td align="center" style="padding:6px 4px"><div style="font-size:18px;color:#f4d35e;line-height:1">&#128274;</div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-top:2px">Güvenli</div></td>'
-        . '<td align="center" style="padding:6px 4px"><div style="font-size:18px;color:#f4d35e;line-height:1">&#9200;</div><div style="font-size:10px;color:#9ca3af;font-weight:600;margin-top:2px">7/24 Destek</div></td>'
+    $iletisimRow .= '</tr></table>';
+
+    // Trust bar - 4 sutun (Outlook table-based)
+    $trustHtml = '<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>'
+        . '<td align="center" valign="top" width="25%" style="padding:0 4px"><div style="font-family:Arial,sans-serif;font-size:18px;color:#f4d35e;line-height:1;font-weight:bold">&#9733;</div><div style="font-family:Arial,sans-serif;font-size:10px;color:#9ca3af;font-weight:bold;margin-top:4px;letter-spacing:.3px">12+ SIRKET</div></td>'
+        . '<td align="center" valign="top" width="25%" style="padding:0 4px"><div style="font-family:Arial,sans-serif;font-size:18px;color:#f4d35e;line-height:1;font-weight:bold">&#10004;</div><div style="font-family:Arial,sans-serif;font-size:10px;color:#9ca3af;font-weight:bold;margin-top:4px;letter-spacing:.3px">KVKK UYUMLU</div></td>'
+        . '<td align="center" valign="top" width="25%" style="padding:0 4px"><div style="font-family:Arial,sans-serif;font-size:18px;color:#f4d35e;line-height:1;font-weight:bold">&#128274;</div><div style="font-family:Arial,sans-serif;font-size:10px;color:#9ca3af;font-weight:bold;margin-top:4px;letter-spacing:.3px">GUVENLI</div></td>'
+        . '<td align="center" valign="top" width="25%" style="padding:0 4px"><div style="font-family:Arial,sans-serif;font-size:18px;color:#f4d35e;line-height:1;font-weight:bold">&#9200;</div><div style="font-family:Arial,sans-serif;font-size:10px;color:#9ca3af;font-weight:bold;margin-top:4px;letter-spacing:.3px">7/24 DESTEK</div></td>'
         . '</tr></table>';
 
-    // Sigorta tipleri footer linkleri
-    $urunLinks = '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>'
-        . '<td align="center" style="font-size:11px;line-height:1.8;color:#6b7280">'
-        .   '<a href="' . $web . '/urun/kasko" style="color:#6b7280;text-decoration:none;margin:0 6px">Kasko</a> &middot; '
-        .   '<a href="' . $web . '/urun/trafik-zorunlu-sorumluluk" style="color:#6b7280;text-decoration:none;margin:0 6px">Trafik</a> &middot; '
-        .   '<a href="' . $web . '/urun/konut-sigortasi" style="color:#6b7280;text-decoration:none;margin:0 6px">Konut</a> &middot; '
-        .   '<a href="' . $web . '/urun/dask" style="color:#6b7280;text-decoration:none;margin:0 6px">DASK</a> &middot; '
-        .   '<a href="' . $web . '/urun/ozel-saglik-sigortasi" style="color:#6b7280;text-decoration:none;margin:0 6px">Sağlık</a>'
-        . '</td>'
-        . '</tr></table>';
+    // Sigorta turleri footer linkleri
+    $urunLinks = '<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="font-family:Arial,sans-serif;font-size:11px;line-height:1.8;color:#9ca3af">'
+        . '<a href="' . $web . '/urun/kasko" style="color:#9ca3af;text-decoration:none;margin:0 6px">Kasko</a> | '
+        . '<a href="' . $web . '/urun/trafik-zorunlu-sorumluluk" style="color:#9ca3af;text-decoration:none;margin:0 6px">Trafik</a> | '
+        . '<a href="' . $web . '/urun/konut-sigortasi" style="color:#9ca3af;text-decoration:none;margin:0 6px">Konut</a> | '
+        . '<a href="' . $web . '/urun/dask" style="color:#9ca3af;text-decoration:none;margin:0 6px">DASK</a> | '
+        . '<a href="' . $web . '/urun/ozel-saglik-sigortasi" style="color:#9ca3af;text-decoration:none;margin:0 6px">Saglik</a>'
+        . '</td></tr></table>';
 
     return <<<HTML
-<!DOCTYPE html>
-<html lang="tr">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="tr">
 <head>
-<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="x-apple-disable-message-reformatting">
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
 <meta name="color-scheme" content="light only">
 <title>{$title}</title>
-<!--[if mso]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
-<style>
-@media screen and (max-width:600px){
-  .mz-pad{padding:24px 20px !important}
-  .mz-hero-pad{padding:32px 24px !important}
-  .mz-hero-title{font-size:22px !important}
-  .mz-iletisim-cards td{display:block !important;width:100% !important;padding:6px 0 !important}
-  .mz-cta a{font-size:14px !important;padding:14px 24px !important}
-}
+<!--[if gte mso 9]>
+<xml>
+  <o:OfficeDocumentSettings>
+    <o:AllowPNG/>
+    <o:PixelsPerInch>96</o:PixelsPerInch>
+  </o:OfficeDocumentSettings>
+</xml>
+<![endif]-->
+<!--[if mso]>
+<style type="text/css">
+  table, td, div, p, a { font-family: Arial, Helvetica, sans-serif !important; }
+  .mz-hero-title { font-family: 'Georgia', 'Times New Roman', serif !important; }
+</style>
+<![endif]-->
+<style type="text/css">
+  body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+  img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+  body { margin: 0 !important; padding: 0 !important; width: 100% !important; min-width: 100% !important; }
+  @media screen and (max-width: 700px) {
+    .mz-container { width: 100% !important; max-width: 100% !important; }
+    .mz-pad { padding: 24px 20px !important; }
+    .mz-hero-pad { padding: 28px 24px !important; }
+    .mz-hero-title { font-size: 22px !important; }
+    .mz-iletisim-cards td { display: block !important; width: 100% !important; padding: 6px 0 !important; }
+  }
 </style>
 </head>
-<body style="margin:0;padding:0;background:#f4f6f9;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1f2937;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale">
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif;color:#1f2937" bgcolor="#f4f6f9">
 
   <div style="display:none;font-size:1px;color:#f4f6f9;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden">{$preheader}</div>
 
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f6f9;padding:32px 0">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f6f9" style="background:#f4f6f9">
     <tr>
-      <td align="center">
+      <td align="center" style="padding:24px 0">
 
-        <!-- Ana Kart -->
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(13,27,42,.12),0 4px 12px rgba(13,27,42,.08)">
+        <!-- Ana Kart - 700px geniş, yatay duzen -->
+        <table role="presentation" class="mz-container" width="700" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="max-width:700px;width:100%;background:#ffffff;border:1px solid #e5e7eb">
 
-          <!-- HEADER: Premium Navy + Hero -->
+          <!-- HEADER: Navy bg + VML gradient (Outlook icin) -->
           <tr>
-            <td class="mz-hero-pad" style="background:linear-gradient(135deg,#0d1b2a 0%,#1b263b 50%,#1a3a5c 100%);padding:40px 48px;position:relative">
-              <!-- Marka satiri -->
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <td bgcolor="#0d1b2a" style="background:#0d1b2a;padding:0">
+              <!--[if gte mso 9]>
+              <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:700px;height:120px;">
+                <v:fill type="gradient" color="#0d1b2a" color2="#1a3a5c" angle="135"/>
+              </v:rect>
+              <div style="position:relative;mso-position-horizontal:left;mso-position-vertical:top">
+              <![endif]-->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td>
-                    <!-- Logo SVG inline (kalkan + M harfi) -->
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-                      <td style="vertical-align:middle;padding-right:14px">
-                        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#e30b30 0%,#a91020 100%);text-align:center;line-height:48px;font-family:Georgia,serif;font-size:24px;font-weight:800;color:#ffffff;box-shadow:0 4px 12px rgba(227,11,48,.35)">M</div>
-                      </td>
-                      <td style="vertical-align:middle">
-                        <div style="font-family:Georgia,'Times New Roman',serif;color:#f4d35e;font-size:11px;font-style:italic;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px">Güven ve Özen İle</div>
-                        <div class="mz-hero-title" style="color:#ffffff;font-size:24px;font-weight:800;letter-spacing:.5px;line-height:1.2">{$brandShort}</div>
-                      </td>
-                    </tr></table>
-                  </td>
-                  <td align="right" valign="top" style="padding-top:6px">
-                    {$badgeHtml}
+                  <td class="mz-hero-pad" style="padding:32px 40px" bgcolor="#0d1b2a">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td valign="middle">
+                          <table cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td bgcolor="#e30b30" style="background:#e30b30;width:48px;height:48px;border-radius:8px;text-align:center;font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:bold;color:#ffffff;line-height:48px" align="center" width="48" height="48">M</td>
+                              <td style="padding-left:14px" valign="middle">
+                                <div style="font-family:Georgia,'Times New Roman',serif;color:#f4d35e;font-size:11px;font-style:italic;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px">Guven ve Ozen Ile</div>
+                                <div class="mz-hero-title" style="font-family:Arial,Helvetica,sans-serif;color:#ffffff;font-size:24px;font-weight:bold;letter-spacing:.3px;line-height:1.2">{$brandShort}</div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                        <td valign="top" align="right" width="180">
+                          {$badgeHtml}
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
-
-              <!-- Decorative gradient line -->
-              <div style="height:3px;background:linear-gradient(90deg,#e30b30 0%,#f4d35e 50%,#e30b30 100%);margin-top:24px;border-radius:2px;opacity:.85"></div>
+              <!--[if gte mso 9]></div><![endif]-->
             </td>
           </tr>
 
-          <!-- BODY -->
+          <!-- Kirmizi accent line -->
           <tr>
-            <td class="mz-pad" style="padding:40px 48px;font-size:15px;line-height:1.7;color:#1f2937;background:#ffffff">
+            <td bgcolor="#e30b30" style="background:#e30b30;height:3px;line-height:3px;font-size:0">&nbsp;</td>
+          </tr>
+
+          <!-- BODY - kompakt yatay duzen -->
+          <tr>
+            <td class="mz-pad" style="padding:32px 40px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;color:#1f2937" bgcolor="#ffffff">
               {$bodyHtml}
-              <div class="mz-cta">{$ctaHtml}</div>
+              {$ctaHtml}
             </td>
           </tr>
 
-          <!-- Trust Bar -->
+          <!-- TRUST BAR - Navy strip -->
           <tr>
-            <td style="background:#0d1b2a;padding:18px 48px">
+            <td bgcolor="#0d1b2a" style="background:#0d1b2a;padding:16px 40px">
               {$trustHtml}
             </td>
           </tr>
 
-          <!-- ILETISIM CARD GRID (3 sutun) -->
+          <!-- ILETISIM CARD GRID -->
           <tr>
-            <td style="background:#f8fafc;padding:24px 36px">
-              <div style="text-align:center;font-size:11px;color:#6b7280;letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:14px">Bize Ulaşın</div>
-              <table class="mz-iletisim-cards" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-                {$iletisimCards}
-              </tr></table>
+            <td bgcolor="#f8fafc" style="background:#f8fafc;padding:24px 32px">
+              <div style="text-align:center;font-family:Arial,sans-serif;font-size:11px;color:#6b7280;letter-spacing:1.2px;text-transform:uppercase;font-weight:bold;margin-bottom:14px">Bize Ulasin</div>
+              {$iletisimRow}
             </td>
           </tr>
 
-          <!-- Hizli erisim - Sigorta tipleri footer linkler -->
+          <!-- Sigorta turleri footer linkler -->
           <tr>
-            <td style="background:#ffffff;padding:20px 36px;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb">
-              <div style="text-align:center;font-size:10px;color:#9ca3af;letter-spacing:1.2px;text-transform:uppercase;font-weight:700;margin-bottom:8px">Sigorta Türlerimiz</div>
+            <td bgcolor="#0d1b2a" style="background:#0d1b2a;padding:18px 32px;border-top:1px solid rgba(255,255,255,.05)">
+              <div style="text-align:center;font-family:Arial,sans-serif;font-size:10px;color:#64748b;letter-spacing:1.2px;text-transform:uppercase;font-weight:bold;margin-bottom:8px">Sigorta Turlerimiz</div>
               {$urunLinks}
             </td>
           </tr>
 
           <!-- FOOTER: Sosyal + Telif -->
           <tr>
-            <td style="background:linear-gradient(135deg,#0d1b2a 0%,#1b263b 100%);padding:28px 36px;text-align:center">
-              <div style="margin-bottom:14px">{$socialHtml}</div>
-              <div style="height:1px;background:rgba(255,255,255,.08);margin:14px 0"></div>
-              <div style="font-size:11px;color:#9ca3af;line-height:1.6">
+            <td bgcolor="#050b18" style="background:#050b18;padding:20px 32px;text-align:center">
+              <div style="margin-bottom:12px">{$socialHtml}</div>
+              <div style="font-family:Arial,sans-serif;font-size:11px;color:#9ca3af;line-height:1.6">
                 <strong style="color:#ffffff">{$brand}</strong><br>
-                {$adres}<br>
-                <span style="opacity:.6">&copy; {$year} Tüm hakları saklıdır.</span>
+                <span style="color:#64748b">{$adres}</span><br>
+                <span style="color:#64748b">&copy; {$year} Tum haklari saklidir.</span>
               </div>
-              <div style="font-size:10px;color:#6b7280;margin-top:14px;line-height:1.5">
-                Bu otomatik gönderilen bir e-postadır.<br>
-                Sorularınız için: <a href="mailto:{$email}" style="color:#9ca3af;text-decoration:underline">{$email}</a>
+              <div style="font-family:Arial,sans-serif;font-size:10px;color:#64748b;margin-top:12px;line-height:1.4">
+                Bu otomatik gonderilen bir e-postadir.<br>
+                Sorulariniz icin: <a href="mailto:{$email}" style="color:#9ca3af;text-decoration:underline">{$email}</a>
               </div>
             </td>
           </tr>
 
         </table>
 
-        <!-- Anti-spam tagline -->
-        <div style="max-width:600px;margin:18px auto 0;padding:0 20px;text-align:center;font-size:11px;color:#9ca3af;line-height:1.5">
-          {$brandShort} &middot; T.C. Hazine ve Maliye Bakanlığı SBM Lisanslı Sigorta Aracılık Şirketi<br>
-          KVKK kapsamında bilgileriniz koruma altındadır.
-        </div>
+        <!-- Anti-spam tagline (kart disinda) -->
+        <table role="presentation" class="mz-container" width="700" cellpadding="0" cellspacing="0" border="0" style="max-width:700px;width:100%">
+          <tr>
+            <td align="center" style="padding:14px 20px;font-family:Arial,sans-serif;font-size:11px;color:#9ca3af;line-height:1.5">
+              {$brandShort} &middot; T.C. Hazine ve Maliye Bakanligi SBM Lisansli Sigorta Aracilik Sirketi<br>
+              KVKK kapsaminda bilgileriniz koruma altindadir.
+            </td>
+          </tr>
+        </table>
 
       </td>
     </tr>
