@@ -56,6 +56,12 @@ $routes = [
     '#^/robots\.txt$#'               => 'robots.php',
 ];
 
+// /sitemap.php (eski URL) -> /sitemap.xml 301 redirect (geriye donuk uyumluluk)
+if ($path === '/sitemap.php') {
+    header('Location: ' . SITE_BASE_URL . '/sitemap.xml', true, 301);
+    exit;
+}
+
 foreach ($routes as $regex => $file) {
     if (preg_match($regex, $path, $m)) {
         $params = array_slice($m, 1);

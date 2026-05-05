@@ -110,17 +110,9 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
 
     <?php if (is_admin()): ?>
     <div class="mz-admin-section">Sistem</div>
-    <a href="kullanicilar.php"         class="<?= $current === 'kullanicilar.php' ? 'active' : '' ?>"><i class="bi bi-person-gear"></i> Kullanıcılar</a>
-    <a href="ayarlar.php"              class="<?= $current === 'ayarlar.php' ? 'active' : '' ?>"><i class="bi bi-gear"></i> Ayarlar</a>
     <a href="sitemap-yenile.php"       class="<?= $current === 'sitemap-yenile.php' ? 'active' : '' ?>"><i class="bi bi-diagram-3"></i> Sitemap Yenile</a>
     <a href="audit-log.php"            class="<?= $current === 'audit-log.php' ? 'active' : '' ?>"><i class="bi bi-clipboard-data"></i> İşlem Kaydı</a>
-    <?php if (is_superadmin()): ?>
-    <a href="update.php"               class="<?= $current === 'update.php' ? 'active' : '' ?>"><i class="bi bi-cpu"></i> Akıllı Güncelleme</a>
     <?php endif; ?>
-    <?php endif; ?>
-
-    <div class="mz-admin-section"></div>
-    <a href="logout.php" class="text-warning"><i class="bi bi-box-arrow-right"></i> Çıkış Yap</a>
   </nav>
 </aside>
 
@@ -128,21 +120,62 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
   <header class="mz-admin-topbar">
     <button class="btn btn-sm btn-outline-light d-lg-none me-2" id="sidebarToggle" type="button"><i class="bi bi-list"></i></button>
     <h5 class="mb-0 fw-bold"><?= e($adminTitle) ?></h5>
-    <div class="ms-auto d-flex align-items-center gap-3">
-      <a class="text-white-50" href="<?= u('/') ?>" target="_blank" title="Siteyi Görüntüle"><i class="bi bi-globe"></i></a>
-      <span class="text-white-50 small d-none d-md-inline"><i class="bi bi-clock"></i> <?= date('d.m.Y H:i') ?></span>
+    <div class="ms-auto d-flex align-items-center gap-2">
+
+      <a class="mz-quick-btn" href="<?= u('/') ?>" target="_blank" title="Siteyi Görüntüle">
+        <i class="bi bi-globe"></i>
+        <span class="mz-quick-btn-label d-none d-xl-inline">Site</span>
+      </a>
+
+      <span class="mz-quick-divider d-none d-md-inline"></span>
+
+      <?php if (is_admin()): ?>
+        <?php if (is_superadmin()): ?>
+          <a class="mz-quick-btn mz-quick-btn-warning <?= $current === 'update.php' ? 'active' : '' ?>"
+             href="update.php" title="Akıllı Güncelleme">
+            <i class="bi bi-cpu"></i>
+            <span class="mz-quick-btn-label d-none d-xl-inline">Güncelle</span>
+          </a>
+        <?php endif; ?>
+
+        <a class="mz-quick-btn <?= $current === 'kullanicilar.php' ? 'active' : '' ?>"
+           href="kullanicilar.php" title="Kullanıcılar">
+          <i class="bi bi-person-gear"></i>
+          <span class="mz-quick-btn-label d-none d-xl-inline">Kullanıcılar</span>
+        </a>
+
+        <a class="mz-quick-btn <?= $current === 'ayarlar.php' ? 'active' : '' ?>"
+           href="ayarlar.php" title="Ayarlar">
+          <i class="bi bi-gear"></i>
+          <span class="mz-quick-btn-label d-none d-xl-inline">Ayarlar</span>
+        </a>
+
+        <span class="mz-quick-divider d-none d-md-inline"></span>
+      <?php endif; ?>
+
+      <span class="text-white-50 small d-none d-lg-inline"><i class="bi bi-clock"></i> <?= date('d.m.Y H:i') ?></span>
+
       <div class="dropdown">
-        <a class="text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" href="#">
-          <i class="bi bi-person-circle"></i> <?= e($me['ad_soyad'] ?? 'Kullanıcı') ?>
+        <a class="text-white text-decoration-none dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" href="#" style="padding:.4rem .65rem">
+          <i class="bi bi-person-circle" style="font-size:1.2rem"></i>
+          <span class="d-none d-md-inline small fw-semibold"><?= e($me['ad_soyad'] ?? 'Kullanıcı') ?></span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><span class="dropdown-item-text small text-muted"><?= e($me['email'] ?? '') ?></span></li>
+          <?php if (!empty($me['kullanici_adi'])): ?>
+            <li><span class="dropdown-item-text small text-muted"><i class="bi bi-person-badge"></i> <code><?= e($me['kullanici_adi']) ?></code></span></li>
+          <?php endif; ?>
           <li><span class="dropdown-item-text small"><span class="badge bg-warning text-dark"><?= e($me['rol'] ?? '') ?></span></span></li>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item" href="profil.php"><i class="bi bi-person"></i> Profilim</a></li>
-          <li><a class="dropdown-item text-danger" href="logout.php"><i class="bi bi-box-arrow-right"></i> Çıkış</a></li>
         </ul>
       </div>
+
+      <a class="mz-quick-btn mz-quick-btn-danger" href="logout.php" title="Çıkış Yap">
+        <i class="bi bi-box-arrow-right"></i>
+        <span class="mz-quick-btn-label d-none d-xl-inline">Çıkış</span>
+      </a>
+
     </div>
   </header>
 

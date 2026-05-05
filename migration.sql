@@ -3016,3 +3016,8 @@ PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 UPDATE `mz_kullanicilar`
 SET `kullanici_adi` = LOWER(SUBSTRING_INDEX(`email`, '@', 1))
 WHERE `kullanici_adi` IS NULL OR `kullanici_adi` = '';
+
+-- ============================================================
+-- v1.1.24 - Admin topbar hizli aksiyon butonlari (sadece kod, SQL yok)
+-- + /sitemap.php legacy URL 301 redirect (sadece kod, SQL yok)
+-- ============================================================

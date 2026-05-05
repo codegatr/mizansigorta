@@ -154,3 +154,96 @@ body.mz-admin { background: var(--mz-bg); font-family: 'Inter', system-ui, -appl
   .mz-admin-main { margin-left: 0 !important; }
   .mz-admin-content { padding: 0 !important; }
 }
+
+/* ============================================================
+   v1.1.24 - Topbar Hizli Aksiyon Butonlari
+   Sidebar'dan tasinan: Akilli Guncelleme, Kullanicilar, Ayarlar, Cikis
+============================================================ */
+
+.mz-quick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: .42rem .7rem;
+    color: rgba(255,255,255,.85);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 500;
+    transition: all .15s ease;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.mz-quick-btn i {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.mz-quick-btn:hover {
+    background: rgba(255,255,255,.14);
+    color: #ffffff;
+    border-color: rgba(255,255,255,.22);
+    transform: translateY(-1px);
+}
+
+.mz-quick-btn.active {
+    background: linear-gradient(135deg, #e30b30, #a91020);
+    color: #ffffff;
+    border-color: rgba(255,255,255,.25);
+    box-shadow: 0 4px 12px rgba(227, 11, 48, .35);
+}
+
+/* Akilli Guncelleme - sari vurgu */
+.mz-quick-btn-warning {
+    background: linear-gradient(135deg, rgba(244, 211, 94, .18), rgba(212, 175, 55, .14));
+    border-color: rgba(244, 211, 94, .35);
+    color: #f4d35e;
+}
+.mz-quick-btn-warning:hover {
+    background: linear-gradient(135deg, #f4d35e, #d4af37);
+    color: #0d1b2a;
+    border-color: #f4d35e;
+    box-shadow: 0 6px 18px rgba(244, 211, 94, .35);
+}
+
+/* Cikis - kirmizi vurgu */
+.mz-quick-btn-danger {
+    background: rgba(227, 11, 48, .12);
+    border-color: rgba(227, 11, 48, .3);
+    color: #ff6b80;
+}
+.mz-quick-btn-danger:hover {
+    background: linear-gradient(135deg, #e30b30, #a91020);
+    color: #ffffff;
+    border-color: rgba(255,255,255,.2);
+    box-shadow: 0 6px 18px rgba(227, 11, 48, .4);
+}
+
+.mz-quick-divider {
+    width: 1px;
+    height: 22px;
+    background: rgba(255,255,255,.18);
+    margin: 0 4px;
+}
+
+/* Mobil/tablet adaptasyon */
+@media (max-width: 991.98px) {
+    .mz-admin-topbar { gap: 6px; padding: .65rem .85rem; }
+    .mz-quick-btn { padding: .42rem .55rem; }
+    .mz-quick-btn-label { display: none !important; }  /* mobilde sadece ikon */
+}
+
+@media (max-width: 575.98px) {
+    .mz-admin-topbar h5 {
+        font-size: .95rem;
+        max-width: 130px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .mz-quick-btn { padding: .38rem .5rem; }
+    .mz-quick-divider { display: none; }
+}
