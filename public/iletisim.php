@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   VALUES (?,?,?,?,?,?,?,NOW())',
                 [$ad, $email, normalize_phone($tel), $konu, $msg, client_ip(), substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)]
             );
+            $mesajId = db_last_id();
 
             $opMail = setting('operator_email', setting('email'));
             $extra  = talep_bildirim_alicilari();
@@ -62,8 +63,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'preheader'   => 'Yeni iletisim mesaji: ' . $ad . ' - ' . $konu,
                 ]);
                 @send_mail($opMail, 'İletişim Mesajı — ' . $konu, $html, '', [
-                    'bcc'      => $extra['bcc'],
-                    'reply_to' => $email,
+                    'bcc'        => $extra['bcc'],
+                    'reply_to'   => $email,
+                    'ilgili_tip' => 'iletisim',
+                    'ilgili_id'  => isset($mesajId) ? (int)$mesajId : null,
                 ]);
             }
 

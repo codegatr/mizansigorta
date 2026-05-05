@@ -3050,3 +3050,32 @@ WHERE NOT EXISTS (SELECT 1 FROM `mz_ayarlar` WHERE `anahtar` = 'talep_bildirim_b
 -- v1.1.29 - Teklif toplu/tekil silme + durum degisikligi mail bildirimi
 -- (sadece kod, SQL yok)
 -- ============================================================
+
+-- ============================================================
+-- v1.1.30 - Mail Log tablosu (gonderim takibi)
+-- Yunus istegi: 'teklifbirimi@ adresine gidip gitmedigini nereden gorecegim?
+-- Yonetim Panelinde, talepler ulasip ulasmadigini gormem gerek.'
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `mz_mail_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `olusturma_tarihi` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `alici` varchar(255) NOT NULL COMMENT 'TO adresi',
+  `cc_listesi` text DEFAULT NULL,
+  `bcc_listesi` text DEFAULT NULL COMMENT 'Virgulle ayrilmis BCC adresleri',
+  `reply_to` varchar(255) DEFAULT NULL,
+  `konu` varchar(255) NOT NULL,
+  `govde_html` mediumtext DEFAULT NULL COMMENT 'Tekrar gondermek icin saklanir',
+  `durum` enum('basarili','hatali') NOT NULL DEFAULT 'basarili',
+  `hata_mesaji` text DEFAULT NULL,
+  `smtp_yanit` text DEFAULT NULL,
+  `ilgili_tip` varchar(40) DEFAULT 'genel' COMMENT 'teklif/hasar/iletisim/temsilci/durum_bildirim/hatirlatma/sifre/test',
+  `ilgili_id` int(11) DEFAULT NULL,
+  `kullanici_id` int(11) DEFAULT NULL COMMENT 'Admin gonderiminde kim gonderdi (public form NULL)',
+  `ip` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_tarih` (`olusturma_tarihi`),
+  KEY `idx_durum` (`durum`),
+  KEY `idx_ilgili` (`ilgili_tip`, `ilgili_id`),
+  KEY `idx_alici` (`alici`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

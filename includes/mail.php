@@ -37,7 +37,22 @@ function send_mail($to, string $subject, string $bodyHtml, string $bodyText = ''
     $fname  = setting('smtp_from_name') ?: SITE_NAME;
     $secure = setting('smtp_secure', 'tls');
 
+    // Log icin meta veri
+    $logCtx = [
+        'alici'        => is_array($to) ? implode(', ', (array)$to) : (string)$to,
+        'cc'           => isset($opts['cc'])  ? implode(', ', (array)$opts['cc'])  : null,
+        'bcc'          => isset($opts['bcc']) ? implode(', ', (array)$opts['bcc']) : null,
+        'reply_to'     => isset($opts['reply_to']) ? (string)$opts['reply_to'] : null,
+        'konu'         => $subject,
+        'govde_html'   => $bodyHtml,
+        'ilgili_tip'   => (string)($opts['ilgili_tip'] ?? 'genel'),
+        'ilgili_id'    => isset($opts['ilgili_id']) ? (int)$opts['ilgili_id'] : null,
+        'kullanici_id' => function_exists('user_id') ? user_id() : null,
+        'ip'           => function_exists('client_ip') ? client_ip() : ($_SERVER['REMOTE_ADDR'] ?? null),
+    ];
+
     if (!$host || !$from) {
+        mail_log_yaz($logCtx, 'hatali', 'SMTP yapilandirilmamis.');
         return ['ok' => false, 'msg' => 'SMTP yapilandirilmamis.'];
     }
     if ($bodyText === '') {
@@ -58,6 +73,7 @@ function send_mail($to, string $subject, string $bodyHtml, string $bodyText = ''
     $bccList = $validate($bccList);
 
     if (!$toList) {
+        mail_log_yaz($logCtx, 'hatali', 'Gecerli alici yok.');
         return ['ok' => false, 'msg' => 'Gecerli alici yok.'];
     }
 
@@ -95,7 +111,9 @@ function send_mail($to, string $subject, string $bodyHtml, string $bodyText = ''
             'verify_peer'      => false, 'verify_peer_name' => false, 'allow_self_signed' => true,
         ]]));
     if (!$smtp) {
-        return ['ok' => false, 'msg' => "SMTP baglanilamadi: $errstr ($errno)"];
+        $msg = "SMTP baglanilamadi: $errstr ($errno)";
+        mail_log_yaz($logCtx, 'hatali', $msg);
+        return ['ok' => false, 'msg' => $msg];
     }
     stream_set_timeout($smtp, 20);
 
@@ -119,6 +137,7 @@ function send_mail($to, string $subject, string $bodyHtml, string $bodyText = ''
         if (!stream_socket_enable_crypto($smtp, true,
                 STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT)) {
             fclose($smtp);
+            mail_log_yaz($logCtx, 'hatali', 'TLS baslatilamadi.');
             return ['ok' => false, 'msg' => 'TLS baslatilamadi.'];
         }
         $cmd('EHLO ' . parse_url(SITE_BASE_URL, PHP_URL_HOST));
@@ -129,6 +148,7 @@ function send_mail($to, string $subject, string $bodyHtml, string $bodyText = ''
         $r = $cmd(base64_encode($pass));
         if (strpos($r, '235') !== 0) {
             fclose($smtp);
+            mail_log_yaz($logCtx, 'hatali', 'SMTP kimlik dogrulama hatasi.', $r);
             return ['ok' => false, 'msg' => 'SMTP kimlik dogrulama hatasi.'];
         }
     }
@@ -140,7 +160,9 @@ function send_mail($to, string $subject, string $bodyHtml, string $bodyText = ''
         $r = $cmd('RCPT TO:<' . $rcpt . '>');
         if (!preg_match('/^25[01]/', $r)) {
             fclose($smtp);
-            return ['ok' => false, 'msg' => 'Alici reddedildi (' . $rcpt . '): ' . trim($r)];
+            $msg = 'Alici reddedildi (' . $rcpt . '): ' . trim($r);
+            mail_log_yaz($logCtx, 'hatali', $msg, $r);
+            return ['ok' => false, 'msg' => $msg];
         }
     }
     $cmd('DATA');
@@ -152,9 +174,55 @@ function send_mail($to, string $subject, string $bodyHtml, string $bodyText = ''
     fclose($smtp);
 
     if (strpos($r, '250') !== 0) {
-        return ['ok' => false, 'msg' => 'Mesaj gonderilemedi: ' . trim($r)];
+        $msg = 'Mesaj gonderilemedi: ' . trim($r);
+        mail_log_yaz($logCtx, 'hatali', $msg, $r);
+        return ['ok' => false, 'msg' => $msg];
     }
+    mail_log_yaz($logCtx, 'basarili', null, trim($r));
     return ['ok' => true, 'msg' => 'Gonderildi'];
+}
+
+/**
+ * Mail log tablosuna kayit yaz. send_mail() icinde her donus noktasinda cagrilir.
+ * Tablo yoksa veya DB hatasi olursa sessizce yutar (mail gonderim akisini bozmasın).
+ *
+ * @param array       $ctx  alici/cc/bcc/konu/govde_html/ilgili_tip/ilgili_id/kullanici_id/ip
+ * @param string      $durum 'basarili' veya 'hatali'
+ * @param string|null $hata
+ * @param string|null $smtpYanit
+ */
+function mail_log_yaz(array $ctx, string $durum, ?string $hata = null, ?string $smtpYanit = null): void
+{
+    try {
+        // Govde HTML cok buyuk olabilir - 64KB limit (mediumtext zaten max 16MB destekler ama
+        // makul bir sınır mantikli olur, log tablosu sislememesin)
+        $govde = (string)($ctx['govde_html'] ?? '');
+        if (mb_strlen($govde) > 65535) {
+            $govde = mb_substr($govde, 0, 65000) . "\n\n[... kesilmis ...]";
+        }
+
+        db_exec('INSERT INTO ' . t('mail_log') . '
+            (olusturma_tarihi, alici, cc_listesi, bcc_listesi, reply_to, konu, govde_html,
+             durum, hata_mesaji, smtp_yanit, ilgili_tip, ilgili_id, kullanici_id, ip)
+            VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                (string)($ctx['alici']    ?? ''),
+                $ctx['cc']                ?: null,
+                $ctx['bcc']               ?: null,
+                $ctx['reply_to']          ?: null,
+                (string)($ctx['konu']     ?? ''),
+                $govde ?: null,
+                $durum,
+                $hata                     ?: null,
+                $smtpYanit                ?: null,
+                (string)($ctx['ilgili_tip'] ?? 'genel'),
+                $ctx['ilgili_id']         ?: null,
+                $ctx['kullanici_id']      ?: null,
+                $ctx['ip']                ?: null,
+            ]);
+    } catch (Throwable $e) {
+        // Tablo yoksa veya DB hatasi - sessizce yut, mail gonderimi etkilenmesin
+    }
 }
 
 /**
@@ -231,7 +299,9 @@ function teklif_durum_bildirim_gonder(int $teklifId, string $yeniDurum): bool
 
     $extra = talep_bildirim_alicilari();
     $r = send_mail($email, 'Teklif durumunuz güncellendi - ' . $teklifNo, $html, '', [
-        'bcc' => $extra['bcc'],
+        'bcc'        => $extra['bcc'],
+        'ilgili_tip' => 'durum_bildirim',
+        'ilgili_id'  => $teklifId,
     ]);
 
     return is_array($r) ? !empty($r['ok']) : (bool)$r;

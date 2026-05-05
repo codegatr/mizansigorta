@@ -111,6 +111,7 @@ $cnt_yeni_hasar  = (int)db_value("SELECT COUNT(*) FROM " . t('hasarlar') . " WHE
     <?php if (is_admin()): ?>
     <div class="mz-admin-section">Sistem</div>
     <a href="sitemap-yenile.php"       class="<?= $current === 'sitemap-yenile.php' ? 'active' : '' ?>"><i class="bi bi-diagram-3"></i> Sitemap Yenile</a>
+    <a href="mail-log.php"             class="<?= $current === 'mail-log.php' ? 'active' : '' ?>"><i class="bi bi-envelope-paper"></i> Mail Log</a>
     <a href="audit-log.php"            class="<?= $current === 'audit-log.php' ? 'active' : '' ?>"><i class="bi bi-clipboard-data"></i> İşlem Kaydı</a>
     <?php endif; ?>
   </nav>

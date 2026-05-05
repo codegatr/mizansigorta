@@ -57,7 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'preheader'   => 'Yeni temsilci basvurusu: ' . $ad,
                     ]),
                     '',
-                    ['bcc' => $extra['bcc'], 'reply_to' => $email ?: null]
+                    [
+                        'bcc'        => $extra['bcc'],
+                        'reply_to'   => $email ?: null,
+                        'ilgili_tip' => 'temsilci',
+                    ]
                 );
             }
 
@@ -73,7 +77,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'badge_color' => '#22c55e',
                         'preheader'   => 'Mizan Sigorta temsilcilik basvurunuz alindi.',
                     ]
-                )
+                ),
+                '',
+                ['ilgili_tip' => 'temsilci']
             );
 
             $ok = true;

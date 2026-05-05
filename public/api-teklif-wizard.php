@@ -129,7 +129,12 @@ try {
                 'preheader' => 'Yeni teklif talebi: ' . $ad . ' - ' . $teklifNo,
             ]),
             '',
-            ['bcc' => $extra['bcc'], 'reply_to' => $email ?: null]
+            [
+                'bcc'        => $extra['bcc'],
+                'reply_to'   => $email ?: null,
+                'ilgili_tip' => 'teklif',
+                'ilgili_id'  => isset($teklifId) ? (int)$teklifId : null,
+            ]
         );
     }
 
@@ -148,7 +153,12 @@ try {
                     'badge_color' => '#22c55e',
                     'preheader' => 'Teklifiniz alindi - ' . $teklifNo,
                 ]
-            )
+            ),
+            '',
+            [
+                'ilgili_tip' => 'teklif',
+                'ilgili_id'  => isset($teklifId) ? (int)$teklifId : null,
+            ]
         );
     }
 

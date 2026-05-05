@@ -84,7 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'cta_text'    => 'Panelde Aç',
                 'cta_url'     => u('/yonetim/hasarlar.php?id=' . $hasarId),
             ]);
-            send_mail($opMail, 'Yeni hasar ihbarı: ' . $no, $html, '', ['bcc' => $extra['bcc']]);
+            send_mail($opMail, 'Yeni hasar ihbarı: ' . $no, $html, '', [
+                'bcc'        => $extra['bcc'],
+                'ilgili_tip' => 'hasar',
+                'ilgili_id'  => (int)$hasarId,
+            ]);
         }
 
         safe_redirect('/hasar-ihbari?ok=1&no=' . urlencode($no));

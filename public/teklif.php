@@ -101,7 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'cta_text'    => 'Panelde Aç',
                 'cta_url'     => u('/yonetim/teklif-detay.php?id=' . $teklifId),
             ]);
-            send_mail($opMail, 'Yeni teklif: ' . $no, $html, '', ['bcc' => $extra['bcc']]);
+            send_mail($opMail, 'Yeni teklif: ' . $no, $html, '', [
+                'bcc'        => $extra['bcc'],
+                'ilgili_tip' => 'teklif',
+                'ilgili_id'  => (int)$teklifId,
+            ]);
         }
         // Musteriye otomatik tesekkur
         if ($email !== '') {
@@ -115,7 +119,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'badge_color' => '#22c55e',
                 'preheader'   => 'Teklif talebiniz alindi - Teklif No: ' . $no,
             ]);
-            send_mail($email, 'Teklif talebiniz alındı - ' . $no, $html);
+            send_mail($email, 'Teklif talebiniz alındı - ' . $no, $html, '', [
+                'ilgili_tip' => 'teklif',
+                'ilgili_id'  => (int)$teklifId,
+            ]);
         }
 
         // Tesekkur sayfasina yonlendir (PRG)

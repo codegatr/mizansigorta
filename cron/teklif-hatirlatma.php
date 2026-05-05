@@ -106,7 +106,11 @@ function sendReminder(array $kural, array $vars, ?int $teklifId = null, ?int $po
         ]);
         // Tum maillerin kopyasi BCC'ye (talep_bildirim_bcc setting)
         $extra = talep_bildirim_alicilari();
-        $ok = send_mail($to, $konu, $html, '', ['bcc' => $extra['bcc']]);
+        $ok = send_mail($to, $konu, $html, '', [
+            'bcc'        => $extra['bcc'],
+            'ilgili_tip' => 'hatirlatma',
+            'ilgili_id'  => isset($teklif['id']) ? (int)$teklif['id'] : null,
+        ]);
         return ['ok' => $ok, 'mesaj' => $ok ? 'Gönderildi' : 'SMTP hatası', 'konu' => $konu, 'alici' => $to];
     }
 
