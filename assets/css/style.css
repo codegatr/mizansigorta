@@ -251,3 +251,34 @@ main { flex: 1; }
 @media (max-width: 575.98px) {
   .mz-scroll-top { right: 16px; bottom: 80px; width: 42px; height: 42px; }
 }
+
+/* ===== Yuvarlak Sirket Logo Karti ===== */
+.mz-partner-circle {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .65rem; padding: 1.25rem .75rem;
+  background: #fff; border: 1px solid var(--mz-border); border-radius: 14px;
+  height: 100%; transition: all .25s; text-align: center;
+  text-decoration: none;
+}
+.mz-partner-circle:hover {
+  border-color: var(--mz-red);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0,0,0,.08);
+}
+.mz-partner-circle img {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  object-fit: contain;
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  background: #fff;
+  transition: transform .25s;
+}
+.mz-partner-circle:hover img { transform: scale(1.05); }
+.mz-partner-circle .mz-partner-name {
+  font-size: .82rem; font-weight: 600; color: var(--mz-navy);
+  line-height: 1.25;
+}
+@media (max-width: 575.98px) {
+  .mz-partner-circle img { width: 56px; height: 56px; }
+  .mz-partner-circle .mz-partner-name { font-size: .75rem; }
+}

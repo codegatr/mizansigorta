@@ -260,16 +260,29 @@ $aksaray  = setting('aksaray_adres');
     <div class="row g-4 justify-content-center">
       <div class="col-lg-7">
         <div class="mz-form-card">
-          <h3 class="fw-bold mb-2"><i class="bi bi-chat-dots text-warning"></i> Bize Mesaj Gönderin</h3>
-          <p class="text-muted small mb-4">Sigorta türü, hasar süreci, teklif veya genel bilgi — sorularınızı bize iletin.</p>
+          <div class="text-center mb-4">
+            <span class="mz-trust-badge mb-2"><i class="bi bi-chat-dots"></i> Bize Yazın</span>
+            <h3 class="fw-bold mb-1" style="color:var(--mz-navy)">Bir mesaj bırakın, dönelim</h3>
+            <p class="text-muted small mb-0">Sigorta türü, hasar süreci, teklif veya genel bilgi — kısa süre içinde size geri dönüş yapalım.</p>
+          </div>
 
           <?php if ($ok): ?>
-            <div class="alert alert-success">
-              <i class="bi bi-check-circle"></i> Mesajınız ulaştı. En kısa sürede size dönüş yapacağız.
+            <div class="alert alert-success d-flex gap-3 align-items-start">
+              <i class="bi bi-check-circle-fill fs-3"></i>
+              <div>
+                <strong class="d-block">Mesajınız ulaştı!</strong>
+                <small>İlgili temsilcimiz en kısa sürede size dönüş yapacak. Aciliyet durumunda doğrudan telefonla arayabilirsiniz.</small>
+              </div>
             </div>
           <?php else: ?>
             <?php if ($errors): ?>
-              <div class="alert alert-danger small"><?= implode('<br>', array_map('e', $errors)) ?></div>
+              <div class="alert alert-danger d-flex gap-3 align-items-start">
+                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                <div>
+                  <strong class="d-block mb-1">Lütfen aşağıdaki hataları düzeltin:</strong>
+                  <ul class="mb-0 small"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul>
+                </div>
+              </div>
             <?php endif; ?>
 
             <form method="post" novalidate data-mz-captcha>
@@ -278,41 +291,60 @@ $aksaray  = setting('aksaray_adres');
 
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label small fw-semibold">Ad Soyad *</label>
-                  <input type="text" name="ad_soyad" class="form-control" required value="<?= e($_POST['ad_soyad'] ?? '') ?>">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-semibold">Telefon *</label>
-                  <input type="tel" name="telefon" class="form-control" required value="<?= e($_POST['telefon'] ?? '') ?>">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-semibold">E-posta *</label>
-                  <input type="email" name="email" class="form-control" required value="<?= e($_POST['email'] ?? '') ?>">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-semibold">Konu *</label>
-                  <input type="text" name="konu" class="form-control" required value="<?= e($_POST['konu'] ?? '') ?>">
-                </div>
-                <div class="col-12">
-                  <label class="form-label small fw-semibold">Mesajınız *</label>
-                  <textarea name="mesaj" class="form-control" rows="5" required><?= e($_POST['mesaj'] ?? '') ?></textarea>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label small fw-semibold">Doğrulama: <span data-mz-cap-a></span> + <span data-mz-cap-b></span> = ?</label>
-                  <input type="number" name="captcha" class="form-control" required data-mz-cap-input>
-                  <input type="hidden" name="captcha_a" data-mz-cap-correct-a>
-                  <input type="hidden" name="captcha_b" data-mz-cap-correct-b>
-                </div>
-                <div class="col-12">
-                  <div class="form-check">
-                    <input type="checkbox" name="kvkk" id="kvkk2" class="form-check-input" required>
-                    <label for="kvkk2" class="form-check-label small">
-                      <a href="<?= u('/sayfa/kvkk') ?>" target="_blank">KVKK Aydınlatma Metni</a>'ni okudum, kişisel verilerimin işlenmesine rıza gösteriyorum. *
-                    </label>
+                  <label class="form-label small fw-semibold">Ad Soyad <span class="text-danger">*</span></label>
+                  <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                    <input type="text" name="ad_soyad" class="form-control" required value="<?= e($_POST['ad_soyad'] ?? '') ?>" placeholder="Adınız ve soyadınız">
                   </div>
                 </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Telefon <span class="text-danger">*</span></label>
+                  <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                    <input type="tel" name="telefon" class="form-control" required value="<?= e($_POST['telefon'] ?? '') ?>" placeholder="0 5xx xxx xx xx">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">E-posta <span class="text-danger">*</span></label>
+                  <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                    <input type="email" name="email" class="form-control" required value="<?= e($_POST['email'] ?? '') ?>" placeholder="ornek@eposta.com">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Konu <span class="text-danger">*</span></label>
+                  <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-tag"></i></span>
+                    <input type="text" name="konu" class="form-control" required value="<?= e($_POST['konu'] ?? '') ?>" placeholder="Örn. Kasko fiyatı, hasar süreci">
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-semibold">Mesajınız <span class="text-danger">*</span></label>
+                  <textarea name="mesaj" class="form-control" rows="5" required placeholder="Sorularınızı veya talebinizi detaylı olarak yazabilirsiniz..."><?= e($_POST['mesaj'] ?? '') ?></textarea>
+                </div>
+
+                <div class="col-12">
+                  <div class="p-3 rounded" style="background:rgba(13,27,42,.04);border:1px dashed rgba(13,27,42,.15)">
+                    <div class="row g-3 align-items-center">
+                      <div class="col-md-5">
+                        <label class="form-label small fw-semibold mb-1">Doğrulama: <span data-mz-cap-a></span> + <span data-mz-cap-b></span> = ?</label>
+                        <input type="number" name="captcha" class="form-control form-control-sm" required data-mz-cap-input placeholder="Sonuç">
+                        <input type="hidden" name="captcha_a" data-mz-cap-correct-a>
+                        <input type="hidden" name="captcha_b" data-mz-cap-correct-b>
+                      </div>
+                      <div class="col-md-7">
+                        <div class="form-check">
+                          <input type="checkbox" name="kvkk" id="kvkk2" class="form-check-input" required>
+                          <label for="kvkk2" class="form-check-label small">
+                            <a href="<?= u('/sayfa/kvkk') ?>" target="_blank">KVKK Aydınlatma Metni</a>'ni okudum, kişisel verilerimin işlenmesine rıza gösteriyorum. <span class="text-danger">*</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="col-12 d-grid">
-                  <button class="btn btn-warning fw-semibold"><i class="bi bi-send"></i> Mesajı Gönder</button>
+                  <button class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-send-fill"></i> Mesajı Gönder</button>
+                </div>
+                <div class="col-12 text-center">
+                  <small class="text-muted"><i class="bi bi-shield-check"></i> Bilgileriniz KVKK kapsamında korunmaktadır</small>
                 </div>
               </div>
             </form>

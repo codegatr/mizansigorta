@@ -1961,13 +1961,25 @@ INSERT IGNORE INTO `mz_referanslar` (`tip`, `ad`, `unvan`, `mesaj`, `puan`, `sir
 -- ====================================================
 -- v1.1.9 - KVKK uyumlu referanslar + UNIQUE constraint
 -- ====================================================
--- (NOT: v1.1.11'de placeholder SVG'ler kaldirildi; logo path'leri NULL'a cekildi.
---       Yonetim panelinden gercek logolar tek tek upload edilebilir.)
+-- (NOT: v1.1.11'de placeholder SVG'ler kaldirildi; logo path'leri NULL'a cekildi.)
+-- (v1.1.14: Yuvarlak avatar SVG'leri geri eklendi - paketle gelir.)
 
--- v1.1.9'da seedlenen broken path'leri temizle
-UPDATE `mz_sigorta_sirketleri`
-SET `logo` = NULL
-WHERE `logo` LIKE 'assets/img/sirketler/%';
+-- v1.1.14: Yuvarlak avatar logo path'leri (paketle gelen SVG'ler)
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/anadolu-sigorta.svg'      WHERE `ad` = 'Anadolu Sigorta'      AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/allianz-sigorta.svg'      WHERE `ad` = 'Allianz Sigorta'      AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/axa-sigorta.svg'          WHERE `ad` = 'AXA Sigorta'          AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/turkiye-sigorta.svg'      WHERE `ad` = 'Türkiye Sigorta'      AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/hdi-sigorta.svg'          WHERE `ad` = 'HDI Sigorta'          AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/quick-sigorta.svg'        WHERE `ad` = 'Quick Sigorta'        AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/neova-sigorta.svg'        WHERE `ad` = 'Neova Sigorta'        AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/ak-sigorta.svg'           WHERE `ad` = 'Ak Sigorta'           AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/doga-sigorta.svg'         WHERE `ad` = 'Doğa Sigorta'         AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/atlas-sigorta.svg'        WHERE `ad` = 'Atlas Sigorta'        AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/corpus-sigorta.svg'       WHERE `ad` = 'Corpus Sigorta'       AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/magdeburger-sigorta.svg'  WHERE `ad` = 'Magdeburger Sigorta'  AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/mapfre-sigorta.svg'       WHERE `ad` = 'Mapfre Sigorta'       AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/ray-sigorta.svg'          WHERE `ad` = 'Ray Sigorta'          AND (`logo` IS NULL OR `logo` = '');
+UPDATE `mz_sigorta_sirketleri` SET `logo` = 'assets/img/sirketler/sompo-sigorta.svg'        WHERE `ad` = 'Sompo Sigorta'        AND (`logo` IS NULL OR `logo` = '');
 
 -- Referanslar UNIQUE constraint
 DELETE r1 FROM `mz_referanslar` r1
@@ -2029,3 +2041,561 @@ INSERT IGNORE INTO `mz_referanslar` (`tip`, `ad`, `unvan`, `mesaj`, `puan`, `sir
 -- UNION SELECT 'referans_toplam', COUNT(*) FROM mz_referanslar WHERE aktif=1
 -- UNION SELECT 'referans_kvkk_uyumsuz', COUNT(*) FROM mz_referanslar WHERE ad LIKE '% %' AND ad NOT LIKE '% _.';
 -- Beklenen: sirket_logo_dolu=15, sirket_toplam=15, referans_toplam=10, referans_kvkk_uyumsuz=0
+
+-- ====================================================
+-- v1.1.14 - Urun aciklamalari toplu guncelleme
+-- ====================================================
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Aracınızı, sürücü sorumluluğunuzu ve yurt dışı yolculuklarınızı kapsayan tüm motorlu taşıt sigortaları.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-collection"></i> Bu Kategori Altında</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Kasko Sigortası</h6><p class="small text-muted mb-0">Aracınızı çarpışma, yangın, hırsızlık, doğal afetler ve cam kırılması gibi geniş risklere karşı korur.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Trafik Sigortası</h6><p class="small text-muted mb-0">Yasal zorunlu sigorta — üçüncü şahıslara verilen maddi ve bedeni zararları karşılar.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">İhtiyari Mali Mesuliyet (İMM)</h6><p class="small text-muted mb-0">Trafik sigortasının limit üstündeki tutarlar için ek koruma sağlar.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Yeşilkart</h6><p class="small text-muted mb-0">Yurt dışına aracınızla çıkarken sınır geçişi için zorunlu sorumluluk teminatı.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-people"></i> Kimler İçin Uygun?</h3><p>Bireysel araç sahipleri, ticari filo işleten firmalar, yurt dışına seyahat eden sürücüler.</p><div class="alert alert-info mt-4 d-flex gap-3 align-items-start"><i class="bi bi-info-circle-fill fs-4"></i><div><strong class="d-block mb-1">Hangi alt ürün size uygun?</strong>Her durumda en uygun teminat farklılık gösterebilir. Müsait temsilcimiz ihtiyacınızı analiz ederek 12+ anlaşmalı şirketten en uygun teklifi sunar.</div></div>' WHERE `slug` = 'oto-sigortalari';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Eviniz, işyeriniz ve apartmanınızın ortak alanları için yangın, doğal afet ve hırsızlık güvencesi.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-collection"></i> Bu Kategori Altında</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Konut Sigortası</h6><p class="small text-muted mb-0">Ev eşyaları, dekorasyon ve bina için kapsamlı paket — yangın, sel, hırsızlık, cam kırılması, asistans.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">İşyeri Yangın Sigortası</h6><p class="small text-muted mb-0">Ticari mekan, mal stoğu, makineler ve kâr kaybı için özel yangın koruması.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">DASK Zorunlu Deprem Sigortası</h6><p class="small text-muted mb-0">Yasal zorunlu — meskenler için deprem ve sonrası yangın/infilak/tsunami teminatı.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Ortak Alan Sigortası</h6><p class="small text-muted mb-0">Apartman ve site yönetimleri için merdiven, asansör, otopark gibi ortak alanlar.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-people"></i> Kimler İçin Uygun?</h3><p>Ev sahipleri ve kiracılar, işyeri sahipleri, apartman/site yöneticileri.</p><div class="alert alert-info mt-4 d-flex gap-3 align-items-start"><i class="bi bi-info-circle-fill fs-4"></i><div><strong class="d-block mb-1">Hangi alt ürün size uygun?</strong>Her durumda en uygun teminat farklılık gösterebilir. Müsait temsilcimiz ihtiyacınızı analiz ederek 12+ anlaşmalı şirketten en uygun teklifi sunar.</div></div>' WHERE `slug` = 'yangin-policeleri';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Bireysel ve kurumsal sağlık güvencesi paketleri — özel hastane, tamamlayıcı ve yurt dışı seçenekler.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-collection"></i> Bu Kategori Altında</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Özel Sağlık Sigortası</h6><p class="small text-muted mb-0">Anlaşmalı özel hastanelerde nitelikli tedavi, ameliyat, doğum ve check-up paketleri.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Tamamlayıcı Sağlık Sigortası</h6><p class="small text-muted mb-0">SGK üzerine eklenen, anlaşmalı özel hastanelerde fark ücretsiz tedavi imkanı.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Yurt Dışı Seyahat Sağlık</h6><p class="small text-muted mb-0">Yurt dışında ani hastalık, kaza ve sağlık masrafları teminatı.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-people"></i> Kimler İçin Uygun?</h3><p>Bireyler ve aileler, çalışan kadrolarına grup sağlık paketi sunan kurumlar, sık seyahat edenler.</p><div class="alert alert-info mt-4 d-flex gap-3 align-items-start"><i class="bi bi-info-circle-fill fs-4"></i><div><strong class="d-block mb-1">Hangi alt ürün size uygun?</strong>Her durumda en uygun teminat farklılık gösterebilir. Müsait temsilcimiz ihtiyacınızı analiz ederek 12+ anlaşmalı şirketten en uygun teklifi sunar.</div></div>' WHERE `slug` = 'saglik-sigortalari';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">İnşaat, montaj, makine ve elektronik cihazlar için "tüm riskler" teminatı — istisnalar haricindeki her hasarı kapsar.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-collection"></i> Bu Kategori Altında</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">İnşaat All Risk (CAR)</h6><p class="small text-muted mb-0">Şantiye süresince inşaat malzemesi, kalıp, iskele ve geçici imalat teminatı.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Montaj All Risk (EAR)</h6><p class="small text-muted mb-0">Mühendislik kapsamında makine kurulumu ve test süreci için özel teminat.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Makine Kırılması</h6><p class="small text-muted mb-0">Üretim hattındaki makinelerin elektrik/mekanik arızalarını karşılar.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Elektronik Cihaz Sigortası</h6><p class="small text-muted mb-0">Bilgisayar, sunucu, tıbbi cihaz ve diğer elektronik ekipmanlar için.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-people"></i> Kimler İçin Uygun?</h3><p>İnşaat firmaları, üretim tesisleri, mühendislik şirketleri, IT yoğun ofisler.</p><div class="alert alert-info mt-4 d-flex gap-3 align-items-start"><i class="bi bi-info-circle-fill fs-4"></i><div><strong class="d-block mb-1">Hangi alt ürün size uygun?</strong>Her durumda en uygun teminat farklılık gösterebilir. Müsait temsilcimiz ihtiyacınızı analiz ederek 12+ anlaşmalı şirketten en uygun teklifi sunar.</div></div>' WHERE `slug` = 'all-riskler';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Tekne, yat ve emtea taşımacılığı için denizcilik ve lojistik sigortaları.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-collection"></i> Bu Kategori Altında</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Tekne (Hull)</h6><p class="small text-muted mb-0">Gemi ve tekne gövdesi için kapsamlı sigorta — çarpışma, fırtına, yangın.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Yat Sigortası</h6><p class="small text-muted mb-0">Özel ve ticari yatlar için gövde, makine ve sorumluluk teminatları.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Nakliyat Emtea</h6><p class="small text-muted mb-0">Yük taşımacılığında mal hasarı, eksilme ve hırsızlık teminatı.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Taşıyıcı Sorumluluk</h6><p class="small text-muted mb-0">Lojistik firmaları için müşteri yüküne karşı sorumluluk.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-people"></i> Kimler İçin Uygun?</h3><p>Lojistik firmaları, tekne/yat sahipleri, ihracat-ithalat yapan firmalar.</p><div class="alert alert-info mt-4 d-flex gap-3 align-items-start"><i class="bi bi-info-circle-fill fs-4"></i><div><strong class="d-block mb-1">Hangi alt ürün size uygun?</strong>Her durumda en uygun teminat farklılık gösterebilir. Müsait temsilcimiz ihtiyacınızı analiz ederek 12+ anlaşmalı şirketten en uygun teklifi sunar.</div></div>' WHERE `slug` = 'nakliyat';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Mali, mesleki ve özel güvenlik sorumluluk teminatları — başkalarına verilen zararlar için yasal koruma.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-collection"></i> Bu Kategori Altında</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">İşveren Mali Sorumluluk</h6><p class="small text-muted mb-0">İş kazası durumunda çalışanlara karşı işveren sorumluluğu.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Üçüncü Şahıs Sorumluluk</h6><p class="small text-muted mb-0">İşletme faaliyetinizden kaynaklı üçüncü kişilere verilen zararlar.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Mesleki Sorumluluk</h6><p class="small text-muted mb-0">Avukat, mali müşavir, doktor, mimar gibi meslekler için mesleki hata teminatı.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Özel Güvenlik Mali Sorumluluk</h6><p class="small text-muted mb-0">Özel güvenlik şirketleri için yasal zorunlu teminat.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-people"></i> Kimler İçin Uygun?</h3><p>İşveren sıfatıyla çalışan firmalar, serbest meslek sahipleri (doktor, avukat, müşavir), güvenlik şirketleri.</p><div class="alert alert-info mt-4 d-flex gap-3 align-items-start"><i class="bi bi-info-circle-fill fs-4"></i><div><strong class="d-block mb-1">Hangi alt ürün size uygun?</strong>Her durumda en uygun teminat farklılık gösterebilir. Müsait temsilcimiz ihtiyacınızı analiz ederek 12+ anlaşmalı şirketten en uygun teklifi sunar.</div></div>' WHERE `slug` = 'sorumluluk-sigortalari';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Devlet destekli TARSİM havuzu kapsamında tarım, hayvancılık, sera ve su ürünleri sigortaları.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-collection"></i> Bu Kategori Altında</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Bitkisel Ürün Sigortası</h6><p class="small text-muted mb-0">Tahıl, meyve, sebze ve diğer bitkisel ürünler için dolu, fırtına, hortum teminatı.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Sera Sigortası</h6><p class="small text-muted mb-0">Sera yapısı ve içindeki ürünler için kapsamlı doğal afet teminatı.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Hayvan Hayat Sigortası</h6><p class="small text-muted mb-0">Büyükbaş, küçükbaş, kümes hayvanları için hastalık ve kaza teminatı.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Arıcılık Sigortası</h6><p class="small text-muted mb-0">Arı kovanları ve bal üretimi için doğal afet ve hayvan kaybı teminatı.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-people"></i> Kimler İçin Uygun?</h3><p>Çiftçiler, hayvan yetiştiricileri, sera işletmecileri, arıcılar — devlet primi yarısını öder.</p><div class="alert alert-info mt-4 d-flex gap-3 align-items-start"><i class="bi bi-info-circle-fill fs-4"></i><div><strong class="d-block mb-1">Hangi alt ürün size uygun?</strong>Her durumda en uygun teminat farklılık gösterebilir. Müsait temsilcimiz ihtiyacınızı analiz ederek 12+ anlaşmalı şirketten en uygun teklifi sunar.</div></div>' WHERE `slug` = 'tarsim';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Bireysel kaza, deprem ve kritik hastalık durumlarında nakit ödeme yapan koruma paketleri.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-collection"></i> Bu Kategori Altında</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Ferdi Kaza Sigortası</h6><p class="small text-muted mb-0">Kaza sonucu ölüm, sürekli sakatlık ve geçici iş göremezlik durumları için tazminat.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Deprem Destek Sigortası</h6><p class="small text-muted mb-0">DASK üzerine ek olarak deprem hasarlarında nakit destek paketi.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Kritik Hastalık Sigortası</h6><p class="small text-muted mb-0">Kanser, kalp krizi, felç gibi 10+ kritik hastalık tanısında peşin ödeme.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-people"></i> Kimler İçin Uygun?</h3><p>Aile reisi olarak gelir güvencesi arayanlar, riskli mesleklerde çalışanlar, deprem bölgesinde yaşayanlar.</p><div class="alert alert-info mt-4 d-flex gap-3 align-items-start"><i class="bi bi-info-circle-fill fs-4"></i><div><strong class="d-block mb-1">Hangi alt ürün size uygun?</strong>Her durumda en uygun teminat farklılık gösterebilir. Müsait temsilcimiz ihtiyacınızı analiz ederek 12+ anlaşmalı şirketten en uygun teklifi sunar.</div></div>' WHERE `slug` = 'ferdi-kaza';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Kefalet senedi, KDV iadesi ve devlet destekli alacak sigortaları — banka teminat mektuplarına alternatif.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-collection"></i> Bu Kategori Altında</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Kefalet Senedi</h6><p class="small text-muted mb-0">İhale, sözleşme ve gümrük süreçlerinde teminat mektubu yerine kullanılan poliçe.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">KDV İadesi Kefalet</h6><p class="small text-muted mb-0">KDV iade süreçlerinde mali idareye verilen teminat.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid var(--mz-red);padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)">Devlet Destekli Alacak Sigortası</h6><p class="small text-muted mb-0">KOBİ ticari alacakları için devlet destekli koruma.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-people"></i> Kimler İçin Uygun?</h3><p>İhalelere katılan firmalar, ihracatçılar, ticari alacak riski yöneten KOBİ''ler.</p><div class="alert alert-info mt-4 d-flex gap-3 align-items-start"><i class="bi bi-info-circle-fill fs-4"></i><div><strong class="d-block mb-1">Hangi alt ürün size uygun?</strong>Her durumda en uygun teminat farklılık gösterebilir. Müsait temsilcimiz ihtiyacınızı analiz ederek 12+ anlaşmalı şirketten en uygun teklifi sunar.</div></div>' WHERE `slug` = 'kefalet-sigortalari';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Beklenmedik kazalar — trafik kazası, ev kazası, iş kazası, spor yaralanmaları — sonucu yaşanabilecek mali yükleri karşılayan bireysel poliçedir.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Teminat Kapsamı</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Kaza Sonucu Ölüm</h6><p class="small text-muted mb-0">Sigortalının kazanın yarattığı bir nedenle vefat etmesi halinde poliçedeki tutar lehtara/varislere ödenir.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Kaza Sonucu Sürekli Sakatlık</h6><p class="small text-muted mb-0">Kaza sonucu kalıcı sakatlık tanısında, sakatlık oranına göre kısmi veya tam tazminat.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Geçici İş Göremezlik (Gündelik Tazminat)</h6><p class="small text-muted mb-0">Kaza nedeniyle çalışamadığınız her gün için günlük tazminat ödemesi.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Tedavi Masrafları</h6><p class="small text-muted mb-0">Kaza sonrası hastane, ameliyat, ilaç ve fizik tedavi giderleri.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Hastane Gündelik Tazminatı</h6><p class="small text-muted mb-0">Kaza nedeniyle yatarak tedavi süresince günlük destek ödemesi.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-x-octagon"></i> Kapsam Dışı Durumlar</h3><ul class="list-unstyled"><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>İntihar veya intihar girişimi sonucu hasarlar</li><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>Sigortalının uyuşturucu/alkol etkisi altındayken yaşadığı kazalar</li><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>Profesyonel sporcuların yarışma kazaları (özel paket gerekli)</li><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>Savaş, terör, isyan ve nükleer riskler</li></ul><div class="alert alert-warning mt-4"><h6 class="fw-bold mb-2"><i class="bi bi-lightbulb-fill"></i> Mizan İpuçları</h6><ul class="mb-0 small"><li class="mb-1">Aile reisi iseniz, eşinizin ve çocuklarınızın da kapsama alındığı **Aile Paketleri** çok daha avantajlıdır.</li><li class="mb-1">Riskli meslek (inşaat, lojistik, güvenlik vb.) yapıyorsanız mesleki paketle prim daha uygun olur.</li><li class="mb-1">Kredi kullanıyorsanız bankalar genelde ferdi kaza şartı koşar — Mizan üzerinden yaptırırsanız çoğu zaman yarı fiyatına aynı teminatı alabilirsiniz.</li></ul></div>' WHERE `slug` = 'ferdi-kaza-sigortasi';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">DASK''ın üzerine eklenen, deprem sonrası nakit destek ödemesi yapan tamamlayıcı pakettir. DASK bina yapısını öderken, bu poliçe size doğrudan nakit destek verir.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Teminat Kapsamı</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Deprem Anlık Nakit Desteği</h6><p class="small text-muted mb-0">Hasarın boyutuna göre, tanı sonrası 7 gün içinde nakit ödeme.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Geçici Konaklama</h6><p class="small text-muted mb-0">Eviniz oturulamaz hale geldiyse 3-6 ay otel/kira desteği.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Eşya Tazminatı</h6><p class="small text-muted mb-0">DASK''ın karşılamadığı ev eşyaları, beyaz eşya, mobilya hasarları.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Acil Yaşam Paketi</h6><p class="small text-muted mb-0">Deprem sonrası ilk 72 saat için temel ihtiyaç malzemeleri kataloğu.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Tıbbi Tahliye</h6><p class="small text-muted mb-0">Bölgenizden güvenli bir noktaya tıbbi tahliye desteği.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-x-octagon"></i> Kapsam Dışı Durumlar</h3><ul class="list-unstyled"><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>Deprem dışındaki doğal afetler (sel, heyelan vb.) — bunlar konut sigortasında</li><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>Bina yapısal hasarı (DASK kapsamında)</li><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>Deprem öncesi mevcut hasarlar</li></ul><div class="alert alert-warning mt-4"><h6 class="fw-bold mb-2"><i class="bi bi-lightbulb-fill"></i> Mizan İpuçları</h6><ul class="mb-0 small"><li class="mb-1">**DASK''ın yerine geçmez, üzerine eklenir.** Önce DASK''ınız olmalı.</li><li class="mb-1">Deprem bölgesinde (özellikle Marmara, Ege) yaşıyorsanız bu paket güçlü tavsiye ediliyor.</li><li class="mb-1">Aile büyüklüğünüze göre konaklama limitini doğru seçmeniz önemli — temsilcimiz hesaplar.</li></ul></div>' WHERE `slug` = 'deprem-destek-sigortasi';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Hayatınızı altüst edebilecek kanser, kalp krizi, felç, organ yetmezliği gibi 10+ kritik hastalığın tanısında **peşin nakit ödeme** yapan koruma paketidir.</div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Teminat Kapsamı</h3><div class="row g-3 mb-4"><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Tek Seferlik Tanı Tazminatı</h6><p class="small text-muted mb-0">Tanı konulduğu anda — tedavi başlamadan — poliçedeki nakit ödeme yapılır.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> İkinci Tıbbi Görüş</h6><p class="small text-muted mb-0">Yurt içi/dışı önde gelen merkezlerde uzman onayı için ücretsiz danışmanlık.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Tedavi Süresi Geliri</h6><p class="small text-muted mb-0">Tedavi nedeniyle çalışamadığınız aylarda gelir kaybı tazminatı.</p></div></div><div class="col-md-6"><div style="background:#f8f9fa;border-left:4px solid #198754;padding:1rem 1.25rem;border-radius:0 8px 8px 0;height:100%"><h6 class="fw-bold mb-1" style="color:var(--mz-navy)"><i class="bi bi-check-circle-fill text-success"></i> Yurt Dışı Tedavi Desteği</h6><p class="small text-muted mb-0">Türkiye''de yapılamayan tedavilerde yurt dışı sevki ve seyahat masrafları.</p></div></div></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-list-check"></i> Kapsanan Hastalıklar</h3><div class="d-flex flex-wrap gap-2 mb-4"><span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-dot text-danger"></i> Kanser</span><span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-dot text-danger"></i> Kalp krizi (miyokart enfarktüsü)</span><span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-dot text-danger"></i> Felç (inme)</span><span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-dot text-danger"></i> Böbrek yetmezliği</span><span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-dot text-danger"></i> Organ nakli</span><span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-dot text-danger"></i> Kalp bypass ameliyatı</span><span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-dot text-danger"></i> Multipl skleroz</span><span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-dot text-danger"></i> Körlük</span><span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-dot text-danger"></i> Sağırlık</span><span class="badge bg-light text-dark border px-3 py-2"><i class="bi bi-dot text-danger"></i> Komada kalmak</span></div><h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-x-octagon"></i> Kapsam Dışı Durumlar</h3><ul class="list-unstyled"><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>Poliçe başlangıcından önce tanısı konmuş hastalıklar</li><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>HIV/AIDS (özel paket gerekli)</li><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>Doğuştan gelen hastalıklar</li><li class="mb-2"><i class="bi bi-x-circle text-muted me-2"></i>İlk 3-6 ay (bekleme süresi) içinde tanı konulan vakalar</li></ul><div class="alert alert-warning mt-4"><h6 class="fw-bold mb-2"><i class="bi bi-lightbulb-fill"></i> Mizan İpuçları</h6><ul class="mb-0 small"><li class="mb-1">Genç ve sağlıklı iken yaptırırsanız primler çok düşük olur — yıllık 1000-2000 TL civarında, **5 yıllık prim sabitleyebilirsiniz.**</li><li class="mb-1">Aile geçmişinizde kanser veya kalp hastalığı varsa öncelikli düşünün.</li><li class="mb-1">Tanı anında peşin ödeme almak, **tedavi sürecinde kritik nakit akışı** sağlar.</li></ul></div>' WHERE `slug` = 'kritik-hastaliklar';
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Aracınızı çarpışma, yangın, hırsızlık, doğal afetler ve cam kırılması gibi geniş risklere karşı korumak için tasarlanan kapsamlı bir poliçedir.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Kasko Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Kasko Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'kasko' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Karayolları Zorunlu Mali Sorumluluk Sigortası — yasal zorunlu poliçe. Üçüncü şahıslara verilen maddi ve bedeni zararları karşılar.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Trafik Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Trafik Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'trafik-zorunlu-sorumluluk' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Trafik sigortasının limit üstünde kalan zararlar için tamamlayıcı, isteğe bağlı sorumluluk teminatıdır.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>İhtiyari Mali Mesuliyet (İMM), riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+İhtiyari Mali Mesuliyet (İMM) her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'ihtiyari-mali-mesuliyet-imm' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Yurt dışına aracınızla çıkışta sınır kapısında talep edilen, aracınızın yurt dışındaki sorumluluk teminatıdır.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Yeşilkart, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Yeşilkart her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'yesilkart' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Eviniz, eşyalarınız ve dekorasyonunuz için yangın, sel, hırsızlık, cam kırılması ve asistans hizmetlerini kapsayan paket sigortadır.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Konut Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Konut Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'konut-sigortasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Ticari mekan, mal stoğu, makine-tesisat ve kâr kaybı için özel olarak tasarlanan yangın güvencesidir.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>İşyeri Yangın Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+İşyeri Yangın Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'isyeri-yangin-sigortasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Yasal zorunlu — meskenler için deprem ve sonrasında oluşan yangın, infilak, tsunami hasarlarını bina yapısı bazında karşılar.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>DASK Zorunlu Deprem Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+DASK Zorunlu Deprem Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'dask' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Apartman ve site yönetimleri için merdiven, asansör, otopark, ortak çatı gibi alanları kapsayan toplu sigortadır.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Ortak Alan Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Ortak Alan Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'ortak-alan-sigortasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Anlaşmalı özel hastanelerde nitelikli tedavi, ameliyat, doğum ve check-up hizmetleri için kapsamlı bireysel sağlık güvencesidir.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Özel Sağlık Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Özel Sağlık Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'ozel-saglik-sigortasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">SGK kapsamındaki tedavilere ek olarak, anlaşmalı özel hastanelerde fark ücretsiz tedavi imkanı sunan ekonomik bir alternatiftir.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Tamamlayıcı Sağlık Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Tamamlayıcı Sağlık Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'tamamlayici-saglik-sigortasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Yurt dışı yolculuklarda ani hastalık, kaza ve sağlık masraflarını karşılayan, vize başvurularında zorunlu olabilen poliçedir.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Yurt Dışı Seyahat Sağlık Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Yurt Dışı Seyahat Sağlık Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'yurt-disi-seyahat-saglik' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Şantiye süresince inşaat malzemesi, kalıp, iskele, geçici imalat ve üçüncü şahıs sorumluluk için kapsamlı koruma sağlar.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>İnşaat All Risk (CAR), riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+İnşaat All Risk (CAR) her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'insaat-all-risk' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Mühendislik kapsamında makine kurulumu, deneme ve test sürecinde ortaya çıkabilecek hasarlara karşı tasarlanmıştır.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Montaj All Risk (EAR), riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Montaj All Risk (EAR) her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'montaj-all-risk' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Üretim hattındaki makinelerin elektrik, mekanik ve montaj hatası kaynaklı arızalarını karşılar.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Makine Kırılması Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Makine Kırılması Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'makine-kirilmasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Bilgisayar, sunucu, tıbbi cihaz, kamera ve diğer elektronik ekipmanlar için ani-beklenmeyen hasar teminatıdır.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Elektronik Cihaz Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Elektronik Cihaz Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'elektronik-cihaz' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">İş kazası durumunda çalışana veya yakınlarına karşı işverenin mali sorumluluğunu karşılayan zorunlu olabilen teminat.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>İşveren Mali Sorumluluk, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+İşveren Mali Sorumluluk her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'isveren-mali-sorumluluk' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">İşletme faaliyetinizden kaynaklı olarak üçüncü kişilere verilen maddi ve bedensel zararları karşılayan sorumluluk poliçesidir.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Üçüncü Şahıs Sorumluluk, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Üçüncü Şahıs Sorumluluk her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'ucuncu-sahis-sorumluluk' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Avukat, mali müşavir, doktor, mimar gibi serbest meslek sahipleri için mesleki hata kaynaklı tazminat teminatıdır.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Mesleki Sorumluluk Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Mesleki Sorumluluk Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'mesleki-sorumluluk' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">5188 sayılı kanun gereği özel güvenlik şirketleri için yasal zorunlu sorumluluk sigortasıdır.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Özel Güvenlik Mali Sorumluluk, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Özel Güvenlik Mali Sorumluluk her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'ozel-guvenlik-mali-sorumluluk' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">TARSİM kapsamında tahıl, meyve, sebze ve tarım ürünleri için dolu, fırtına, hortum, sel teminatı sağlar — devlet primin yarısını öder.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Bitkisel Ürün Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Bitkisel Ürün Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'bitkisel-urun' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">TARSİM kapsamında sera yapısı ve içindeki ürünler için kapsamlı doğal afet ve yangın güvencesidir.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Sera Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Sera Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'sera-sigortasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Koyun, keçi gibi küçükbaş hayvanlar için hastalık, kaza ve afet kaynaklı kayıp teminatıdır.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Küçükbaş Hayvan Hayat Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Küçükbaş Hayvan Hayat Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'kucukbas-hayvan-hayat' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Sığır ve manda gibi büyükbaş hayvanlar için TARSİM destekli hayat sigortasıdır.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Büyükbaş Hayvan Hayat Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Büyükbaş Hayvan Hayat Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'buyukbas-hayvan-hayat' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Tavuk, hindi gibi kanatlı hayvancılık işletmeleri için sürü hayat güvencesidir.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Kümes Hayvanları Hayat Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Kümes Hayvanları Hayat Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'kumes-hayvanlari-hayat' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Balık çiftlikleri ve su ürünleri yetiştiriciliği için doğal afet ve hastalık teminatı sağlar.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Su Ürünleri Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Su Ürünleri Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'su-urunleri-sigortasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Arı kovanları ve bal üretimi için doğal afet, hayvan kaybı ve hırsızlık güvencesi sunar.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Arıcılık Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Arıcılık Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'aricilik-sigortasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Gemi ve tekne gövdesi için çarpışma, fırtına, yangın ve diğer denizcilik risklerine karşı kapsamlı sigorta.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Tekne (Hull) Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Tekne (Hull) Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'tekne-hull' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Özel ve ticari yatlar için gövde, makine, donanım ve sorumluluk teminatlarını içeren kapsamlı paket.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Yat Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Yat Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'yat-sigortasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Yıllık abonman sözleşmesiyle ihracat-ithalat yüklerinde mal hasarı, eksilme ve hırsızlık teminatı.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Nakliyat Emtea Abonman, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Nakliyat Emtea Abonman her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'nakliyat-emtea-abonman' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Lojistik firmaları için müşteri yüküne karşı sorumluluğu karşılayan, CMR şartlarıyla uyumlu poliçe.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Taşıyıcı Sorumluluk, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Taşıyıcı Sorumluluk her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'tasiyici-sorumluluk' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+UPDATE `mz_urunler` SET `aciklama` = '<div class="lead mb-4">Tersanelerde gemi/tekne inşaat süreci boyunca yaşanabilecek hasarları karşılar.</div>
+<h3 class="fw-bold mt-4 mb-3" style="color:var(--mz-navy)"><i class="bi bi-shield-check"></i> Bu Sigorta Neyi Kapsar?</h3>
+<p>Tekne İnşaat Sigortası, riskinize özgü teminatlarla tasarlanmış bir poliçedir. Anlaşmalı 12+ sigorta şirketinden teklif çekerek sizin durumunuza en uygun:</p>
+<ul>
+<li>Teminat limitlerini doğru ayarlayan,</li>
+<li>İstisnaları net belirlenmiş,</li>
+<li>Hasar süreci hızlı ilerleyen,</li>
+<li>Prim açısından en avantajlı paketi seçeriz.</li>
+</ul>
+<div class="alert alert-info mt-4 d-flex gap-3 align-items-start">
+<i class="bi bi-info-circle-fill fs-4"></i>
+<div>
+<strong class="d-block mb-1">Detaylı bilgi için temsilcimiz arasın</strong>
+Tekne İnşaat Sigortası her durumda farklı teminat ve limit gerektirebilir. Talep formunu doldurun, müsait temsilcimiz size özel ürün analizi yaparak karşılaştırmalı teklif hazırlasın.
+</div>
+</div>' WHERE `slug` = 'tekne-insaat-sigortasi' AND (`aciklama` IS NULL OR `aciklama` = '' OR LENGTH(`aciklama`) < 200);
+
+
+-- Bitti.

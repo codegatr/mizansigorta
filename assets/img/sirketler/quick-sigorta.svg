@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Quick Sigorta">
+  <title>Quick Sigorta</title>
+  <circle cx="50" cy="50" r="48" fill="#fdb813"/>
+  <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+  <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+        font-family="'Inter','Helvetica Neue',sans-serif" font-weight="800"
+        font-size="44" fill="#1a1a1a" letter-spacing="0.5">Q</text>
+</svg>

@@ -85,100 +85,228 @@ $pageTitle = 'Hasar İhbarı - ' . setting('firma_adi', SITE_NAME);
 require MIZAN_INC . '/header.php';
 ?>
 
-<section class="mz-page-head">
-  <div class="container py-4">
-    <h1 class="fw-bold mb-1">Hasar İhbarı</h1>
-    <nav><ol class="breadcrumb mb-0">
-      <li class="breadcrumb-item"><a href="<?= u('/') ?>">Anasayfa</a></li>
-      <li class="breadcrumb-item active">Hasar İhbarı</li>
-    </ol></nav>
+<section class="mz-page-head" style="background:linear-gradient(135deg,#7f1d1d 0%, var(--mz-navy) 100%)">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <h1 class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill text-warning"></i> Hasar İhbarı</h1>
+        <p class="mb-0 small" style="color:rgba(255,255,255,.85)">Hasar yaşadıysanız endişelenmeyin — süreç bizimle.</p>
+        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item"><a href="<?= u('/') ?>">Anasayfa</a></li>
+          <li class="breadcrumb-item active">Hasar İhbarı</li>
+        </ol></nav>
+      </div>
+      <div class="d-none d-md-flex flex-wrap gap-2">
+        <span class="mz-trust-badge"><i class="bi bi-clock-history"></i> 7/24 Destek</span>
+        <span class="mz-trust-badge"><i class="bi bi-people"></i> Uzman Eksper</span>
+      </div>
+    </div>
   </div>
 </section>
 
+<!-- Acil arama bandı -->
+<?php if ($sitTel = setting('telefon')): ?>
+<section style="background:linear-gradient(90deg,#7f1d1d,#991b1b);color:#fff;padding:1.25rem 0">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <div style="width:48px;height:48px;border-radius:50%;background:#fff;color:#991b1b;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;animation:pulse 2s infinite">
+          <i class="bi bi-telephone-fill"></i>
+        </div>
+        <div>
+          <small style="display:block;text-transform:uppercase;letter-spacing:.1em;opacity:.85">Acil hasar mı yaşadınız?</small>
+          <strong style="font-size:1.15rem">7/24 hasar destek hattımızı arayın</strong>
+        </div>
+      </div>
+      <a href="tel:<?= e(preg_replace('/\s+/','',$sitTel)) ?>" class="btn btn-warning btn-lg fw-bold px-4">
+        <i class="bi bi-telephone-fill"></i> <?= e($sitTel) ?>
+      </a>
+    </div>
+  </div>
+</section>
+<style>
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,.5); }
+  50% { box-shadow: 0 0 0 12px rgba(255,255,255,0); }
+}
+</style>
+<?php endif; ?>
+
+<!-- 4 adim sureci -->
 <section class="container py-5">
+  <div class="text-center mb-4">
+    <span class="mz-trust-badge mb-2"><i class="bi bi-list-check"></i> Süreç</span>
+    <h2 class="fw-bold" style="color:var(--mz-navy)">Hasar süreci nasıl ilerler?</h2>
+    <p class="text-muted">İhbarınızdan tazminat ödemesine 4 adım</p>
+  </div>
+  <div class="row g-3">
+    <?php
+    $steps = [
+      ['1', 'bi-clipboard-check', 'İhbar Alımı', 'Formu doldurun veya bizi arayın. Dosya numaranızı SMS/e-posta ile alacaksınız.'],
+      ['2', 'bi-person-badge', 'Eksper Atanması', 'Sigorta şirketi bağımsız eksper atar. Sizinle iletişime geçer ve gerekirse hasar yerine gelir.'],
+      ['3', 'bi-file-earmark-text', 'Belge Toplama', 'Eksper raporu, fatura, fotoğraf gibi gerekli belgeler bizimle toplanır. Süreci sizin yerinize takip ederiz.'],
+      ['4', 'bi-cash-stack', 'Ödeme', 'Onay sonrası tazminat hesabınıza yatırılır. Ortalama süreç: kasko 7-15 gün, konut 15-30 gün.'],
+    ];
+    foreach ($steps as $s): ?>
+      <div class="col-sm-6 col-lg-3">
+        <div style="background:#fff;border:1px solid var(--mz-border);border-radius:14px;padding:1.5rem;height:100%;position:relative;transition:all .2s" onmouseover="this.style.borderColor='var(--mz-red)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,.08)'" onmouseout="this.style.borderColor='var(--mz-border)';this.style.transform='';this.style.boxShadow=''">
+          <span style="position:absolute;top:-14px;left:1.5rem;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--mz-red),var(--mz-red-2));color:#fff;font-weight:800;font-size:.9rem;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(238,39,55,.35)"><?= $s[0] ?></span>
+          <i class="bi <?= $s[1] ?>" style="font-size:1.6rem;color:var(--mz-red);display:block;margin-top:.5rem"></i>
+          <h6 class="fw-bold mt-3 mb-1" style="color:var(--mz-navy)"><?= $s[2] ?></h6>
+          <p class="small text-muted mb-0"><?= $s[3] ?></p>
+        </div>
+      </div>
+    <?php endforeach; ?>
+  </div>
+</section>
+
+<section class="container pb-5">
   <div class="row g-4">
     <div class="col-lg-8">
       <?php if (!empty($_GET['ok'])): ?>
-        <div class="alert alert-success">
-          Hasar ihbarınız başarıyla iletildi. Dosya numaranız: <strong><?= e($_GET['no'] ?? '') ?></strong>
+        <div class="alert alert-success d-flex gap-3 align-items-start">
+          <i class="bi bi-check-circle-fill fs-3"></i>
+          <div>
+            <strong class="d-block mb-1">Hasar ihbarınız başarıyla alındı!</strong>
+            <span class="small">Dosya numaranız: <strong class="text-warning"><?= e($_GET['no'] ?? '') ?></strong></span>
+            <p class="small text-muted mb-0 mt-2">Bu numarayı saklayın. Eksper en kısa sürede sizinle iletişime geçecek. SMS ve e-posta ile bilgilendirileceksiniz.</p>
+          </div>
         </div>
       <?php endif; ?>
       <?php if ($errors): ?>
-        <div class="alert alert-danger"><ul class="mb-0"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul></div>
+        <div class="alert alert-danger d-flex gap-3 align-items-start">
+          <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+          <div>
+            <strong class="d-block mb-1">Lütfen aşağıdaki hataları düzeltin:</strong>
+            <ul class="mb-0 small"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul>
+          </div>
+        </div>
       <?php endif; ?>
 
       <form method="post" enctype="multipart/form-data" class="mz-form-card" novalidate>
         <?= csrf_field() ?>
         <input type="text" name="website" style="display:none">
 
-        <div class="row g-3">
+        <h5 class="fw-bold mb-3"><i class="bi bi-person-fill text-warning"></i> Sizin Bilgileriniz</h5>
+        <div class="row g-3 mb-4">
           <div class="col-md-6">
-            <label class="form-label">Ad Soyad *</label>
-            <input type="text" name="ad_soyad" class="form-control" required>
+            <label class="form-label small fw-semibold">Ad Soyad <span class="text-danger">*</span></label>
+            <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+              <input type="text" name="ad_soyad" class="form-control" required placeholder="Adınız ve soyadınız">
+            </div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Telefon *</label>
-            <input type="tel" name="telefon" class="form-control" required>
+            <label class="form-label small fw-semibold">Telefon <span class="text-danger">*</span></label>
+            <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+              <input type="tel" name="telefon" class="form-control" required placeholder="0 5xx xxx xx xx">
+            </div>
           </div>
-          <div class="col-md-6">
-            <label class="form-label">E-posta</label>
-            <input type="email" name="email" class="form-control">
+          <div class="col-12">
+            <label class="form-label small fw-semibold">E-posta <small class="text-muted fw-normal">(opsiyonel — bilgilendirme için)</small></label>
+            <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+              <input type="email" name="email" class="form-control" placeholder="ornek@eposta.com">
+            </div>
           </div>
+        </div>
+
+        <h5 class="fw-bold mb-3"><i class="bi bi-info-square-fill text-warning"></i> Hasar Bilgileri</h5>
+        <div class="row g-3 mb-4">
           <div class="col-md-6">
-            <label class="form-label">Sigorta Türü</label>
+            <label class="form-label small fw-semibold">Sigorta Türü</label>
             <select name="urun_id" class="form-select">
-              <option value="">Seçiniz</option>
+              <option value="">Seçiniz (bilmiyorsanız boş bırakın)</option>
               <?php foreach ($urunler as $u): ?>
                 <option value="<?= (int) $u['id'] ?>"><?= e($u['baslik']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Olay Tarihi</label>
+            <label class="form-label small fw-semibold">Olay Tarihi</label>
             <input type="date" name="olay_tarihi" class="form-control">
           </div>
-          <div class="col-md-6">
-            <label class="form-label">Olay Yeri</label>
-            <input type="text" name="olay_yeri" class="form-control">
-          </div>
           <div class="col-12">
-            <label class="form-label">Olay Açıklaması *</label>
-            <textarea name="olay_aciklama" class="form-control" rows="5" required></textarea>
-          </div>
-          <div class="col-12">
-            <label class="form-label">Belge / Fotoğraf (max 5 dosya, 5MB)</label>
-            <input type="file" name="ekler[]" class="form-control" multiple accept=".jpg,.jpeg,.png,.webp,.pdf">
-          </div>
-          <div class="col-md-4">
-            <label class="form-label"><?= $captchaA ?> + <?= $captchaB ?> = ?</label>
-            <input type="number" name="captcha" class="form-control" required>
-            <input type="hidden" name="captcha_a" value="<?= $captchaA ?>">
-            <input type="hidden" name="captcha_b" value="<?= $captchaB ?>">
-          </div>
-          <div class="col-md-8 d-flex align-items-end">
-            <div class="form-check">
-              <input type="checkbox" name="kvkk" id="hkvkk" class="form-check-input" required>
-              <label class="form-check-label" for="hkvkk"><a href="<?= u('/sayfa/kvkk') ?>" target="_blank">KVKK Aydınlatma Metni</a>'ni onaylıyorum.</label>
+            <label class="form-label small fw-semibold">Olay Yeri</label>
+            <div class="input-group"><span class="input-group-text bg-light"><i class="bi bi-geo-alt"></i></span>
+              <input type="text" name="olay_yeri" class="form-control" placeholder="Şehir, ilçe, mahalle / işyeri adresi">
             </div>
           </div>
-          <div class="col-12 d-grid">
-            <button class="btn btn-warning btn-lg fw-semibold"><i class="bi bi-send"></i> Hasar İhbarını Gönder</button>
+          <div class="col-12">
+            <label class="form-label small fw-semibold">Olay Açıklaması <span class="text-danger">*</span></label>
+            <textarea name="olay_aciklama" class="form-control" rows="5" required placeholder="Olayı sakince anlatın: ne oldu, ne zaman, kim/ne hasar gördü, taraflar var mıydı, polis/jandarma çağrıldı mı vb."></textarea>
+            <div class="form-text small"><i class="bi bi-info-circle"></i> Detaylı yazmanız sürecin hızlanmasına yardımcı olur.</div>
+          </div>
+          <div class="col-12">
+            <label class="form-label small fw-semibold">Belge / Fotoğraf <small class="text-muted fw-normal">(max 5 dosya, her biri 5 MB)</small></label>
+            <input type="file" name="ekler[]" class="form-control" multiple accept=".jpg,.jpeg,.png,.webp,.pdf">
+            <div class="form-text small"><i class="bi bi-info-circle"></i> Hasar fotoğrafları, kaza tutanağı, polis raporu, fatura — varsa eklemeniz değerlendirmeyi hızlandırır.</div>
           </div>
         </div>
+
+        <div class="p-3 rounded mb-3" style="background:rgba(13,27,42,.04);border:1px dashed rgba(13,27,42,.15)">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-5">
+              <label class="form-label small fw-semibold mb-1">Doğrulama: <?= $captchaA ?> + <?= $captchaB ?> = ?</label>
+              <input type="number" name="captcha" class="form-control form-control-sm" required placeholder="Sonuç">
+              <input type="hidden" name="captcha_a" value="<?= $captchaA ?>">
+              <input type="hidden" name="captcha_b" value="<?= $captchaB ?>">
+            </div>
+            <div class="col-md-7">
+              <div class="form-check">
+                <input type="checkbox" name="kvkk" id="hkvkk" class="form-check-input" required>
+                <label class="form-check-label small" for="hkvkk"><a href="<?= u('/sayfa/kvkk') ?>" target="_blank">KVKK Aydınlatma Metni</a>'ni okudum, onaylıyorum. <span class="text-danger">*</span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-warning btn-lg w-100 fw-semibold py-3"><i class="bi bi-send-fill"></i> Hasar İhbarını Gönder</button>
+        <p class="text-center small text-muted mt-3 mb-0">
+          <i class="bi bi-shield-check"></i> Bilgileriniz KVKK kapsamında korunmaktadır · Sadece hasar süreci için kullanılır
+        </p>
       </form>
     </div>
-    <div class="col-lg-4">
-      <div class="mz-side-card">
-        <h6 class="fw-bold"><i class="bi bi-info-circle text-warning"></i> Önemli Bilgi</h6>
-        <p class="small">Hasar ihbarının ardından dosyanız sigorta şirketine iletilir. Süreç boyunca aramalarımıza yanıt vermeniz hızlı sonuç almanızı sağlar.</p>
+
+    <aside class="col-lg-4">
+      <!-- Onemli bilgi -->
+      <div class="card border-0 shadow-sm mb-3" style="background:#fff8e6;border-left:4px solid var(--mz-warning, #ffc107) !important">
+        <div class="card-body">
+          <h6 class="fw-bold mb-2"><i class="bi bi-info-circle-fill text-warning"></i> Hasar İhbarı İpuçları</h6>
+          <ul class="small mb-0">
+            <li class="mb-1"><strong>İlk 5 gün</strong> içinde ihbar etmeniz hak kaybınızı önler.</li>
+            <li class="mb-1">Trafik kazası ise <strong>polis veya jandarma tutanağı</strong> mutlaka tutturun.</li>
+            <li class="mb-1">Yangın/sel hasarı için itfaiye/AFAD raporu önemlidir.</li>
+            <li class="mb-1">Hasar mahallini fotoğraflayın, eksiltmeden saklayın.</li>
+            <li class="mb-0">Süreç boyunca aramalarımıza yanıt vermeniz hızlı sonuç sağlar.</li>
+          </ul>
+        </div>
       </div>
-      <?php if ($tel = setting('telefon')): ?>
-      <div class="mz-side-card mt-3 text-center">
-        <h6 class="fw-bold">7/24 Hasar Hattı</h6>
-        <a href="tel:<?= e(preg_replace('/\s+/','',$tel)) ?>" class="d-block fs-4 fw-bold"><?= e($tel) ?></a>
+
+      <!-- 7/24 Hat -->
+      <?php if ($sitTel): ?>
+      <div class="mz-side-card text-center mb-3">
+        <i class="bi bi-headset-vr" style="font-size:2rem;color:var(--mz-red)"></i>
+        <h6 class="fw-bold mt-2 mb-1">7/24 Hasar Hattı</h6>
+        <p class="small mb-3" style="opacity:.85">Acil durumlarda doğrudan arayın</p>
+        <a href="tel:<?= e(preg_replace('/\s+/','',$sitTel)) ?>" class="btn btn-warning fw-bold w-100">
+          <i class="bi bi-telephone-fill"></i> <?= e($sitTel) ?>
+        </a>
       </div>
       <?php endif; ?>
-    </div>
+
+      <!-- WhatsApp ek kanal -->
+      <?php if ($wa = setting('whatsapp')): ?>
+      <div class="card border-0 shadow-sm">
+        <div class="card-body text-center">
+          <i class="bi bi-whatsapp" style="font-size:2rem;color:#25D366"></i>
+          <h6 class="fw-bold mt-2 mb-1">WhatsApp ile İhbar</h6>
+          <p class="small text-muted mb-3">Hasar fotoğraflarını hızlıca gönderin</p>
+          <a href="https://wa.me/<?= e($wa) ?>?text=<?= rawurlencode('Hasar ihbarı yapmak istiyorum.') ?>" target="_blank" class="btn fw-semibold w-100" style="background:#25D366;color:#fff">
+            <i class="bi bi-whatsapp"></i> WhatsApp'tan Yaz
+          </a>
+        </div>
+      </div>
+      <?php endif; ?>
+    </aside>
   </div>
 </section>
 

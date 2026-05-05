@@ -280,7 +280,8 @@ require MIZAN_INC . '/header.php';
       ?>
         <div class="mz-anlasmali-card">
           <?php if ($logoUrl): ?>
-            <img src="<?= e($logoUrl) ?>" alt="<?= e($s['ad']) ?>" style="max-width:100%;max-height:50px;object-fit:contain">
+            <img src="<?= e($logoUrl) ?>" alt="<?= e($s['ad']) ?>" style="width:64px;height:64px;border-radius:50%;object-fit:contain;box-shadow:0 4px 12px rgba(0,0,0,.1);background:#fff;display:block;margin:0 auto .5rem">
+            <span style="display:block;font-size:.85rem;color:var(--mz-navy);font-weight:600"><?= e($s['ad']) ?></span>
           <?php else: ?>
             <i class="bi bi-shield-fill-check"></i>
             <?= e($s['ad']) ?>

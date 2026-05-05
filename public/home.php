@@ -130,13 +130,18 @@ require MIZAN_INC . '/header.php';
     </div>
     <div class="row g-3">
       <?php foreach ($sirketler as $s): ?>
-        <div class="col-6 col-md-3 col-lg-2">
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
           <?php $logoUrl = sirket_logo_url($s['logo']); ?>
-          <?php if ($logoUrl): ?>
-            <div class="mz-partner-logo" title="<?= e($s['ad']) ?>"><img src="<?= e($logoUrl) ?>" alt="<?= e($s['ad']) ?>"></div>
-          <?php else: ?>
-            <div class="mz-partner-text"><?= e($s['ad']) ?></div>
-          <?php endif; ?>
+          <div class="mz-partner-circle" title="<?= e($s['ad']) ?>">
+            <?php if ($logoUrl): ?>
+              <img src="<?= e($logoUrl) ?>" alt="<?= e($s['ad']) ?>" loading="lazy">
+            <?php else: ?>
+              <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--mz-navy),var(--mz-dark-2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.5rem">
+                <?= e(mb_strtoupper(mb_substr($s['ad'], 0, 1))) ?>
+              </div>
+            <?php endif; ?>
+            <span class="mz-partner-name"><?= e($s['ad']) ?></span>
+          </div>
         </div>
       <?php endforeach; ?>
     </div>
