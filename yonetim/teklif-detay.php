@@ -157,6 +157,34 @@ $urunDetay = !empty($teklif['urun_detay_json']) ? json_decode((string)$teklif['u
             </table>
           </div>
         </div>
+
+        <?php
+        // Sigorta detay alanlari (v1.1.40+) - musteri Wizard'da doldurmus olabilir
+        $sgrDetay = [];
+        if (!empty($teklif['dogum_tarihi']) && $teklif['dogum_tarihi'] !== '0000-00-00') {
+            $sgrDetay[] = ['Doğum Tarihi', date('d.m.Y', strtotime($teklif['dogum_tarihi']))];
+        }
+        if (!empty($teklif['tckn']))           $sgrDetay[] = ['TCKN', $teklif['tckn']];
+        if (!empty($teklif['arac_plakasi']))   $sgrDetay[] = ['Araç Plakası', $teklif['arac_plakasi']];
+        if (!empty($teklif['ruhsat_seri_no'])) $sgrDetay[] = ['Ruhsat Seri No', $teklif['ruhsat_seri_no']];
+        if ($sgrDetay):
+        ?>
+        <div class="alert mt-3 mb-0" style="background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #f59e0b">
+          <div class="small fw-bold text-uppercase mb-2" style="letter-spacing:.5px;color:#92400e">
+            <i class="bi bi-lightning-charge-fill"></i> Hızlı Dönüş Bilgileri (Müşteri Doldurdu)
+          </div>
+          <table class="table table-sm mb-0" style="background:transparent">
+            <tbody>
+              <?php foreach ($sgrDetay as $row): ?>
+                <tr>
+                  <th width="35%" style="border:0;background:transparent"><?= e($row[0]) ?></th>
+                  <td style="border:0;font-weight:600;background:transparent;font-family:Monaco,monospace;font-size:14px"><?= e($row[1]) ?></td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+        <?php endif; ?>
         <?php if ($urunDetay): ?>
           <hr>
           <h6 class="fw-bold small text-muted">Ürüne Özel Detaylar</h6>

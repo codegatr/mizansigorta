@@ -3148,3 +3148,38 @@ SET @sql := IF(@idx_exists = 0,
     'ALTER TABLE `mz_teklifler` ADD KEY `idx_arsivli` (`arsivli`)',
     'SELECT "idx_arsivli zaten var" AS info');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- ============================================================
+-- v1.1.40 - Sigorta detay alanlari (hizli donus icin)
+-- Yunus istegi: 'Tekliflerde Daha hizli Donus yapabilmek icin,
+-- Dogum Tarihi, Ruhsat Seri Numarasi, Arac Plakasi'
+-- ============================================================
+
+-- 4 yeni kolon (idempotent INFORMATION_SCHEMA pattern)
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='mz_teklifler' AND COLUMN_NAME='dogum_tarihi');
+SET @sql := IF(@col=0,
+  'ALTER TABLE `mz_teklifler` ADD COLUMN `dogum_tarihi` DATE NULL DEFAULT NULL AFTER `ilce`',
+  'SELECT "dogum_tarihi var" AS i');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='mz_teklifler' AND COLUMN_NAME='tckn');
+SET @sql := IF(@col=0,
+  'ALTER TABLE `mz_teklifler` ADD COLUMN `tckn` VARCHAR(11) NULL DEFAULT NULL AFTER `dogum_tarihi`',
+  'SELECT "tckn var" AS i');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='mz_teklifler' AND COLUMN_NAME='arac_plakasi');
+SET @sql := IF(@col=0,
+  'ALTER TABLE `mz_teklifler` ADD COLUMN `arac_plakasi` VARCHAR(20) NULL DEFAULT NULL AFTER `tckn`',
+  'SELECT "arac_plakasi var" AS i');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='mz_teklifler' AND COLUMN_NAME='ruhsat_seri_no');
+SET @sql := IF(@col=0,
+  'ALTER TABLE `mz_teklifler` ADD COLUMN `ruhsat_seri_no` VARCHAR(60) NULL DEFAULT NULL AFTER `arac_plakasi`',
+  'SELECT "ruhsat_seri_no var" AS i');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;

@@ -46,6 +46,29 @@ $email    = strtolower(trim((string)($d['email'] ?? '')));
 $mesaj    = trim((string)($d['mesaj'] ?? ''));
 $kvkk     = (bool)($d['kvkk'] ?? false);
 
+// Sigorta detaylari (opsiyonel - hizli donus icin)
+$dogumGun = (int)($d['dogum_gun'] ?? 0);
+$dogumAy  = (int)($d['dogum_ay']  ?? 0);
+$dogumYil = (int)($d['dogum_yil'] ?? 0);
+$tckn     = preg_replace('/[^0-9]/', '', (string)($d['tckn'] ?? ''));
+$plaka    = strtoupper(preg_replace('/[^A-Za-z0-9 ]/', '', (string)($d['plaka'] ?? '')));
+$ruhsat   = strtoupper(preg_replace('/[^A-Za-z0-9 ]/', '', (string)($d['ruhsat'] ?? '')));
+$uavt     = preg_replace('/[^0-9]/', '', (string)($d['uavt'] ?? ''));
+$mkare    = (int)($d['metrekare'] ?? 0);
+
+// Dogum tarihi DATE'e cevir (opsiyonel)
+$dogumDate = null;
+if ($dogumGun > 0 && $dogumAy > 0 && $dogumYil > 1900 && $dogumYil < 2100) {
+    if (checkdate($dogumAy, $dogumGun, $dogumYil)) {
+        $dogumDate = sprintf('%04d-%02d-%02d', $dogumYil, $dogumAy, $dogumGun);
+    }
+}
+// TCKN basit kontrol (boyut + algoritma)
+if ($tckn !== '' && (strlen($tckn) !== 11 || !function_exists('valid_tckn') || !valid_tckn($tckn))) {
+    // Gecersiz TCKN -> kaydetme (sessizce ignore)
+    $tckn = '';
+}
+
 // Validasyon
 if ($urunSlug === '' || mb_strlen($urunSlug) > 80) {
     echo json_encode(['ok' => false, 'error' => 'Sigorta ürünü seçilmedi.']);
@@ -81,11 +104,18 @@ if (!$urun) {
 
 try {
     $teklifNo = generate_no(setting('teklif_otomatik_no', 'TKL'));
+    // urun_detay_json - kategoriye ozel ek alanlar (UAVT, m2 gibi)
+    $detay = [];
+    if ($uavt !== '') $detay['uavt']     = $uavt;
+    if ($mkare > 0)   $detay['metrekare'] = $mkare;
+    $detayJson = $detay ? json_encode($detay, JSON_UNESCAPED_UNICODE) : null;
+
     db_exec(
         'INSERT INTO ' . t('teklifler') . '
          (teklif_no, urun_id, kaynak, durum, ad_soyad, firma_adi, email, telefon, il, ilce,
+          dogum_tarihi, tckn, arac_plakasi, ruhsat_seri_no, urun_detay_json,
           aciklama, kvkk_onay, ip_adresi, user_agent, olusturma_tarihi)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())',
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NOW())',
         [
             $teklifNo,
             (int)$urun['id'],
@@ -97,6 +127,11 @@ try {
             $tel,
             $il !== '' ? $il : null,
             $ilce !== '' ? $ilce : null,
+            $dogumDate,
+            $tckn !== '' ? $tckn : null,
+            $plaka !== '' ? $plaka : null,
+            $ruhsat !== '' ? $ruhsat : null,
+            $detayJson,
             $mesaj !== '' ? $mesaj : null,
             1,
             $ip,
@@ -108,6 +143,22 @@ try {
     // Operatör bildirimi
     $opMail = setting('teklif_bildirim_email', setting('email'));
     if ($opMail) {
+        // Sigorta detaylari (varsa) - ozel kart icinde goster
+        $detayHtml = '';
+        $detaySatirlar = [];
+        if ($dogumDate)        $detaySatirlar[] = '<b>Doğum Tarihi:</b> ' . e(date('d.m.Y', strtotime($dogumDate)));
+        if ($tckn !== '')      $detaySatirlar[] = '<b>TCKN:</b> ' . e($tckn);
+        if ($plaka !== '')     $detaySatirlar[] = '<b>Plaka:</b> ' . e($plaka);
+        if ($ruhsat !== '')    $detaySatirlar[] = '<b>Ruhsat Seri No:</b> ' . e($ruhsat);
+        if ($uavt !== '')      $detaySatirlar[] = '<b>UAVT No:</b> ' . e($uavt);
+        if ($mkare > 0)        $detaySatirlar[] = '<b>m²:</b> ' . (int)$mkare;
+        if ($detaySatirlar) {
+            $detayHtml = '<div style="background:#fffbeb;border-left:4px solid #f59e0b;padding:14px 18px;margin:14px 0;border-radius:6px">'
+                       . '<div style="font-size:11px;font-weight:700;color:#92400e;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px">⚡ Hızlı Dönüş Bilgileri (Müşteri Doldurdu)</div>'
+                       . '<p style="margin:0;line-height:1.9">' . implode('<br>', $detaySatirlar) . '</p>'
+                       . '</div>';
+        }
+
         $body = '<h2>Yeni Teklif Talebi (Wizard)</h2>'
               . '<p><b>Teklif No:</b> ' . e($teklifNo) . '</p>'
               . '<p><b>Ürün:</b> ' . e($urun['baslik']) . '</p>'
@@ -117,6 +168,7 @@ try {
               . '<p><b>Telefon:</b> ' . e($tel) . '</p>'
               . ($email ? '<p><b>E-posta:</b> ' . e($email) . '</p>' : '')
               . ($il ? '<p><b>Şehir:</b> ' . e($il . ($ilce ? ' / ' . $ilce : '')) . '</p>' : '')
+              . $detayHtml
               . ($mesaj ? '<p><b>Mesaj:</b><br>' . nl2br(e($mesaj)) . '</p>' : '')
               . '<hr><p>Yönetim panelinden teklifi inceleyebilirsiniz.</p>';
         $extra = talep_bildirim_alicilari();

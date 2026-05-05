@@ -141,6 +141,87 @@ foreach ($wizKategoriler as $k) {
             <textarea id="wizMesaj" class="form-control" rows="2" placeholder="Aracın markası/modeli, evin alanı, kuruluşunuzun büyüklüğü gibi detaylar..."></textarea>
           </div>
 
+          <!-- ====== Sigorta Detaylari (opsiyonel - hizli donus icin) ====== -->
+          <details class="mb-3 wiz-detay-box">
+            <summary class="wiz-detay-summary">
+              <i class="bi bi-lightning-charge-fill text-warning"></i>
+              <span>Hızlı dönüş için sigorta detayları</span>
+              <small class="text-muted ms-1">(opsiyonel)</small>
+            </summary>
+            <div class="wiz-detay-icerik mt-3">
+              <p class="small text-muted mb-3"><i class="bi bi-info-circle"></i> Bu bilgileri doldurursanız <strong>aramada size daha hızlı dönüş</strong> yapabiliriz.</p>
+
+              <!-- Dogum tarihi (Tüm ürünler) -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold mb-1">Doğum Tarihi <small class="text-muted">(opsiyonel)</small></label>
+                <div class="row g-2">
+                  <div class="col-4">
+                    <select id="wizDogumGun" class="form-select form-select-sm">
+                      <option value="">Gün</option>
+                      <?php for ($g = 1; $g <= 31; $g++): ?><option value="<?= $g ?>"><?= str_pad($g, 2, '0', STR_PAD_LEFT) ?></option><?php endfor; ?>
+                    </select>
+                  </div>
+                  <div class="col-4">
+                    <select id="wizDogumAy" class="form-select form-select-sm">
+                      <option value="">Ay</option>
+                      <?php
+                      $aylar = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+                      for ($a = 1; $a <= 12; $a++): ?><option value="<?= $a ?>"><?= $aylar[$a] ?></option><?php endfor; ?>
+                    </select>
+                  </div>
+                  <div class="col-4">
+                    <select id="wizDogumYil" class="form-select form-select-sm">
+                      <option value="">Yıl</option>
+                      <?php $thisYear = (int)date('Y');
+                      for ($y = $thisYear - 18; $y >= $thisYear - 90; $y--): ?><option value="<?= $y ?>"><?= $y ?></option><?php endfor; ?>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TCKN (Tüm ürünler) -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold mb-1">T.C. Kimlik No <small class="text-muted">(opsiyonel)</small></label>
+                <input type="text" id="wizTckn" class="form-control form-control-sm" placeholder="11 haneli TC Kimlik No" maxlength="11" inputmode="numeric" pattern="[0-9]{11}">
+                <small class="text-muted">Sigorta poliçesi düzenlemek için gerekli — yalnızca aracılık sürecinde kullanılır</small>
+              </div>
+
+              <!-- Arac alanlari (sadece arac kategorisi) -->
+              <div id="wizDetayArac" class="d-none">
+                <hr class="my-3">
+                <div class="small fw-bold text-uppercase text-muted mb-2" style="letter-spacing:.5px"><i class="bi bi-car-front"></i> Araç Bilgileri</div>
+                <div class="row g-2 mb-2">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-semibold mb-1">Araç Plakası</label>
+                    <input type="text" id="wizPlaka" class="form-control form-control-sm" placeholder="34 ABC 123" style="text-transform:uppercase" maxlength="20">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-semibold mb-1">Ruhsat Seri No</label>
+                    <input type="text" id="wizRuhsat" class="form-control form-control-sm" placeholder="AB123456 veya yeni belge no" style="text-transform:uppercase" maxlength="60">
+                  </div>
+                </div>
+                <small class="text-muted">Plakaya ve ruhsat bilgisine göre 12+ şirketten en uygun primi anında karşılaştırırız.</small>
+              </div>
+
+              <!-- Konut alanlari (konut/dask kategorisi) -->
+              <div id="wizDetayKonut" class="d-none">
+                <hr class="my-3">
+                <div class="small fw-bold text-uppercase text-muted mb-2" style="letter-spacing:.5px"><i class="bi bi-house"></i> Konut Bilgileri</div>
+                <div class="row g-2 mb-2">
+                  <div class="col-md-7">
+                    <label class="form-label small fw-semibold mb-1">UAVT Numarası</label>
+                    <input type="text" id="wizUavt" class="form-control form-control-sm" placeholder="10 haneli (e-Devlet'ten alınır)" maxlength="10" inputmode="numeric">
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label small fw-semibold mb-1">Brüt m²</label>
+                    <input type="number" id="wizMetrekare" class="form-control form-control-sm" placeholder="120" min="20" max="5000">
+                  </div>
+                </div>
+                <small class="text-muted">UAVT no e-Devlet → "Yapı Kayıt" → "Adres Kayıt" sayfasından alınabilir.</small>
+              </div>
+            </div>
+          </details>
+
           <div class="form-check small">
             <input type="checkbox" id="wizKvkk" class="form-check-input" required>
             <label for="wizKvkk" class="form-check-label">
@@ -208,6 +289,15 @@ foreach ($wizKategoriler as $k) {
 }
 .wiz-prod-btn:hover { border-color: var(--mz-red); background: rgba(227,11,48,.04); }
 .wiz-prod-btn.active { border-color: var(--mz-red); background: rgba(227,11,48,.08); font-weight: 600; }
+
+/* Sigorta detaylari (opsiyonel) - hizli donus icin */
+.wiz-detay-box { border: 1.5px dashed #fbbf24; border-radius: 12px; padding: 12px 16px; background: rgba(251,191,36,.04); transition: all .2s; }
+.wiz-detay-box[open] { border-style: solid; background: rgba(251,191,36,.06); border-color: #f59e0b; }
+.wiz-detay-summary { cursor: pointer; font-weight: 600; color: var(--mz-navy); font-size: 14px; display: flex; align-items: center; gap: 8px; user-select: none; list-style: none; }
+.wiz-detay-summary::-webkit-details-marker { display: none; }
+.wiz-detay-summary::after { content: '+'; margin-left: auto; font-size: 20px; color: #f59e0b; font-weight: 800; transition: transform .2s; }
+.wiz-detay-box[open] .wiz-detay-summary::after { transform: rotate(45deg); }
+.wiz-detay-icerik { padding-top: 8px; border-top: 1px dashed #fbbf24; }
 .wiz-prod-btn .check { margin-left: auto; color: var(--mz-red); opacity: 0; transition: opacity .15s; }
 .wiz-prod-btn.active .check { opacity: 1; }
 </style>
@@ -223,6 +313,7 @@ foreach ($wizKategoriler as $k) {
     urun_slug: null,
     urun_baslik: null,
     cat_id: null,
+    cat_slug: null,
     cat_baslik: null,
     tip: 'bireysel',
     ad: '',
@@ -233,6 +324,15 @@ foreach ($wizKategoriler as $k) {
     email: '',
     mesaj: '',
     kvkk: false,
+    // Sigorta detaylari (opsiyonel)
+    dogum_gun: '',
+    dogum_ay: '',
+    dogum_yil: '',
+    tckn: '',
+    plaka: '',
+    ruhsat: '',
+    uavt: '',
+    metrekare: '',
   };
 
   const stepLabels = {
@@ -279,6 +379,16 @@ foreach ($wizKategoriler as $k) {
     if (n === 3) {
       next.classList.add('d-none');
       submit.classList.remove('d-none');
+      // Kategori slug'ina gore detay alanlarini ac
+      const aracBox = document.getElementById('wizDetayArac');
+      const konutBox = document.getElementById('wizDetayKonut');
+      const slug = (state.cat_slug || '').toLowerCase();
+      // Arac kategorisi: kasko, trafik, arac
+      const isArac = /arac|kasko|trafik|otomobil|tasit/.test(slug);
+      // Konut kategorisi: konut, dask, ev
+      const isKonut = /konut|dask|ev|deprem/.test(slug);
+      if (aracBox) aracBox.classList.toggle('d-none', !isArac);
+      if (konutBox) konutBox.classList.toggle('d-none', !isKonut);
     } else {
       next.classList.remove('d-none');
       submit.classList.add('d-none');
@@ -311,6 +421,7 @@ foreach ($wizKategoriler as $k) {
     btn.addEventListener('click', () => {
       const id = parseInt(btn.dataset.catId, 10);
       state.cat_id = id;
+      state.cat_slug = btn.dataset.catSlug || '';
       state.cat_baslik = btn.dataset.catBaslik;
       // Alt ürünleri göster
       document.querySelector('.wiz-pane-cats').classList.add('d-none');
@@ -401,6 +512,16 @@ foreach ($wizKategoriler as $k) {
     state.mesaj = document.getElementById('wizMesaj').value.trim();
     state.kvkk = document.getElementById('wizKvkk').checked;
 
+    // Sigorta detaylari (opsiyonel - kullanici doldurdu ise alir)
+    state.dogum_gun = (document.getElementById('wizDogumGun')||{}).value || '';
+    state.dogum_ay  = (document.getElementById('wizDogumAy') ||{}).value || '';
+    state.dogum_yil = (document.getElementById('wizDogumYil')||{}).value || '';
+    state.tckn      = (document.getElementById('wizTckn')    ||{}).value.trim() || '';
+    state.plaka     = (document.getElementById('wizPlaka')   ||{}).value.trim().toUpperCase() || '';
+    state.ruhsat    = (document.getElementById('wizRuhsat')  ||{}).value.trim().toUpperCase() || '';
+    state.uavt      = (document.getElementById('wizUavt')    ||{}).value.trim() || '';
+    state.metrekare = (document.getElementById('wizMetrekare')||{}).value.trim() || '';
+
     const submit = document.querySelector('.wiz-submit');
     submit.disabled = true;
     submit.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Gönderiliyor...';
@@ -433,20 +554,33 @@ foreach ($wizKategoriler as $k) {
   // Reset on close
   document.getElementById('teklifWizard').addEventListener('hidden.bs.modal', () => {
     state.step = 1;
-    state.urun_slug = state.urun_baslik = state.cat_id = state.cat_baslik = null;
+    state.urun_slug = state.urun_baslik = state.cat_id = state.cat_slug = state.cat_baslik = null;
     state.tip = 'bireysel';
     state.ad = state.firma = state.il = state.ilce = state.tel = state.email = state.mesaj = '';
     state.kvkk = false;
+    state.dogum_gun = state.dogum_ay = state.dogum_yil = state.tckn = '';
+    state.plaka = state.ruhsat = state.uavt = state.metrekare = '';
     document.querySelectorAll('.wiz-prod-btn').forEach(b => b.classList.remove('active'));
-    ['wizAd', 'wizFirma', 'wizIl', 'wizIlce', 'wizTel', 'wizEmail', 'wizMesaj'].forEach(id => {
+    ['wizAd', 'wizFirma', 'wizIl', 'wizIlce', 'wizTel', 'wizEmail', 'wizMesaj',
+     'wizTckn', 'wizPlaka', 'wizRuhsat', 'wizUavt', 'wizMetrekare'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
+    });
+    ['wizDogumGun', 'wizDogumAy', 'wizDogumYil'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.selectedIndex = 0;
     });
     document.getElementById('wizKvkk').checked = false;
     document.querySelector('.wiz-pane-prods').classList.add('d-none');
     document.querySelector('.wiz-pane-cats').classList.remove('d-none');
     document.getElementById('wTip1').checked = true;
     document.querySelector('.wiz-firma').classList.add('d-none');
+    // Detay box'larini gizle ve <details>'i kapat
+    const dArac = document.getElementById('wizDetayArac');
+    const dKonut = document.getElementById('wizDetayKonut');
+    if (dArac) dArac.classList.add('d-none');
+    if (dKonut) dKonut.classList.add('d-none');
+    document.querySelectorAll('.wiz-detay-box').forEach(d => d.removeAttribute('open'));
     showStep(1);
   });
 })();
