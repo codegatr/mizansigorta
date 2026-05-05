@@ -162,11 +162,16 @@ $urunDetay = !empty($teklif['urun_detay_json']) ? json_decode((string)$teklif['u
         // Sigorta detay alanlari (v1.1.40+) - musteri Wizard'da doldurmus olabilir
         $sgrDetay = [];
         if (!empty($teklif['dogum_tarihi']) && $teklif['dogum_tarihi'] !== '0000-00-00') {
-            $sgrDetay[] = ['Doğum Tarihi', date('d.m.Y', strtotime($teklif['dogum_tarihi']))];
+            $sgrDetay[] = ['Doğum Tarihi', date('d.m.Y', strtotime($teklif['dogum_tarihi'])), ''];
         }
-        if (!empty($teklif['tckn']))           $sgrDetay[] = ['TCKN', $teklif['tckn']];
-        if (!empty($teklif['arac_plakasi']))   $sgrDetay[] = ['Araç Plakası', $teklif['arac_plakasi']];
-        if (!empty($teklif['ruhsat_seri_no'])) $sgrDetay[] = ['Ruhsat Seri No', $teklif['ruhsat_seri_no']];
+        if (!empty($teklif['tckn'])) {
+            // TCKN algoritma kontrolu - gecersizse uyari isareti
+            $tcknValid = function_exists('valid_tckn') && valid_tckn($teklif['tckn']);
+            $tcknNote = $tcknValid ? '' : '<small class="text-danger ms-2" title="TCKN algoritma kontrolu basarisiz - musteri arandiginda dogrulanmali"><i class="bi bi-exclamation-triangle-fill"></i> Algoritma fail</small>';
+            $sgrDetay[] = ['TCKN', $teklif['tckn'], $tcknNote];
+        }
+        if (!empty($teklif['arac_plakasi']))   $sgrDetay[] = ['Araç Plakası', $teklif['arac_plakasi'], ''];
+        if (!empty($teklif['ruhsat_seri_no'])) $sgrDetay[] = ['Ruhsat Seri No', $teklif['ruhsat_seri_no'], ''];
         if ($sgrDetay):
         ?>
         <div class="alert mt-3 mb-0" style="background:#fffbeb;border:1px solid #fcd34d;border-left:4px solid #f59e0b">
@@ -178,7 +183,7 @@ $urunDetay = !empty($teklif['urun_detay_json']) ? json_decode((string)$teklif['u
               <?php foreach ($sgrDetay as $row): ?>
                 <tr>
                   <th width="35%" style="border:0;background:transparent"><?= e($row[0]) ?></th>
-                  <td style="border:0;font-weight:600;background:transparent;font-family:Monaco,monospace;font-size:14px"><?= e($row[1]) ?></td>
+                  <td style="border:0;font-weight:600;background:transparent;font-family:Monaco,monospace;font-size:14px"><?= e($row[1]) ?><?= $row[2] ?></td>
                 </tr>
               <?php endforeach; ?>
             </tbody>

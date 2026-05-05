@@ -183,7 +183,7 @@ foreach ($wizKategoriler as $k) {
               <div class="mb-3">
                 <label class="form-label small fw-semibold mb-1">T.C. Kimlik No <small class="text-muted">(opsiyonel)</small></label>
                 <input type="text" id="wizTckn" class="form-control form-control-sm" placeholder="11 haneli TC Kimlik No" maxlength="11" inputmode="numeric" pattern="[0-9]{11}">
-                <small class="text-muted">Sigorta poliçesi düzenlemek için gerekli — yalnızca aracılık sürecinde kullanılır</small>
+                <small class="text-muted">Sigorta poliçesi düzenlemek için gerekli — yalnızca aracılık sürecinde kullanılır.</small>
               </div>
 
               <!-- Arac alanlari (sadece arac kategorisi) -->

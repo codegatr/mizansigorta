@@ -63,10 +63,12 @@ if ($dogumGun > 0 && $dogumAy > 0 && $dogumYil > 1900 && $dogumYil < 2100) {
         $dogumDate = sprintf('%04d-%02d-%02d', $dogumYil, $dogumAy, $dogumGun);
     }
 }
-// TCKN basit kontrol (boyut + algoritma)
-if ($tckn !== '' && (strlen($tckn) !== 11 || !function_exists('valid_tckn') || !valid_tckn($tckn))) {
-    // Gecersiz TCKN -> kaydetme (sessizce ignore)
-    $tckn = '';
+// TCKN format kontrolu - SADECE 11 hane olmali (algoritma kontrolu yok)
+// (Yunus 'gercek olmasa bile elinde tutmak istiyorum' demis olabilir.
+//  Algoritma fail -> sessizce silmek yerine, format dogruysa kaydet.
+//  Sigorta poliçesi yaparken zaten gercek TCKN gerekecek - musteri o zaman dogrular.)
+if ($tckn !== '' && strlen($tckn) !== 11) {
+    $tckn = ''; // sadece format yanlissa sil (5 haneli vs)
 }
 
 // Validasyon
