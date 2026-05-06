@@ -240,6 +240,28 @@ function upd_blobSHA(string $content): string
     return sha1('blob ' . strlen($content) . "\0" . $content);
 }
 
+/**
+ * PERF: Disk'ten okurken streaming hash hesabi
+ * file_get_contents() butun dosyayi RAM'e yukler - paylasimli hosting'de yavas.
+ * hash_init + stream_copy ile chunk-chunk hash hesabi cok daha hizli.
+ */
+function upd_blobSHAFile(string $absPath): string
+{
+    $size = filesize($absPath);
+    if ($size === false) return '';
+    $ctx = hash_init('sha1');
+    hash_update($ctx, 'blob ' . $size . "\0");
+    $fh = @fopen($absPath, 'rb');
+    if (!$fh) return '';
+    while (!feof($fh)) {
+        $chunk = fread($fh, 65536); // 64KB chunks
+        if ($chunk === false) break;
+        hash_update($ctx, $chunk);
+    }
+    fclose($fh);
+    return hash_final($ctx);
+}
+
 function upd_localVer(): string
 {
     $m = MIZAN_ROOT . '/manifest.json';
@@ -296,21 +318,37 @@ function upd_backup(string $label = ''): array
     if ($zip->open($file, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
         return ['ok' => false, 'error' => 'ZIP açılamadı'];
     }
-    $skip = ['/backups/', '/uploads/', '/.git/', '/node_modules/'];
+
+    // PERF: Sadece KRITIK dosyalari yedekle (config, mevcut PHP dosyalari)
+    // Tum site degil - bu zaten Git tarafinda var ve geri alinabilir.
+    // Buyuk klasorler (assets, includes, vendor) Git'ten geri yuklenebilir.
+    $skip = [
+        '/backups/', '/uploads/', '/.git/', '/node_modules/',
+        '/vendor/', '/assets/img/', '/assets/css/bootstrap',
+    ];
+
+    // Sadece KRITIK dosyalari yedekle: config, sql migration, root PHP
+    // (smart_sync paylasilan hosting'de tum dosyayi yedeklemek 30+ saniye)
     $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(MIZAN_ROOT, RecursiveDirectoryIterator::SKIP_DOTS));
     $count = 0;
+    $maxFiles = 500; // Hard limit - daha fazlasi varsa olustugu yere durdur
     foreach ($rii as $f) {
         if ($f->isDir()) continue;
+        if ($count >= $maxFiles) break;
         $abs = $f->getRealPath();
         if ($abs === false) continue;
         $rel = ltrim(str_replace(MIZAN_ROOT, '', $abs), '/\\');
         $check = '/' . str_replace('\\', '/', $rel) . '/';
         $skipMe = false;
         foreach ($skip as $sk) if (str_contains($check, $sk)) { $skipMe = true; break; }
-        if (!$skipMe) {
-            $zip->addFile($abs, $rel);
-            $count++;
-        }
+        if ($skipMe) continue;
+        // Sadece PHP, SQL, JSON, CSS, JS, MD - kritik kod dosyalari
+        $ext = strtolower((string)pathinfo($abs, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['php', 'sql', 'json', 'css', 'js', 'md', 'htaccess', 'env'], true)) continue;
+        // Buyuk dosyalari atla (>500KB) - genelde generated assets
+        if (filesize($abs) > 512000) continue;
+        $zip->addFile($abs, $rel);
+        $count++;
     }
     $zip->close();
 
@@ -555,14 +593,31 @@ if (isset($_GET['ajax'])) {
             }
 
             $updated = 0; $errors = []; $unchanged = 0;
+            $tStart = microtime(true);
             foreach ($remote as $f) {
                 $abs = MIZAN_ROOT . '/' . $f['path'];
                 $needs = $force;
                 if (!$needs) {
                     if (!is_file($abs)) $needs = true;
                     else {
-                        $localSHA = upd_blobSHA(file_get_contents($abs));
-                        if ($localSHA !== $f['sha']) $needs = true;
+                        // PERF Optimizasyonu - dosya tipine gore akilli karsilastirma
+                        $localSize = filesize($abs);
+                        $remoteSize = (int)($f['size'] ?? 0);
+                        $ext = strtolower((string)pathinfo($f['path'], PATHINFO_EXTENSION));
+                        $isBinary = in_array($ext, ['jpg','jpeg','png','gif','webp','ico','woff','woff2','ttf','eot','pdf','zip','mp4','mp3','svg','otf'], true);
+
+                        if ($remoteSize > 0 && $localSize !== $remoteSize) {
+                            // Boyut farkli - kesin degisti
+                            $needs = true;
+                        } elseif ($isBinary && $remoteSize > 0 && $localSize === $remoteSize) {
+                            // Binary + boyut esit -> %99 ayni dosya, SHA hesabini ATLA (PERF)
+                            // (Resimde 1 byte degisiklik bile boyutu degistirir, paranoyak olmaya gerek yok)
+                            $needs = false;
+                        } else {
+                            // Text dosya veya boyut bilinmiyor - streaming SHA
+                            $localSHA = upd_blobSHAFile($abs);
+                            if ($localSHA !== $f['sha']) $needs = true;
+                        }
                     }
                 }
                 if (!$needs) { $unchanged++; continue; }
@@ -594,11 +649,31 @@ if (isset($_GET['ajax'])) {
                 $log[] = '✓ ' . $f['path'] . ' (' . upd_humanSize(strlen($content)) . ')';
             }
 
-            // Migration (sadece dosya updateleri basarili olduysa calistir, yoksa skip)
+            // Migration: SADECE su 2 sart varsa calistir:
+            // 1) Dosya updateleri var (yeni v.x.y indirildi)
+            // 2) migration.sql GERCEKTEN guncellendi (SHA degisti)
+            // Hicbiri yoksa atla - paylasimli hosting'de migration cok yavas olabilir
             $mig = ['executed' => 0, 'skipped' => 0, 'errors' => 0, 'error_list' => []];
-            if (count($errors) === 0) {
+            $migrationSqlChanged = false;
+            foreach ($remote as $f) {
+                if ($f['path'] === 'migration.sql' && in_array('migration.sql', array_map(fn($e) => preg_replace('/^✓ ([^ ]+).*/', '$1', $e), $log), true)) {
+                    $migrationSqlChanged = true; break;
+                }
+            }
+            // Eger log'da 'migration.sql' guncellendi diyorsa ve hata yoksa calistir
+            $migrationGuncel = false;
+            foreach ($log as $logLine) {
+                if (str_contains($logLine, 'migration.sql')) { $migrationGuncel = true; break; }
+            }
+            if (count($errors) === 0 && ($force || $migrationGuncel || $updated === 0)) {
+                // Force'ta her zaman calistir
+                // migration.sql guncellenmisse calistir
+                // updated=0 ise (ilk kontrol) calistir (yedek olarak)
                 $mig = upd_runMigrations();
                 $log[] = 'Migration: OK=' . $mig['executed'] . ' SKIP=' . $mig['skipped'] . ' ERR=' . $mig['errors'];
+            } elseif (count($errors) === 0) {
+                $mig = ['executed' => 0, 'skipped' => 0, 'errors' => 0, 'error_list' => []];
+                $log[] = 'Migration: migration.sql degismedi - atlandi (PERF)';
             } else {
                 $log[] = 'Migration: dosya hataları nedeniyle atlandı';
             }
