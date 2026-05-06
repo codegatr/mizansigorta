@@ -49,13 +49,12 @@ require MIZAN_INC . '/header.php';
       <div class="d-flex gap-3 text-muted small mb-4">
         <span><i class="bi bi-calendar3"></i> <?= tr_date($post['yayin_tarihi']) ?></span>
         <span><i class="bi bi-eye"></i> <?= number_format((int)$post['goruntulenme'], 0, ',', '.') ?> okunma</span>
-        <?php if (!empty($post['yazar_ad'])): ?>
-          <span><i class="bi bi-person"></i> <?= e($post['yazar_ad']) ?></span>
-        <?php endif; ?>
       </div>
 
       <?php if (!empty($post['kapak_gorseli'])): ?>
-        <img src="<?= e(asset('uploads/blog/' . $post['kapak_gorseli'])) ?>" class="img-fluid rounded shadow-sm mb-4 w-100" alt="<?= e($post['baslik']) ?>" style="max-height:480px;object-fit:cover;">
+        <div class="mb-4 text-center" style="background:#f8fafc;border-radius:.5rem;overflow:hidden">
+          <img src="<?= e(asset('uploads/blog/' . $post['kapak_gorseli'])) ?>" class="img-fluid rounded shadow-sm w-100" alt="<?= e($post['baslik']) ?>" style="max-height:520px;object-fit:contain;background:#f8fafc">
+        </div>
       <?php endif; ?>
 
       <?php if (!empty($post['ozet'])): ?>
