@@ -11,8 +11,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($act === 'save') {
         $id     = (int)($_POST['id'] ?? 0);
         $baslik = trim((string)($_POST['baslik'] ?? ''));
-        $slug   = trim((string)($_POST['slug'] ?? '')) ?: slugify($baslik);
+        // Slug HER DURUMDA slugify'den gecsin (kullanici Türkçe karakter veya bosluk yazmis olabilir)
+        $slugInput = trim((string)($_POST['slug'] ?? ''));
+        $slug = $slugInput !== '' ? slugify($slugInput) : slugify($baslik);
+        if ($slug === '' || $slug === 'kayit') $slug = slugify($baslik);
         if ($baslik === '') admin_redirect('blog.php', 'danger', 'Başlık zorunlu.');
+
+        // Slug benzersizlik kontrolü
+        $existsParams = [$slug];
+        $existsSql = 'SELECT id FROM ' . t('blog') . ' WHERE slug = ?';
+        if ($id) { $existsSql .= ' AND id != ?'; $existsParams[] = $id; }
+        if (db_value($existsSql, $existsParams)) {
+            $slug = $slug . '-' . substr((string) time(), -4);
+        }
 
         $yt = trim((string)($_POST['yayin_tarihi'] ?? ''));
         if ($yt === '') $yt = date('Y-m-d H:i:s');
@@ -60,6 +71,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         admin_redirect('blog.php', 'success', 'Yazı silindi.');
     }
 
+    if ($act === 'sluglari_onar') {
+        // Tum bozuk slug'lari tespit edip yeniden uret
+        $rows = db_all('SELECT id, slug, baslik FROM ' . t('blog'));
+        $onarilanSayi = 0;
+        foreach ($rows as $r) {
+            $eskiSlug = (string)$r['slug'];
+            $yeniSlug = slugify($r['baslik']);
+            // Sadece bozuk olanlari onar (Türkçe/bosluk/uppercase iceren)
+            if ($eskiSlug !== $yeniSlug && !preg_match('/^[a-z0-9\-]+$/', $eskiSlug)) {
+                // Benzersiz olmasini garantile
+                $sayac = 0;
+                $denemeSlug = $yeniSlug;
+                while (db_value('SELECT id FROM ' . t('blog') . ' WHERE slug = ? AND id != ?', [$denemeSlug, $r['id']])) {
+                    $sayac++;
+                    $denemeSlug = $yeniSlug . '-' . $sayac;
+                }
+                db_exec('UPDATE ' . t('blog') . ' SET slug = ? WHERE id = ?', [$denemeSlug, $r['id']]);
+                $onarilanSayi++;
+            }
+        }
+        audit_log('blog_sluglari_onarildi', 'blog', null, "$onarilanSayi yazi");
+        admin_redirect('blog.php', 'success', "$onarilanSayi yazının URL slug'ı onarıldı.");
+    }
+
     if ($act === 'toggle') {
         $id = (int)($_POST['id'] ?? 0);
         db_exec('UPDATE ' . t('blog') . ' SET aktif = 1 - aktif, guncelleme_tarihi=NOW() WHERE id=?', [$id]);
@@ -99,6 +134,22 @@ $edit = $editId ? db_row('SELECT * FROM ' . t('blog') . ' WHERE id=?', [$editId]
 
 <div class="row g-3">
   <div class="col-lg-7">
+    <?php
+    // Bozuk slug var mi kontrol (Türkçe karakter, bosluk veya uppercase iceren)
+    $bozukSlugSayisi = (int) db_value("SELECT COUNT(*) FROM " . t('blog') . " WHERE slug REGEXP '[^a-z0-9-]' OR slug = '' OR slug LIKE '% %'");
+    if ($bozukSlugSayisi > 0):
+    ?>
+    <div class="alert alert-warning d-flex justify-content-between align-items-center py-2 mb-2" style="border-left:4px solid #f59e0b">
+      <div>
+        <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+        <strong><?= $bozukSlugSayisi ?> yazının</strong> URL slug'ı bozuk (Türkçe karakter veya boşluk içeriyor).
+      </div>
+      <form method="post" class="d-inline" onsubmit="return confirm('<?= $bozukSlugSayisi ?> yazının URL adresi yeniden üretilecek. Eski URL\'lere artık erişilemez (404). Devam edilsin mi?');">
+        <?= csrf_field() ?><input type="hidden" name="action" value="sluglari_onar">
+        <button class="btn btn-warning btn-sm fw-semibold"><i class="bi bi-magic"></i> Hemen Onar</button>
+      </form>
+    </div>
+    <?php endif; ?>
     <div class="card border-0 shadow-sm">
       <div class="card-body p-0">
         <div class="table-responsive">
@@ -152,8 +203,15 @@ $edit = $editId ? db_row('SELECT * FROM ' . t('blog') . ' WHERE id=?', [$editId]
           <input type="hidden" name="action" value="save">
           <input type="hidden" name="id" value="<?= (int)($edit['id'] ?? 0) ?>">
           <div class="row g-2">
-            <div class="col-12"><label class="form-label small">Başlık *</label><input type="text" name="baslik" required class="form-control form-control-sm" value="<?= e($edit['baslik'] ?? '') ?>"></div>
-            <div class="col-md-7"><label class="form-label small">Slug</label><input type="text" name="slug" class="form-control form-control-sm" value="<?= e($edit['slug'] ?? '') ?>"></div>
+            <div class="col-12"><label class="form-label small">Başlık *</label><input type="text" name="baslik" id="blogBaslik" required class="form-control form-control-sm" value="<?= e($edit['baslik'] ?? '') ?>"></div>
+            <div class="col-md-7">
+              <label class="form-label small">URL Slug <small class="text-muted">(boş bırakırsan başlıktan otomatik üretilir)</small></label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text"><?= e(rtrim(SITE_BASE_URL, '/')) ?>/blog/</span>
+                <input type="text" name="slug" id="blogSlug" class="form-control form-control-sm" value="<?= e($edit['slug'] ?? '') ?>" placeholder="otomatik-uretilir" pattern="[a-z0-9\-]+" title="Sadece kucuk harf, rakam ve tire">
+              </div>
+              <small class="text-muted">Sadece <code>a-z, 0-9, -</code> kullanılır. Türkçe karakter ve boşluklar otomatik dönüştürülür.</small>
+            </div>
             <div class="col-md-5"><label class="form-label small">Yayın Tarihi</label><input type="datetime-local" name="yayin_tarihi" class="form-control form-control-sm" value="<?= $edit && $edit['yayin_tarihi'] ? date('Y-m-d\TH:i', strtotime($edit['yayin_tarihi'])) : date('Y-m-d\TH:i') ?>"></div>
             <div class="col-md-7"><label class="form-label small">Kategori</label><input type="text" name="kategori" class="form-control form-control-sm" value="<?= e($edit['kategori'] ?? '') ?>"></div>
             <div class="col-md-5"><label class="form-label small">Etiketler (virgülle)</label><input type="text" name="etiketler" class="form-control form-control-sm" value="<?= e($edit['etiketler'] ?? '') ?>"></div>
@@ -175,5 +233,51 @@ $edit = $editId ? db_row('SELECT * FROM ' . t('blog') . ' WHERE id=?', [$editId]
     </div>
   </div>
 </div>
+
+<script>
+// Canli slug uretim - basligi yazarken slug alani otomatik doldur
+(function() {
+  var baslik = document.getElementById('blogBaslik');
+  var slug   = document.getElementById('blogSlug');
+  if (!baslik || !slug) return;
+
+  // Türkçe karakter map
+  var trMap = {'ı':'i','İ':'i','ğ':'g','Ğ':'g','ü':'u','Ü':'u','ş':'s','Ş':'s','ö':'o','Ö':'o','ç':'c','Ç':'c'};
+
+  function slugify(text) {
+    text = text.replace(/[ıİğĞüÜşŞöÖçÇ]/g, function(c) { return trMap[c] || c; });
+    text = text.toLowerCase();
+    text = text.replace(/[^a-z0-9]+/g, '-');
+    text = text.replace(/^-+|-+$/g, '');
+    return text || 'kayit';
+  }
+
+  // Slug bos veya kullanici degistirmemisse otomatik doldur
+  var slugDokunuldu = slug.value.trim() !== '';
+
+  baslik.addEventListener('input', function() {
+    if (!slugDokunuldu) {
+      slug.value = slugify(baslik.value);
+    }
+  });
+
+  slug.addEventListener('input', function() {
+    slugDokunuldu = slug.value.trim() !== '';
+    // Yazdiginda da sanitize et (Türkçe yazmasin)
+    var clean = slugify(slug.value);
+    if (clean !== slug.value.toLowerCase()) {
+      var pos = slug.selectionStart;
+      slug.value = clean;
+      try { slug.setSelectionRange(pos, pos); } catch(e){}
+    }
+  });
+
+  // Sayfa acilisinda baslik dolu, slug bos ise otomatik doldur
+  if (baslik.value.trim() && !slug.value.trim()) {
+    slug.value = slugify(baslik.value);
+    slugDokunuldu = false;
+  }
+})();
+</script>
 
 <?php require __DIR__ . '/_footer.php';

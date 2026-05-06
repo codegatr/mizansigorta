@@ -3232,3 +3232,18 @@ VALUES
    'Hemen Ara', 'tel:', 'bi-telephone',
    'custom_url', '/uploads/slaytlar/slayt-4-hasar-aninda-yaninizdayiz.jpg',
    1, 4, NOW());
+
+-- ============================================================
+-- v1.1.48 - Blog slug onarim (bozuk URL'leri tespit)
+-- Yunus raporu: Blog yazisi linki "/blog/Genclere%20Ozel%20..."
+-- olarak Türkçe ve bosluk iceriyordu (slug yerine baslik kullanildi)
+-- ============================================================
+
+-- Bozuk slug'lari logla (Türkçe karakter, bosluk, uppercase iceren)
+-- (Otomatik degistirme yapmiyoruz cunku slugify PHP fonksiyonu lazim)
+-- Yunus admin paneline girip her bozuk yaziyi 'Duzenle > Kaydet' yapmali
+SELECT id, slug, baslik
+  FROM mz_blog
+ WHERE slug REGEXP '[^a-z0-9-]'
+    OR slug = ''
+    OR slug LIKE '% %';
