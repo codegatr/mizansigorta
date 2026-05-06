@@ -397,11 +397,33 @@ $dtLocal = function ($v) {
               </div>
               <div class="col-md-8">
                 <div class="d-flex justify-content-between align-items-start gap-2 mb-2 flex-wrap">
-                  <span class="badge bg-<?= $dColor ?>"><i class="bi bi-circle-fill" style="font-size:.4rem"></i> <?= e($dLabel) ?></span>
+                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="badge bg-<?= $dColor ?>"><i class="bi bi-circle-fill" style="font-size:.4rem"></i> <?= e($dLabel) ?></span>
+                    <?php if (!empty($r['blog_id'])): ?>
+                      <span class="badge bg-warning text-dark" title="Bu kampanya bir blog yazısından otomatik oluşturulmuştur. Düzenlemek için blog yazısını açın.">
+                        <i class="bi bi-link-45deg"></i> Blog'dan
+                      </span>
+                    <?php endif; ?>
+                  </div>
                   <small class="text-muted">#<?= (int)$r['id'] ?> · sıra <?= (int)$r['sira'] ?></small>
                 </div>
 
                 <h6 class="fw-bold mb-1"><?= e($r['baslik']) ?></h6>
+                <?php if (!empty($r['blog_id'])):
+                    $blogYazi = db_row('SELECT slug, baslik FROM ' . t('blog') . ' WHERE id=?', [(int)$r['blog_id']]);
+                    if ($blogYazi):
+                ?>
+                  <div class="alert alert-warning py-2 px-3 mb-2 small d-flex justify-content-between align-items-center">
+                    <span>
+                      <i class="bi bi-info-circle"></i>
+                      Bu kampanya <strong>blog yazısından</strong> otomatik üretilmiş — düzenlemek için yazıyı açın.
+                    </span>
+                    <a href="blog.php?edit=<?= (int)$r['blog_id'] ?>" class="btn btn-sm btn-warning fw-semibold">
+                      <i class="bi bi-pencil"></i> Yazıyı Düzenle
+                    </a>
+                  </div>
+                <?php endif; endif; ?>
+
                 <?php if ($r['alt_baslik']): ?>
                   <small class="text-muted d-block mb-2"><?= e($r['alt_baslik']) ?></small>
                 <?php endif; ?>

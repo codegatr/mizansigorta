@@ -3247,3 +3247,33 @@ SELECT id, slug, baslik
  WHERE slug REGEXP '[^a-z0-9-]'
     OR slug = ''
     OR slug LIKE '% %';
+
+-- ============================================================
+-- v1.1.49 - Blog <-> Kampanya entegrasyonu
+-- Yunus istegi: 'Kampanyalar icerigini BLOG'dan alsin. Blog
+-- olustururken Kampanya olarak da eklensin mi diye sorsun.'
+-- ============================================================
+
+-- mz_blog tablosuna kampanya_id linki ekle (idempotent)
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='mz_blog' AND COLUMN_NAME='kampanya_id');
+SET @sql := IF(@col=0,
+  'ALTER TABLE `mz_blog` ADD COLUMN `kampanya_id` INT UNSIGNED NULL DEFAULT NULL AFTER `aktif`',
+  'SELECT "kampanya_id var" AS i');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+-- Index ekle
+SET @idx := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='mz_blog' AND INDEX_NAME='idx_kampanya_id');
+SET @sql := IF(@idx=0,
+  'ALTER TABLE `mz_blog` ADD KEY `idx_kampanya_id` (`kampanya_id`)',
+  'SELECT "idx_kampanya_id var" AS i');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
+
+-- mz_kampanyalar tablosuna blog_id geri-link (opsiyonel, bilgi amaçli)
+SET @col := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='mz_kampanyalar' AND COLUMN_NAME='blog_id');
+SET @sql := IF(@col=0,
+  'ALTER TABLE `mz_kampanyalar` ADD COLUMN `blog_id` INT UNSIGNED NULL DEFAULT NULL AFTER `gorsel_url` COMMENT "Bu kampanya bir blog yazisindan otomatik uretildiyse blog id"',
+  'SELECT "blog_id var" AS i');
+PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
