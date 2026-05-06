@@ -41,10 +41,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'yazar_id'     => user_id(),
             'aktif'        => isset($_POST['aktif']) ? 1 : 0,
         ];
+        // Mevcut kapak gorselini koru (yeni yuklenmediyse)
+        if ($id) {
+            $eskiKapak = (string) db_value('SELECT kapak_gorseli FROM ' . t('blog') . ' WHERE id=?', [$id]);
+            if ($eskiKapak !== '') $d['kapak_gorseli'] = $eskiKapak;
+        }
 
         try {
             $up = admin_handle_upload('kapak', 'blog', ['jpg','jpeg','png','webp']);
-            if ($up) $d['kapak_gorseli'] = $up;
+            if ($up) {
+                // Yeni dosya - eski varsa sil
+                if (!empty($d['kapak_gorseli']) && $d['kapak_gorseli'] !== $up) {
+                    @admin_delete_upload('blog', $d['kapak_gorseli']);
+                }
+                $d['kapak_gorseli'] = $up;
+            }
         } catch (Throwable $e) { admin_redirect('blog.php', 'danger', $e->getMessage()); }
 
         // Kampanya entegrasyonu - blog yazisindan otomatik kampanya yarat/guncelle/sil
@@ -283,8 +294,18 @@ if ($edit && !empty($edit['kampanya_id'])) {
             <div class="col-md-5"><label class="form-label small">Yayın Tarihi</label><input type="datetime-local" name="yayin_tarihi" class="form-control form-control-sm" value="<?= $edit && $edit['yayin_tarihi'] ? date('Y-m-d\TH:i', strtotime($edit['yayin_tarihi'])) : date('Y-m-d\TH:i') ?>"></div>
             <div class="col-md-7"><label class="form-label small">Kategori</label><input type="text" name="kategori" class="form-control form-control-sm" value="<?= e($edit['kategori'] ?? '') ?>"></div>
             <div class="col-md-5"><label class="form-label small">Etiketler (virgülle)</label><input type="text" name="etiketler" class="form-control form-control-sm" value="<?= e($edit['etiketler'] ?? '') ?>"></div>
-            <div class="col-12"><label class="form-label small">Kapak Görseli</label><input type="file" name="kapak" class="form-control form-control-sm" accept="image/*">
-              <?php if ($edit && $edit['kapak_gorseli']): ?><div class="small text-muted mt-1">Mevcut: <?= e($edit['kapak_gorseli']) ?></div><?php endif; ?>
+            <div class="col-12">
+              <label class="form-label small">Kapak Görseli</label>
+              <input type="file" name="kapak" class="form-control form-control-sm" accept="image/*">
+              <?php if ($edit && $edit['kapak_gorseli']): ?>
+                <div class="mt-2 d-flex align-items-center gap-2">
+                  <img src="<?= u('uploads/blog/' . rawurlencode($edit['kapak_gorseli'])) ?>" alt="Mevcut kapak" style="width:90px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #e5e7eb">
+                  <small class="text-muted">
+                    <i class="bi bi-info-circle"></i> Mevcut görsel.<br>
+                    Yeni dosya seçmezsen bu korunur.
+                  </small>
+                </div>
+              <?php endif; ?>
             </div>
             <div class="col-12"><label class="form-label small">Özet</label><textarea name="ozet" rows="2" class="form-control form-control-sm"><?= e($edit['ozet'] ?? '') ?></textarea></div>
             <div class="col-12"><label class="form-label small">İçerik (HTML)</label><textarea name="icerik" rows="10" class="form-control form-control-sm font-monospace"><?= e($edit['icerik'] ?? '') ?></textarea></div>
@@ -296,7 +317,7 @@ if ($edit && !empty($edit['kampanya_id'])) {
             <div class="col-12 mt-3">
               <div class="border-top pt-3">
                 <div class="form-check">
-                  <input type="checkbox" name="kampanya_yap" id="bgKmp" class="form-check-input" <?= $editKampanya ? 'checked' : '' ?> onchange="document.getElementById('kmpAlanlari').style.display=this.checked?'block':'none'">
+                  <input type="checkbox" name="kampanya_yap" id="bgKmp" class="form-check-input" <?= $editKampanya ? 'checked' : '' ?>>
                   <label for="bgKmp" class="form-check-label fw-semibold">
                     <i class="bi bi-megaphone-fill text-warning"></i>
                     Bu yazıyı kampanya pop-up olarak da göster
@@ -305,7 +326,7 @@ if ($edit && !empty($edit['kampanya_id'])) {
                 <small class="text-muted ms-4 d-block">İşaretlenirse blog yazısı sitenin pop-up alanında otomatik görüntülenir. Pop-up tıklandığında ziyaretçi blog yazısına yönlendirilir.</small>
               </div>
 
-              <div id="kmpAlanlari" style="display:<?= $editKampanya ? 'block' : 'none' ?>" class="mt-3 p-3 rounded" style2="background:rgba(251,191,36,.04);border:1px dashed #fbbf24">
+              <div id="kmpAlanlari" class="mt-3 p-3 rounded" style="display:<?= $editKampanya ? 'block' : 'none' ?>;background:rgba(251,191,36,.06);border:1px dashed #fbbf24">
                 <div class="row g-2">
                   <div class="col-md-6">
                     <label class="form-label small fw-semibold">Pop-up Başlama Tarihi</label>
@@ -426,6 +447,22 @@ if ($edit && !empty($edit['kampanya_id'])) {
     slug.value = slugify(baslik.value);
     slugDokunuldu = false;
   }
+})();
+
+// Kampanya checkbox toggle - alanlari ac/kapat
+(function() {
+  var cb = document.getElementById('bgKmp');
+  var box = document.getElementById('kmpAlanlari');
+  if (!cb || !box) return;
+
+  function syncBoxVisibility() {
+    box.style.display = cb.checked ? 'block' : 'none';
+  }
+
+  cb.addEventListener('change', syncBoxVisibility);
+  cb.addEventListener('click', syncBoxVisibility);
+  // Sayfa yuklendiginde mevcut duruma gore ayarla
+  syncBoxVisibility();
 })();
 </script>
 

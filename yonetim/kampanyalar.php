@@ -63,7 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $gorselUrl = '';
         }
-        // 3) URL kontrolu (boş veya geçerli url)
+        // 3) URL alani BOS ve duzenleme modu -> MEVCUT GORSELI KORU
+        // (kullanici yeni dosya yuklemediyse ve URL yazmadiysa, eski silinmemeli)
+        elseif ($gorselUrl === '' && $eski && !empty($eski['gorsel_url'])) {
+            $gorselUrl = (string) $eski['gorsel_url']; // mevcut gorseli koru
+        }
+        // 4) URL girilmis - format kontrolu
         elseif ($gorselUrl !== '' && !filter_var($gorselUrl, FILTER_VALIDATE_URL)) {
             // Yuklenen path /uploads/... veya tam URL kabul
             if (strpos($gorselUrl, '/uploads/') !== 0) {

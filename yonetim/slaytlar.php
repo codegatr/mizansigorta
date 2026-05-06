@@ -36,6 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'aktif'         => isset($_POST['aktif']) ? 1 : 0,
         ];
 
+        // Mevcut görseli koru (yeni dosya yuklenmediyse VE URL bos POST geldiyse)
+        if ($id && empty($d['gorsel_url']) && empty($_FILES['gorsel_file']['name'])) {
+            $eskiUrl = (string) db_value('SELECT gorsel_url FROM ' . t('slaytlar') . ' WHERE id=?', [$id]);
+            if ($eskiUrl !== '') $d['gorsel_url'] = $eskiUrl;
+        }
+
         if ($d['baslik'] === '' && empty($_FILES['gorsel_file']['name']) && empty($d['gorsel_url'])) {
             // Eski: sadece baslik zorunlu. Yeni: gorsel basili oldugunda baslik bos olabilir,
             // ama o zaman gorsel olmali (custom_url + dosya)
